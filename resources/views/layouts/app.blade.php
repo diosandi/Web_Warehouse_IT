@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ config('app.name', 'Warehouse IT RSCM') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<style>
+        body {
+            overflow-x: hidden;
+        }
+        
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Desktop: Adjust main content when sidebar is visible (not hidden) */
+        @media (min-width: 768px) {
+            #main-content:not(.sidebar-hidden) {
+                margin-left: 16rem;
+            }
+            #main-content.sidebar-hidden {
+                margin-left: 0;
+            }
+        }
+
+        /* Mobile: Always no margin */
+        @media (max-width: 767px) {
+            #main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <div class="flex flex-col h-screen">
+        <!-- Include Navbar (Fixed Height) -->
+        @include('layouts.navbar')
+
+        <!-- Main Container (Flex grow) -->
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Include Sidebar -->
+            @include('layouts.sidebar')
+
+            <!-- Main Content Area -->
+            <main id="main-content" class="flex-1 overflow-y-auto">
+                <div class="p-4 md:p-8">
+                    @yield('content')
+                </div>
+            </main>
+        </div>
+
+        <!-- Include Footer -->
+        @include('layouts.footer')
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            if (!toggle || !sidebar) {
+                console.error('Sidebar elements not found');
+                return;
+            }
+
+            // Function to set sidebar visibility state
+            function setSidebarHidden(isHidden) {
+                if (isHidden) {
+                    sidebar.classList.add('-translate-x-full');
+                    if (mainContent) mainContent.classList.add('sidebar-hidden');
+                    if (overlay) overlay.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('-translate-x-full');
+                    if (mainContent) mainContent.classList.remove('sidebar-hidden');
+                    if (overlay && window.innerWidth < 768) {
+                        overlay.classList.remove('hidden');
+                    }
+                }
+            }
+
+            // Function to get whether sidebar should be hidden
+            function shouldSidebarBeHidden() {
+                return sidebar.classList.contains('-translate-x-full');
+            }
+
+            // Toggle sidebar visibility (works on ALL screen sizes)
+            toggle.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isCurrentlyHidden = shouldSidebarBeHidden();
+                setSidebarHidden(!isCurrentlyHidden);
+            });
+
+            // Close sidebar when clicking on overlay
+            if (overlay) {
+                overlay.addEventListener('click', function () {
+                    setSidebarHidden(true);
+                });
+            }
+
+            // Close sidebar when clicking on a link (mobile only)
+            const sidebarLinks = sidebar.querySelectorAll('a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    if (window.innerWidth < 768) {
+                        setSidebarHidden(true);
+                    }
+                });
+            });
+
+            // Handle resize events - restore default state based on screen size
+            let resizeTimer;
+            window.addEventListener('resize', function () {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function () {
+                    if (window.innerWidth >= 768) {
+                        // Desktop: show sidebar by default (unless user toggled it off)
+                        // Check if sidebar was manually hidden
+                        const wasManuallyHidden = sidebar.hasAttribute('data-manually-hidden');
+                        if (!wasManuallyHidden) {
+                            setSidebarHidden(false);
+                        }
+                    } else {
+                        // Mobile: hide sidebar by default
+                        setSidebarHidden(true);
+                    }
+                }, 250);
+            });
+
+            // Initial state on page load
+            if (window.innerWidth < 768) {
+                setSidebarHidden(true);
+            } else {
+                setSidebarHidden(false);
+            }
+
+            // Track manual toggle to remember user preference
+            const originalToggle = toggle.onclick;
+            toggle.addEventListener('click', function () {
+                if (shouldSidebarBeHidden()) {
+                    sidebar.removeAttribute('data-manually-hidden');
+                } else {
+                    sidebar.setAttribute('data-manually-hidden', 'true');
+                }
+            });
+
+            // Prevent body scroll when sidebar is open on mobile
+            sidebar.addEventListener('transitionend', function () {
+                if (window.innerWidth < 768) {
+                    if (shouldSidebarBeHidden()) {
+                        document.body.style.overflow = 'auto';
+                    } else {
+                        document.body.style.overflow = 'hidden';
+                    }
+                }
+            });
+        });
+    </script>
+    
+</body>
+</html>
