@@ -10,21 +10,89 @@ use Illuminate\Http\Request;
 
 class DistributionController extends Controller
 {
+    //Search item per produk
     public function search(Request $request)
     {
         $query = $request->q;
         $kategori = $request->kategori;
 
-        $items = Items::where('kategori', $kategori)
-            ->where('status', 'available')
-            ->where(function($q) use ($query) {
-                $q->where('serial_number', 'like', "%$query%")
-                ->orWhere('merk', 'like', "%$query%");
+       $items = Items::where('kategori', $kategori)
+        ->where(function($q) use ($kategori) {
+
+            // Printer boleh dipakai berkali-kali
+            if ($kategori == 'Printer Kertas' || $kategori == 'Printer Barcode') {
+                $q->whereIn('status', ['available', 'used']);
+            } else {
+                // selain printer harus available
+                $q->where('status', 'available');
+            }
+
+        })
+        ->where(function($q) use ($query) {
+            $q->where('serial_number', 'like', "%$query%")
+            ->orWhere('merk', 'like', "%$query%");
+        })
+        ->limit(10)
+        ->get();
+
+        return response()->json($items);
+    }
+    //Search index
+    public function searchDistribution(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+
+        if ($q === '') {
+            return response()->json([]);
+        }
+
+        $search = "%{$q}%";
+        $results = Distribution::with(['distributionItems.item','location'])
+            ->where('nama_user', 'like', $search)
+            ->orWhere('divisi', 'like', $search)
+            ->orWhereHas('location', function ($itemQuery) use ($search) {
+                $itemQuery->where('gedung', 'like', $search)
+                          ->orWhere('ruangan', 'like', $search);
+            })
+            ->orWhereHas('distributionItems.item', function ($itemQuery)use($search) {
+                $itemQuery->where('serial_number','like',$search)
+                          ->orWhere('merk','like',$search);
             })
             ->limit(10)
             ->get();
 
-        return response()->json($items);
+        $suggestions = $results->map(function($d) {
+        $item = $d->distributionItems->first()?->item;
+        $location = $d->location;
+
+        $itemText = $item
+            ? ($item->serial_number . ' - ' . $item->merk)
+            : '-';
+
+        $locationText = $location
+            ? ($location->gedung . ' - ' . $location->ruangan)
+            : '-';
+
+
+            return [
+                'id' => $d->id,
+                'merk' => $item ? $item->merk : '-',
+                'serial_number' => $item ? $item->serial_number : '-',
+                'gedung'=> $location ? $location->gedung : '-',
+                'ruangan'=>$location ? $location->ruangan : '-',
+                'nama_user' => $d->nama_user,
+                'text' => trim($itemText .' | Lokasi: '. $locationText . ' | Nama User: ' . ($d->nama_user ?? '-'))
+            ];
+        });
+
+        return response()->json($suggestions);
+    }
+    //Search dapat ruangan
+    public function getRuangan(Request $request)
+    {
+        $ruangan = Locations::where('gedung', $request->gedung)->get();
+
+        return response()->json($ruangan);
     }
 
     public function index(Request $request)
@@ -79,16 +147,14 @@ class DistributionController extends Controller
         $locations = Locations::all();
 
         return view('distribution.index', compact('distribution', 'locations'));
-
-        // $distribution = Distribution::with(['distributionItems.item', 'location'])
-        // ->latest()
-        // ->paginate(10);
-
-        // return view('distribution.index', compact('distribution'));
     }
 
     public function create()
     {
+        $gedungList = Locations::select('gedung')
+        ->distinct()
+        ->pluck('gedung');
+
         return view('distribution.create', [
             'pcs' => Items::where('kategori','PC')->where('status','available')->get(),
             'monitors' => Items::where('kategori','Monitor')->where('status','available')->get(),
@@ -96,24 +162,54 @@ class DistributionController extends Controller
             'printers_barcode' => Items::where('kategori','Printer Barcode')->where('status','available')->get(),
             'scanners' => Items::where('kategori','Scanner')->where('status','available')->get(),
             'locations' => Locations::all(),
+            'gedungList' => $gedungList
         ]);
     }
 
     public function store(Request $request)
     {
-            $request->validate([
+        $request->validate([
             'location_id' => 'required',
             'nama_user' => 'nullable',
             'divisi' => 'nullable',
             'tanggal_distribusi' => 'required|date',
-            'items' => 'required|array',
-            'items.*' => 'nullable|exists:items,id'
+            'items' => 'nullable|array',
+            'items.*' => 'nullable|exists:items,id',
+            'printer_kertas_ids' => 'nullable|array',
+            'printer_kertas_ids.*' => 'exists:items,id',
+            'printer_barcode_ids' => 'nullable|array',
+            'printer_barcode_ids.*' => 'exists:items,id',
         ]);
 
+        $items = collect($request->input('items', []))
+            ->merge($request->input('printer_kertas_ids', []))
+            ->merge($request->input('printer_barcode_ids', []))
+            ->filter()
+            ->unique()
+            ->values();
+
         // CEK MINIMAL 1 DEVICE
-            if (!collect($request->items)->filter()->count()) {
-                return back()->withErrors(['items' => 'Minimal pilih 1 device!']);
+        if ($items->isEmpty()) {
+            return back()->with(['error' => 'Minimal pilih 1 device!'])->withInput();
+        }
+
+        // CEK KHUSUS DEVICE EXCLUSIVE
+        foreach ($items as $itemId) {
+            $item = Items::find($itemId);
+
+            if (in_array($item->kategori, ['PC', 'Monitor', 'Scanner'])) {
+
+                $dipakai = DistributionItem::where('item_id', $itemId)
+                    ->whereHas('distribution', function($q) {
+                        $q->where('status', 'dipakai');
+                    })
+                    ->exists();
+
+                if ($dipakai) {
+                    return back()->with('error', $item->serial_number . ' sudah dipakai!');
+                }
             }
+        }
 
         // 1. simpan header
         $distribution = Distribution::create([
@@ -126,18 +222,18 @@ class DistributionController extends Controller
         ]);
 
         // 2. simpan semua device
-        foreach ($request->items as $itemId) {
-
-            if (!$itemId) continue;
-
+        foreach ($items as $itemId) {
             DistributionItem::create([
                 'distribution_id' => $distribution->id,
                 'item_id' => $itemId
             ]);
 
-            // update status item
-            Items::where('id', $itemId)
-                ->update(['status' => 'used']);
+            $item = Items::find($itemId);
+
+            // kalau bukan printer → set used
+            if (!in_array($item->kategori, ['Printer Kertas', 'Printer Barcode'])) {
+                $item->update(['status' => 'used']);
+            }
         }
         return redirect()->route('distribution.index')
             ->with('success', 'Distribusi berhasil disimpan');
@@ -158,12 +254,12 @@ class DistributionController extends Controller
         ->first()?->item;
 
         $printer_kertas_selected = $distribution->distributionItems
-        ->where('item.kategori', 'Printer Kertas')
-        ->first()?->item;
+        ->filter(fn ($distributionItem) => optional($distributionItem->item)->kategori === 'Printer Kertas')
+        ->pluck('item');
 
         $printer_barcode_selected = $distribution->distributionItems
-        ->where('item.kategori', 'Printer Barcode')
-        ->first()?->item;
+        ->filter(fn ($distributionItem) => optional($distributionItem->item)->kategori === 'Printer Barcode')
+        ->pluck('item');
 
         $scanner_selected = $distribution->distributionItems
         ->where('item.kategori', 'Scanner')
@@ -199,6 +295,10 @@ class DistributionController extends Controller
                 ->orWhereIn('id', $selectedItems);
             })->get();
 
+        $gedungList = Locations::select('gedung')
+        ->distinct()
+        ->pluck('gedung');
+
         $locations = Locations::all();
 
         return view('distribution.edit', compact(
@@ -206,6 +306,7 @@ class DistributionController extends Controller
             'selectedItems',
             'pcs','monitors','printers_kertas','printers_barcode','scanners',
             'locations',
+            'gedungList',
             'pc_selected',
             'monitor_selected',
             'printer_kertas_selected',
@@ -221,29 +322,60 @@ class DistributionController extends Controller
             'tanggal_distribusi' => 'required|date',
 
             // TAMBAHAN
-            'items' => 'required|array',
-            'items.*' => 'nullable|exists:items,id'
+            'items' => 'nullable|array',
+            'items.*' => 'nullable|exists:items,id',
+            'printer_kertas_ids' => 'nullable|array',
+            'printer_kertas_ids.*' => 'exists:items,id',
+            'printer_barcode_ids' => 'nullable|array',
+            'printer_barcode_ids.*' => 'exists:items,id',
         ]);
         $distribution = Distribution::findOrFail($id);
+
+        $items = collect($request->input('items', []))
+            ->merge($request->input('printer_kertas_ids', []))
+            ->merge($request->input('printer_barcode_ids', []))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($items->isEmpty()) {
+            return back()->with(['error' => 'Minimal pilih 1 device!'])->withInput();
+        }
+
+        // CEK KHUSUS DEVICE EXCLUSIVE, kecuali device yang memang sudah ada di distribusi ini
+        foreach ($items as $itemId) {
+            $item = Items::find($itemId);
+
+            if (in_array($item->kategori, ['PC', 'Monitor', 'Scanner'])) {
+                $dipakai = DistributionItem::where('item_id', $itemId)
+                    ->where('distribution_id', '!=', $distribution->id)
+                    ->whereHas('distribution', function($q) {
+                        $q->where('status', 'dipakai');
+                    })
+                    ->exists();
+
+                if ($dipakai) {
+                    return back()->with('error', $item->serial_number . ' sudah dipakai!')->withInput();
+                }
+            }
+        }
 
         // ambil item lama
         $oldItems = DistributionItem::where('distribution_id', $id)->get();
 
         foreach ($oldItems as $old) {
-            // balikin status
-            Items::where('id', $old->item_id)
-                ->update(['status' => 'available']);
+
+            $item = Items::find($old->item_id);
+
+            // hanya non-printer yang direset
+            if (!in_array($item->kategori, ['Printer Kertas', 'Printer Barcode'])) {
+                $item->update(['status' => 'available']);
+            }
 
             $old->delete();
         }
 
-        $items = array_filter($request->items ?? []); // buang yang kosong
-
-        if (count($items) == 0) {
-            return back()->withErrors(['items' => 'Minimal pilih 1 device!']);
-        }
-
-        $status = count($items) > 0 ? 'dipakai' : 'dikembalikan';
+        $status = $items->isNotEmpty() ? 'dipakai' : 'dikembalikan';
         // update header
         $distribution->update([
             'location_id' => $request->location_id,
@@ -255,17 +387,17 @@ class DistributionController extends Controller
         ]);
 
         // insert ulang item
-        foreach ($request->items as $itemId) {
-
-            if (!$itemId) continue;
-
+        foreach ($items as $itemId) {
             DistributionItem::create([
                 'distribution_id' => $distribution->id,
                 'item_id' => $itemId
             ]);
 
-            Items::where('id', $itemId)
-                ->update(['status' => 'used']);
+            $item = Items::find($itemId);
+
+            if (!in_array($item->kategori, ['Printer Kertas', 'Printer Barcode'])) {
+                $item->update(['status' => 'used']);
+            }
         }
 
         return redirect()->route('distribution.index')
@@ -274,15 +406,14 @@ class DistributionController extends Controller
 
     public function destroy($id)
     {
-    // $distribution = Distribution::findOrFail($id);
+        $usedCount = DistributionItem::where('item_id', $id)->count();
 
-    // foreach ($distribution->items as $di) {
-    //     $di->item->update(['status' => 'available']);
-    // }
+        if ($usedCount == 0) {
+            Items::where('id', $id)->update([
+                'status' => 'available'
+            ]);
+        }
 
-    // $distribution->update(['status' => 'dikembalikan']);
-
-    // return back()->with('success', 'Barang berhasil dikembalikan');
         $distribution=Distribution::findOrFail($id);
         //Ubah status
         $distribution->update([
@@ -290,7 +421,12 @@ class DistributionController extends Controller
         ]);
         //kembali item ke gudang
         foreach ($distribution->distributionItems as $d) {
-            $d->item->update(['status' => 'available']);
+
+            $item = $d->item;
+
+            if (!in_array($item->kategori, ['Printer Kertas', 'Printer Barcode'])) {
+                $item->update(['status' => 'available']);
+            }
         }
 
         return back()->with('succes','Barang berhasil dikembalikan');

@@ -60,10 +60,10 @@
 
             <!-- SERIAL NUMBER -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Serial Number</label>
+                <label>Serial Number <span class="text-red-500">*</span></label>
                 <div id="sn-wrapper">
                     <div class="flex gap-2 mb-2">
-                        <input type="text" name="serial_numbers[]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <input type="text" name="serial_numbers[]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
                         <button type="button" onclick="removeSN(this)" class="bg-red-500 text-white px-3 rounded">✕</button>
                     </div>
                 </div>

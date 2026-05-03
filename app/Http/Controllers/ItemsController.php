@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Items;
-use App\Models\Distribution;
+use App\Models\DistributionItem;
 use Illuminate\Http\Request;
 
 class ItemsController extends Controller
@@ -11,16 +11,45 @@ class ItemsController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function searchItems(Request $request)
+    {
+        $q = $request->q;
+
+        $items = Items::where('serial_number', 'like', "%$q%")
+            ->orWhere('service_tag', 'like', "%$q%")
+            ->orWhere('merk', 'like', "%$q%")
+            ->orWhere('type', 'like', "%$q%")
+            ->orWhere('processor', 'like', "%$q%")
+            ->orWhere('os', 'like', "%$q%")
+            ->orWhere('ram_gb', 'like', "%$q%")
+            ->orWhere('tahun', 'like', "%$q%")
+            ->limit(10)
+            ->get();
+
+        return response()->json(
+            $items->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'text' => $item->serial_number . ' - ' . $item->merk . '-' . $item->type
+                ];
+            })
+        );
+    }
+
     public function index(Request $request)
     {
         $query = Items::query();
         $selectedKategori = array_values(array_filter((array) $request->input('kategori', '')));
         $selectedMerk = array_values(array_filter((array) $request->input('merk', '')));
-        
-        // Search functionality
-        if ($request->filled('search')) {
-            $search = '%' . $request->search . '%';
-            $query->where(function ($q) use ($search) {
+
+         if ($request->item_id) {
+            // 🔥 kalau pilih dari suggestion → pakai ID saja
+            $query->where('id', $request->item_id);
+        } 
+            elseif ($request->filled('search')) {
+                // 🔥 kalau manual ketik → pakai search
+                $search = '%' . $request->search . '%';
+                $query->where(function ($q) use ($search) {
                 $q->where('serial_number', 'like', $search)
                   ->orWhere('service_tag', 'like', $search)
                   ->orWhere('merk', 'like', $search)
@@ -29,7 +58,7 @@ class ItemsController extends Controller
                   ->orWhere('os', 'like', $search)
                   ->orWhere('ram_gb', 'like', $search)
                   ->orWhere('tahun','like', $search);
-            });
+                });
         }
         
         // Filter by kategori
@@ -42,6 +71,10 @@ class ItemsController extends Controller
             $query->whereIn('merk', $selectedMerk);
         }
         
+        if ($request->status) {
+        $query->where('status', $request->status);
+        }
+
         $items = $query->latest()->paginate(10)->appends($request->query());
         
         // Get all kategori options
@@ -121,7 +154,7 @@ class ItemsController extends Controller
     {
         $validated = $request->validate([
             'kategori' => 'required|in:PC,Monitor,Printer Kertas,Printer Barcode,Scanner',
-            'merk' => 'required|string|max:255',
+            'merk' =>  $item->barang_masuk_id ?'nullable':'required|string|max:255',
             'type' => 'required|string|max:255',
             'serial_number' => 'required|string|unique:items,serial_number,' . $item->id,
             'service_tag' => 'nullable|string|max:255',
@@ -136,6 +169,11 @@ class ItemsController extends Controller
         //     'is_active' => false
         // ]);
         // Items::where('is_active', true)->get();
+        // 🔥 HANDLE MERK DI SINI
+        if ($item->barang_masuk_id) {
+            $validated['merk'] = $item->merk; // paksa pakai yang lama
+        }
+
         $item->update($validated);
 
         return redirect()->route('items.index')->with('success', 'Master Data Barang berhasil diperbarui !');
@@ -153,7 +191,7 @@ class ItemsController extends Controller
             return back()->with('error', 'Item sedang digunakan, tidak bisa dihapus !');
         }
         // Cek apakah pernah masuk distribusi
-        $dipakai = Distribution::where('item_id',$id)->exists();
+        $dipakai = DistributionItem::where('item_id',$id)->exists();
 
         if($dipakai){
             return back()->with('error', 'Item sudah pernah didistribusikan !');

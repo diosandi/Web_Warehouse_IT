@@ -4,7 +4,7 @@
 <br>
 <div class="container mx-auto px-4 py-12">
 
-        <!-- Header -->
+    <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Tambah Distribusi Barang</h1>
@@ -17,6 +17,17 @@
             Kembali
         </a>
     </div>
+
+    <!-- Alert Error -->
+    @if(session('error'))
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6 flex items-center">
+            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-3.536-9.536a1 1 0 011.414-1.414L10 8.586l2.121-2.121a1 1 0 111.414 1.414L11.414 10l2.121 2.121a1 1 0 01-1.414 1.414L10 11.414l-2.121 2.121a1 1 0 01-1.414-1.414L8.586 10 6.464 7.879z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="font-medium">{{ session('error') }}</span>
+        </div>
+    @endif
+
     <!-- FORM -->
     <div class="bg-white rounded-xl shadow-lg p-8">
         <form action="{{ route('distribution.store') }}" method="POST">
@@ -35,25 +46,32 @@
 
             <!-- LOKASI -->
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
-                <select name="location_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                    @foreach($locations as $loc)
-                        <option value="{{ $loc->id }}">
-                            {{ $loc->gedung }} - {{ $loc->ruangan }}
-                        </option>
-                    @endforeach
-                </select>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi <span class="text-red-500">*</span></label>
+                    <!-- GEDUNG -->
+                    <select id="gedung" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+                        <option value="">-- Pilih Gedung --</option>
+                        @foreach($gedungList as $g)
+                            <option value="{{ $g }}">{{ $g }}</option>
+                        @endforeach
+                    </select>
+                    <br><br>
+                    <!-- RUANGAN -->
+                    <select name="location_id" id="ruangan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+                        <option value="">-- Pilih Ruangan --</option>
+                    </select>
             </div>
+
+            
 
             <!-- TANGGAL -->
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal</label>
-                <input type="date" name="tanggal_distribusi" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal <span class="text-red-500">*</span></label>
+                <input type="date" name="tanggal_distribusi" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <hr class="my-6">
 
-            <h2 class="font-bold text-lg mb-4">Pilih Device</h2>
+            <h2 class="font-bold text-lg mb-4">Pilih Device <span class="text-red-500">*</span></h2>
 
             <!-- PC -->
             <div class="mb-4 relative">
@@ -90,8 +108,10 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Ketik SN Printer Kertas...">
 
-                <input type="hidden" name="items[]" id="printer_kertas_id">
+               
+                {{-- <input type="hidden" name="items[]" id="printer_kertas_id"> --}}
 
+                <div id="printer_kertas_selected" class="mt-2 flex flex-wrap gap-2"></div>
                 <div id="printer_kertas_suggestions"
                     class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
                 </div>
@@ -104,8 +124,10 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Ketik SN Printer Barcode...">
 
-                <input type="hidden" name="items[]" id="printer_barcode_id">
+                
+                {{-- <input type="hidden" name="items[]" id="printer_barcode_id"> --}}
 
+                <div id="printer_barcode_selected" class="mt-2 flex flex-wrap gap-2"></div>
                 <div id="printer_barcode_suggestions"
                     class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
                 </div>
@@ -152,7 +174,8 @@
 
 </div>
 <script>
-function setupSearch(inputId, suggestionId, hiddenId, kategori) {
+// Search Device tambah data barang
+function setupSearch(inputId, suggestionId, hiddenId, kategori, containerId = null, inputName = null) {
     let $input = $(inputId);
     let $suggestions = $(suggestionId);
     let $hidden = $(hiddenId);
@@ -199,16 +222,41 @@ function setupSearch(inputId, suggestionId, hiddenId, kategori) {
         }, 300);
     });
 
-    $suggestions.on('click', 'div', function () {
-        $input.val($(this).data('text'));
-        $hidden.val($(this).data('id'));
-        $suggestions.hide();
-    });
-
     $(document).on('click', function (e) {
         if (!$(e.target).closest(inputId + ', ' + suggestionId).length) {
             $suggestions.hide();
         }
+    });
+
+    $suggestions.on('click', 'div', function () {
+    let id = $(this).data('id');
+    let text = $(this).data('text');
+
+    // 👉 MULTI SELECT (printer)
+    if (containerId && inputName) {
+
+        // Cegah duplicate
+        if ($(containerId + ' input[value="'+id+'"]').length) return;
+
+        let input = `<input type="hidden" name="${inputName}[]" value="${id}">`;
+
+        let badge = `
+            <span class="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center gap-1">
+                ${text}
+                <button type="button" class="remove-item text-red-500" data-id="${id}">×</button>
+            </span>
+        `;
+
+        $(containerId).append(input).append(badge);
+        $input.val('');
+
+    } else {
+        // 👉 SINGLE SELECT (PC, Monitor, Scanner)
+        $input.val(text);
+        $hidden.val(id);
+    }
+
+    $suggestions.hide();
     });
 }
 
@@ -233,9 +281,60 @@ $('form').on('submit', function(e) {
 $(document).ready(function () {
     setupSearch('#pc_search', '#pc_suggestions', '#pc_id', 'PC');
     setupSearch('#monitor_search', '#monitor_suggestions', '#monitor_id', 'Monitor');
-    setupSearch('#printer_kertas_search', '#printer_kertas_suggestions', '#printer_kertas_id', 'Printer Kertas');
-    setupSearch('#printer_barcode_search', '#printer_barcode_suggestions', '#printer_barcode_id', 'Printer Barcode');
     setupSearch('#scanner_search', '#scanner_suggestions', '#scanner_id', 'Scanner');
+
+     // MULTI
+    setupSearch(
+        '#printer_kertas_search',
+        '#printer_kertas_suggestions',
+        null,
+        'Printer Kertas',
+        '#printer_kertas_selected',
+        'printer_kertas_ids'
+    );
+
+    setupSearch(
+        '#printer_barcode_search',
+        '#printer_barcode_suggestions',
+        null,
+        'Printer Barcode',
+        '#printer_barcode_selected',
+        'printer_barcode_ids'
+    );
+});
+
+$(document).on('click', '.remove-item', function () {
+    let id = $(this).data('id');
+    let $container = $(this).closest('div');
+
+    $(this).parent().remove(); // hapus badge
+    $container.find(`input[value="${id}"]`).remove(); // hapus hidden
+});
+
+//Search ambil ruangan
+$('#gedung').on('change', function() {
+    let gedung = $(this).val();
+
+    if (!gedung) {
+    $('#ruangan').html('<option>Pilih gedung dulu</option>');
+    return;
+    }
+
+    $('#ruangan').html('<option>Loading...</option>');
+
+    $.ajax({
+        url: '/get-ruangan',
+        data: { gedung: gedung },
+        success: function(data) {
+            let html = '<option value="">-- Pilih Ruangan --</option>';
+
+            data.forEach(r => {
+                html += `<option value="${r.id}">${r.ruangan}</option>`;
+            });
+
+            $('#ruangan').html(html);
+        }
+    });
 });
 </script>
 @endsection

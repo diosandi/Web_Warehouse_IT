@@ -42,7 +42,7 @@ class Items extends Model
 
     public function distributionItems()
     {
-        return $this->hasMany(DistributionItem::class);
+        return $this->hasMany(DistributionItem::class,'item_id');
     }
         /**
      * Get kategori options untuk dropdown
@@ -56,5 +56,14 @@ class Items extends Model
             'Printer Barcode' => 'Printer Barcode',
             'Scanner' => 'Scanner'
         ];
+    }
+
+    public function isUsed()
+    {
+        return $this->distributionItems()
+            ->whereHas('distribution', function ($q) {
+                $q->where('status', 'dipakai');
+            })
+            ->exists();
     }
 }

@@ -58,7 +58,9 @@
             <div>
                 <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Barang</label>
                 <div class="relative">
-                    <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Cari user, SN, Merk" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari user, SN, Merk" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="hidden" name="item_id" id="item_id_hidden">
+                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto"></div>
                     @if(request('search'))
                         <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold">{{ strlen(request('search')) }} char</span>
                     @endif
@@ -117,11 +119,26 @@
     </details>
   
 
-    <!-- Table -->
+    <!-- Daftar Distribution  -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+
+        <!-- Result Counter -->
+        <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
+            <div class="text-xs md:text-sm text-gray-600">
+                <span class="font-semibold text-gray-800">{{ $distribution->total() }}</span> 
+                <span>Data Distribusi Ditemukan</span>
+                @if(request('search'))
+                    <span class="text-gray-500">(dari total database)</span>
+                @endif
+            </div>
+            <div class="text-xs md:text-sm text-gray-600">
+                Halaman <span class="font-semibold">{{ $distribution->currentPage() }}</span> dari <span class="font-semibold">{{ $distribution->lastPage() }}</span>
+            </div>
+        </div>
+
+        <!-- Table -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <!-- HEADER -->
                 <thead class="bg-gradient-to-r from-green-600 to-green-700">
                     <tr>
                         <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
@@ -143,37 +160,81 @@
                     @forelse($distribution as $d)
                        @php
                             $kategori = [
-                                'PC' => '-',
-                                'Monitor' => '-',
-                                'Printer Kertas' => '-',
-                                'Printer Barcode' => '-',
-                                'Scanner' => '-',
+                                'PC' => [],
+                                'Monitor' => [],
+                                'Printer Kertas' => [],
+                                'Printer Barcode' => [],
+                                'Scanner' => [],
                             ];
 
                             foreach($d->distributionItems as $di) {
                                 $item = $di->item;
 
                                 if(isset($kategori[$item->kategori])) {
-                                    $kategori[$item->kategori] = $item->serial_number . ' / ' . ($item->merk ?? '-');
+                                    $kategori[$item->kategori][] = $item->serial_number . ' / ' . ($item->merk ?? '-');
                                 }
                             }
                         @endphp
                         <tr>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $loop->iteration + ($distribution->currentPage() - 1) * $distribution->perPage() }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $kategori['PC'] }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $kategori['Monitor'] }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $kategori['Printer Kertas'] }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $kategori['Printer Barcode'] }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $kategori['Scanner'] }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $d->nama_user }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $d->divisi ?? '-' }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $d->location->gedung ?? '-' }} - {{ $d->location->ruangan ?? '-' }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $d->tanggal_distribusi }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $loop->iteration + ($distribution->currentPage() - 1) * $distribution->perPage() }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['PC']))
+                                                                                                        @foreach($kategori['PC'] as $pc)
+                                                                                                            <div>{{ $pc }}</div>
+                                                                                                        @endforeach
+                                                                                                    @else
+                                                                                                        -
+                                                                                                    @endif</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Monitor']))
+                                                                                                        @foreach($kategori['Monitor'] as $pc)
+                                                                                                            <div>{{ $pc }}</div>
+                                                                                                        @endforeach
+                                                                                                    @else
+                                                                                                        -
+                                                                                                    @endif</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Printer Kertas']))
+                                                                                                        <div class="flex flex-col gap-1">
+                                                                                                            @foreach($kategori['Printer Kertas'] as $pk)
+                                                                                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                                                                                                    {{ $pk }}
+                                                                                                                </span>
+                                                                                                            @endforeach
+                                                                                                            <span class="text-xs text-gray-500">
+                                                                                                                Total: {{ count($kategori['Printer Kertas']) }}
+                                                                                                            </span>
+                                                                                                        </div>
+                                                                                                    @else
+                                                                                                        -
+                                                                                                    @endif</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Printer Barcode']))
+                                                                                                        <div class="flex flex-col gap-1">
+                                                                                                            @foreach($kategori['Printer Barcode'] as $pb)
+                                                                                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                                                                                                    {{ $pb }}
+                                                                                                                </span>
+                                                                                                            @endforeach
+                                                                                                            <span class="text-xs text-gray-500">
+                                                                                                                Total: {{ count($kategori['Printer Barcode']) }}
+                                                                                                            </span>
+                                                                                                        </div>
+                                                                                                    @else
+                                                                                                        -
+                                                                                                    @endif</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Scanner']))
+                                                                                                        @foreach($kategori['Scanner'] as $pc)
+                                                                                                            <div>{{ $pc }}</div>
+                                                                                                        @endforeach
+                                                                                                    @else
+                                                                                                        -
+                                                                                                    @endif</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->nama_user }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->divisi ?? '-' }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->location->gedung ?? '-' }} - {{ $d->location->ruangan ?? '-' }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->tanggal_distribusi }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">
                                 @if($d->status == 'dipakai')
                                     <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs">Dipakai</span>
                                 @else
-                                    <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs">Dikembalikan</span>
+                                    <span class="px-2 py-1 rounded bg-red-100 text-red-700 text-xs">Dikembalikan</span>
                                 @endif
                             </td>
                             <td class="px-4 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -197,6 +258,8 @@
                                 </div>
                             </td>
                         </tr>
+
+                    <!-- Jika Data Kosong -->
                     @empty
                         <tr>
                             <td colspan="10" class="px-3 md:px-4 py-8">
@@ -223,16 +286,18 @@
                             </td>
                         </tr>
                     @endforelse
-                </tbody>
 
+                </tbody>
             </table>
         </div>
+
         <!-- Pagination -->
         <div class="bg-white px-3 md:px-4 py-4 border-t border-gray-200 overflow-x-auto">
             <div class="flex justify-center md:justify-end">
                 {{ $distribution->links() }}
             </div>
         </div>
+        
     </div>
 </div>
 <style>
@@ -280,6 +345,58 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+});
+
+$(document).ready(function() {
+    var $input = $('#search');
+    var $suggestions = $('#suggestions');
+    var $hidden = $('#item_id_hidden');
+    var searchDelay;
+
+    $input.on('input', function() {
+        var query = $(this).val().trim();
+        $hidden.val(''); // reset hidden
+        clearTimeout(searchDelay);
+
+        if (query.length < 1) {
+            $suggestions.empty().hide();
+            return;
+        }
+
+        searchDelay = setTimeout(function() {
+            $.ajax({
+                url: '{{ route('distribution.search_distribution') }}',
+                data: { q: query },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.length === 0) {
+                        $suggestions.html('<div class="px-3 py-2 text-gray-500">Tidak ada hasil</div>').show();
+                        return;
+                    }
+                    var html = '';
+                        $.each(data, function(i, item) {
+                        html += '<div class="px-3 py-2 cursor-pointer hover:bg-green-100" data-id="'+item.id+'" data-text="'+item.text+'">'+item.text+'</div>';
+                    });
+                    $suggestions.html(html).show();
+                }
+            });
+        }, 300);
+    });
+
+    $suggestions.on('click', 'div[data-id]', function() {
+        var id = $(this).data('id');
+        var text = $(this).data('text');
+        $input.val(text);
+        $hidden.val(id);
+        $suggestions.hide();
+    });
+
+    // Hide suggestions on click outside
+    $(document).on('mousedown', function(e) {
+        if (!$(e.target).closest('#search, #suggestions').length) {
+            $suggestions.hide();
+        }
+    });
 });
 </script>
 @endsection

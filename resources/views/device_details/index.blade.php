@@ -60,7 +60,7 @@
                 <!-- Kategori Filter -->
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Merk</label>
-                        <select name="merk" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                        <select name="merk" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
                             <option value="">Semua</option>
                              @foreach($merks as $merk)
                                 <option value="{{ $merk }}" {{ request('merk') == $merk ? 'selected' : '' }}>
@@ -93,11 +93,12 @@
 
     <!-- Daftar Device Details -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+
          <!-- Result Counter -->
         <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
             <div class="text-xs md:text-sm text-gray-600">
                 <span class="font-semibold text-gray-800">{{ $deviceDetails->total() }}</span> 
-                <span>device detail(s) ditemukan</span>
+                <span>Data Device Detail Ditemukan</span>
                 @if(request('search'))
                     <span class="text-gray-500">(dari total database)</span>
                 @endif
@@ -106,6 +107,7 @@
                 Halaman <span class="font-semibold">{{ $deviceDetails->currentPage() }}</span> dari <span class="font-semibold">{{ $deviceDetails->lastPage() }}</span>
             </div>
         </div>
+
         <!--Table-->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -126,22 +128,25 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($deviceDetails as $index => $deviceDetail)
                         <tr class="hover:bg-gray-50 transition duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $deviceDetails->firstItem() + $index }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $deviceDetail->pc_name ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $deviceDetail->user_account ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ optional($deviceDetail->item)->serial_number ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ optional($deviceDetail->item)->merk ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $deviceDetail->ip_address ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $deviceDetail->mac_lan ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $deviceDetail->mac_wifi ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $deviceDetail->os_version ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $deviceDetails->firstItem() + $index }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->pc_name ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->user_account ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase font-semibold text-gray-900">{{ optional($deviceDetail->item)->serial_number ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ optional($deviceDetail->item)->merk ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->ip_address ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->mac_lan ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->mac_wifi ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->os_version ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                 <div class="inline-flex gap-2">
+                                    <!-- Tombol Edit -->
                                     <a href="{{ route('device_details.edit', $deviceDetail) }}" title="Edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition duration-150 flex items-center gap-1">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
+
+                                    <!-- Tombol Hapus -->
                                     <form action="{{ route('device_details.destroy', $deviceDetail) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus device detail ini?');">
                                         @csrf
                                         @method('DELETE')
@@ -154,6 +159,8 @@
                                 </div>
                             </td>
                         </tr>
+
+                    <!-- Jika Data Kosong -->
                     @empty
                         <tr>
                             <td colspan="10" class="px-3 md:px-4 py-8">
@@ -168,13 +175,18 @@
                             </td>
                         </tr>
                     @endforelse
+
                 </tbody>
             </table>
         </div>
 
-        <div class="p-4">
-            {{ $deviceDetails->links() }}
+        <!-- Pagination -->
+        <div class="bg-white px-3 md:px-4 py-4 border-t border-gray-200 overflow-x-auto">
+            <div class="flex justify-center md:justify-end">
+                {{ $deviceDetails->links() }}
+            </div>
         </div>
+
     </div>
 </div>
 

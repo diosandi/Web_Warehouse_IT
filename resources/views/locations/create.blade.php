@@ -21,7 +21,7 @@
     <div class="bg-white rounded-xl shadow-lg p-3 md:p-6 lg:p-8">
         <form action="{{route('locations.store') }}" method="POST">
             @csrf
-            <!--nama warehouse-->
+            <!-- Nama Gedung -->
             <div class="mb-6">
                 <label for="gedung" class="block text-sm font-senibold text-gray-700 mb-2">
                     Nama Gedung
@@ -35,15 +35,15 @@
                  @enderror
             </div>
 
-            <!--lokasi-->
+            <!-- Ruangan-->
             <div class="mb-6">
                 <label for="ruangan" class="black text-sm font-semibod text-gray-700 mb-2">
                     Nama Ruangan
                 </label>
                 <input type="text" name="ruangan" id="ruangan" value="{{old ('ruangan')}}" class="w-full px-2 md:px-3 py-2 text-sm border
                  border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition 
-                 @error('ruangan') border-red-500 @enderror" placeholder="Lt 1 RUANG IT">
-
+                 @error('ruangan') border-red-500 @enderror" 
+                 placeholder="Lt 1 RUANG IT" required>
                  @error('ruangan')
                  <p class="text-red-500 text-xs mt-1">{{$message}}</p>
                  @enderror

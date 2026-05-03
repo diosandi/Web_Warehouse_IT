@@ -55,7 +55,9 @@
             <div>
                 <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Lokasi</label>
                 <div class="relative">
-                    <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Cari nama gedung dan ruangan" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari nama gedung dan ruangan" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="hidden" name="location_id" id="location_id_hidden">
+                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto"></div>
                     @if(request('search'))
                         <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold">{{ strlen(request('search')) }} char</span>
                     @endif
@@ -177,13 +179,14 @@
         </div>
     </details>
 
-    <!-- Card Table -->
+    <!-- Daftar Locations -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+
         <!-- Result Counter -->
         <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
             <div class="text-xs md:text-sm text-gray-600">
                 <span class="font-semibold text-gray-800">{{ $locations->total() }}</span> 
-                <span>location(s) ditemukan</span>
+                <span>Data Location Ditemukan</span>
                 @if(request('search') || !empty($selectedGedung) || !empty($selectedRuangan))
                     <span class="text-gray-500">(dari total database)</span>
                 @endif
@@ -218,13 +221,13 @@
                                         </svg>
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-semibold text-gray-900">
+                                        <div class="text-sm font-semibold text-gray-900 uppercase">
                                             {{ $loc->gedung }}
                                         </div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 uppercase">
                                 {{ $loc->ruangan ?? '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -249,6 +252,8 @@
                                 </div>
                             </td>
                         </tr>
+                    
+                    <!-- Jika Data Kosong -->
                     @empty
                         <tr>
                             <td colspan="6" class="px-6 py-12 text-center">
@@ -262,16 +267,18 @@
                             </td>
                         </tr>
                     @endforelse
+
                 </tbody>
             </table>
         </div>
 
         <!-- Pagination -->
-        @if($locations->hasPages())
-            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <div class="bg-white px-3 md:px-4 py-4 border-t border-gray-200 overflow-x-auto">
+            <div class="flex justify-center md:justify-end">
                 {{ $locations->links() }}
             </div>
-        @endif
+        </div>
+
     </div>
 </div>
 
@@ -301,5 +308,57 @@
         background-color: #fcfcfc;
     }
 </style>
+<script>
+$(document).ready(function() {
+    var $input = $('#search');
+    var $suggestions = $('#suggestions');
+    var $hidden = $('#location_id_hidden');
+    var searchDelay;
 
+    $input.on('input', function() {
+        var query = $(this).val().trim();
+        $hidden.val(''); // reset hidden
+        clearTimeout(searchDelay);
+
+        if (query.length < 1) {
+            $suggestions.empty().hide();
+            return;
+        }
+
+        searchDelay = setTimeout(function() {
+            $.ajax({
+                url: '{{ route('locations.search_locations') }}',
+                data: { q: query },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.length === 0) {
+                        $suggestions.html('<div class="px-3 py-2 text-gray-500">Tidak ada hasil</div>').show();
+                        return;
+                    }
+                    var html = '';
+                    $.each(data, function(i, location) {
+                        html += '<div class="px-3 py-2 cursor-pointer hover:bg-green-100" data-id="'+location.id+'" data-text="'+location.text+'">'+location.text+'</div>';
+                    });
+                    $suggestions.html(html).show();
+                }
+            });
+        }, 250);
+    });
+
+    $suggestions.on('click', 'div[data-id]', function() {
+        var id = $(this).data('id');
+        var text = $(this).data('text');
+        $input.val(text);
+        $hidden.val(id);
+        $suggestions.hide();
+    });
+
+    // Hide suggestions on click outside
+    $(document).on('mousedown', function(e) {
+        if (!$(e.target).closest('#search, #suggestions').length) {
+            $suggestions.hide();
+        }
+    });
+});
+</script>
 @endsection

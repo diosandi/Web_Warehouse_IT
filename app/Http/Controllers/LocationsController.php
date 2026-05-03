@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Locations;
 use App\Models\Distribution;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 
 class LocationsController extends Controller
@@ -10,20 +11,45 @@ class LocationsController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function searchLocations(Request $request)
+    {
+        $q = $request->q;
+
+        $locations = Locations::where('gedung', 'like', "%$q%")
+            ->orWhere('ruangan', 'like', "%$q%")
+            ->limit(10)
+            ->get();
+
+        return response()->json(
+            $locations->map(function ($loc) {
+                return [
+                    'id' => $loc->id,
+                    'text' => $loc->gedung . ' - ' . $loc->ruangan
+                ];
+            })
+        );
+    }
+    
+
     public function index(Request $request)
     {
         $query = Locations::query();
         $selectedGedung = array_values(array_filter((array) $request->input('gedung','')));
         $selectedRuangan = array_values(array_filter((array) $request->input('ruangan','')));
 
-        //search functionality
-        if ($request->filled('search')) {
-            $search = '%' . $request->search.'%';
-            $query->where(function ($q) use ($search){
-                $q->where('gedung', 'like', $search)
-                  ->orwhere('ruangan', 'like', $search);
-            });
+            if ($request->location_id) {
+            // 🔥 kalau pilih dari suggestion → pakai ID saja
+            $query->where('id', $request->location_id);
+        } 
+            elseif ($request->filled('search')) {
+                // 🔥 kalau manual ketik → pakai search
+                $search = '%' . $request->search . '%';
+                $query->where(function ($q) use ($search) {
+                    $q->where('gedung', 'like', $search)
+                    ->orWhere('ruangan', 'like', $search);
+                });
         }
+        
         //Filter by gedung
         if(!empty($selectedGedung)){
             $query->whereIn('gedung',$selectedGedung);
@@ -76,11 +102,15 @@ class LocationsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Locations $location)
     {
         $validated = $request->validate([
             'gedung'=> 'required|max:255',
-            'ruangan'=> 'nullable|string|max:255',
+            'ruangan'=> ['nullable','string','max:255',
+                         Rule::unique('locations')->where (function($query)use($request){
+                            return $query->where('gedung',$request->gedung);
+                         })->ignore($location->id)
+            ]
         ]);
 
         Locations::create($validated);
@@ -111,7 +141,11 @@ class LocationsController extends Controller
     {
         $validated = $request->validate([
             'gedung'=> 'required|max:255',
-            'ruangan'=> 'nullable|string|max:255',
+            'ruangan'=> ['nullable','string','max:255',
+                         Rule::unique('locations')->where (function($query)use($request){
+                            return $query->where('gedung',$request->gedung);
+                         })->ignore($location->id)
+            ]
         ]);
 
         $location->update($validated);

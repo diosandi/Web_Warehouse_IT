@@ -8,20 +8,61 @@ use Illuminate\Http\Request;
 
 class Barang_masukController extends Controller
 {
+
+    public function searchBarangMasuk(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+
+        if ($q === '') {
+            return response()->json([]);
+        }
+
+        $search = "%{$q}%";
+        $results = Barang_masuk::with('items')
+            ->where('supplier', 'like', $search)
+            ->orWhere('keterangan', 'like', $search)
+            ->orWhereHas('items', function ($itemQuery) use ($search) {
+                $itemQuery->where('merk', 'like', $search)
+                          ->orWhere('kategori', 'like', $search);
+            })
+            ->limit(10)
+            ->get();
+
+        $suggestions = $results->map(function($d) {
+            $item = $d->items->first();
+            $itemText = $item
+                ? ($item->merk . ' - ' . $item->kategori)
+                : '-';
+
+            return [
+                'id' => $d->id,
+                'merk' => $item ? $item->merk : '-',
+                'kategori' => $item ? $item->kategori : '-',
+                'supplier' => $d->supplier,
+                'text' => trim($itemText . ' | supplier: ' . ($d->supplier ?? '-'))
+            ];
+        });
+
+        return response()->json($suggestions);
+    }
+
     public function index(Request $request)
     {
         $query = Barang_masuk::with(['items']);
         // SEARCH
-        if ($request->search) {
+        if ($request->filled('item_id')) {
+        $query->whereKey($request->item_id);
+        } elseif ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('supplier', 'like', "%{$request->search}%")
-                ->orWhere('keterangan', 'like', "%{$request->search}%");
-                })
+                ->orWhere('keterangan', 'like', "%{$request->search}%")
                 ->orWhereHas('items', function($item) use ($request) {
-                    $item->where('kategori', 'like', "%{$request->search}%")
+                    $item->where('serial_number', 'like', "%{$request->search}%")
+                        ->orWhere('kategori', 'like', "%{$request->search}%")
                         ->orWhere('merk', 'like', "%{$request->search}%");
                 });
-            };
+            });
+        }
 
         // FILTER KATEGORI
         if ($request->kategori) {

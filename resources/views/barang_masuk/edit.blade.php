@@ -35,16 +35,16 @@
                     <option value="">-- Pilih Kategori --</option>
                     <option value="PC" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'PC') ? 'selected' : '' }}>PC</option>
                     <option value="Monitor" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'Monitor') ? 'selected' : '' }}>Monitor</option>
-                    <option value="Printer kertas" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'Printer kertas') ? 'selected' : '' }}>Printer kertas</option>
-                    <option value="Printer barcode" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'Printer barcode') ? 'selected' : '' }}>Printer barcode</option>
+                    <option value="Printer Kertas" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'Printer Kertas') ? 'selected' : '' }}>Printer kertas</option>
+                    <option value="Printer Barcode" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'Printer Barcode') ? 'selected' : '' }}>Printer barcode</option>
                     <option value="Scanner" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'Scanner') ? 'selected' : '' }}>Scanner</option>
                 </select>
             </div>
 
             <!-- Merk -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Merk</label>
-                <input type="text" name="merk" value="{{ old('merk', $barang_masuk->items->first()->merk ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <label>Merk <span class="text-red-500">*</label>
+                <input type="text" name="merk" value="{{ old('merk', $barang_masuk->items->first()->merk ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- Supplier -->
@@ -55,13 +55,13 @@
 
             <!-- Tanggal -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Tanggal Masuk</label>
+                <label>Tanggal Masuk <span class="text-red-500">*</label>
                 <input type="date" name="tanggal_masuk" value="{{ old('tanggal_masuk', $barang_masuk->tanggal_masuk ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"required>
             </div>
 
             <!-- SERIAL NUMBER -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Serial Number</label>
+                <label>Serial Number <span class="text-red-500">*</label>
 
                 <div id="sn-wrapper">
 
@@ -70,7 +70,7 @@
                         @foreach (old('serial_numbers') as $sn)
                             <div class="flex gap-2 mb-2">
                                 <input type="text" name="serial_numbers[]" value="{{ $sn }}"
-                                    class="w-full px-3 py-2 border rounded-lg">
+                                    class="w-full px-3 py-2 border rounded-lg" required>
                                 <button type="button" onclick="removeSN(this)" 
                                     class="bg-red-500 text-white px-3 rounded">✕</button>
                             </div>
@@ -81,7 +81,7 @@
                         @foreach ($items as $item)
                             <div class="flex gap-2 mb-2">
                                 <input type="text" name="serial_numbers[]" value="{{ $item->serial_number }}"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
                                 <button type="button" onclick="removeSN(this)" 
                                     class="bg-red-500 text-white px-3 rounded">✕</button>
                             </div>
@@ -91,7 +91,7 @@
                     @else
                         <div class="flex gap-2 mb-2">
                             <input type="text" name="serial_numbers[]" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
                             <button type="button" onclick="removeSN(this)" 
                                 class="bg-red-500 text-white px-3 rounded">✕</button>
                         </div>

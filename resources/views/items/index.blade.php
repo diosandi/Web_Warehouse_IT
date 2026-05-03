@@ -61,7 +61,9 @@
             <div>
                 <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Barang</label>
                 <div class="relative">
-                    <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Cari S/N, Service Tag, Merk, Type, Processor, OS, PO..." class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari S/N, Service Tag, Merk, Type, Processor, OS, PO..." class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="hidden" name='item_id' id="item_id_hidden">
+                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto"></div>
                     @if(request('search'))
                         <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold">{{ strlen(request('search')) }} char</span>
                     @endif
@@ -114,6 +116,16 @@
                             </div>
                         </div>
                     </details>
+                </div>
+
+                <!-- Status Filter -->
+                <div>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Status</label>
+                        <select name="status" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                            <option value="">Semua</option>
+                            <option value="used" {{ request('status')=='used'?'selected':'' }}>Digunakan</option>
+                            <option value="available" {{ request('status')=='available'?'selected':'' }}>Tersedia</option>
+                        </select>
                 </div>
 
                 <!-- Buttons -->
@@ -169,6 +181,7 @@
                             </span>
                         @endif
                         
+                        
                         <!-- Clear All Button -->
                         <a href="{{ route('items.index') }}" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-full inline-flex items-center gap-1 text-xs md:text-sm font-semibold transition duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,11 +198,12 @@
 
     <!-- Daftar Master Data Barang -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+
         <!-- Result Counter -->
         <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
             <div class="text-xs md:text-sm text-gray-600">
                 <span class="font-semibold text-gray-800">{{ $items->total() }}</span> 
-                <span>item(s) ditemukan</span>
+                <span>Data Item Ditemukan</span>
                 @if(request('search') || !empty($selectedKategori) || !empty($selectedMerk))
                     <span class="text-gray-500">(dari total database)</span>
                 @endif
@@ -199,6 +213,7 @@
             </div>
         </div>
 
+        <!-- Table -->
         <div class="overflow-x-auto">
             <table class="w-full min-w-max divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-green-600 to-green-700">
@@ -212,6 +227,7 @@
                         <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Processor</th>
                         <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">RAM</th>
                         <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider hidden md:table-cell">Tahun</th>
+                        <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Status</th>
                         <th class="px-3 md:px-4 py-3 md:py-4 text-center text-xs font-semibold text-white uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -232,20 +248,43 @@
                                     <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Scanner</span>
                                 @endif
                             </td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-700">{{ $item->merk ? Str::limit($item->merk, 8) : '-' }}</td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-700">{{ $item->type ? Str::limit($item->type, 8) : '-' }}</td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-mono text-gray-700">{{ $item->serial_number ? Str::limit($item->serial_number, 10) : '-' }}</td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-mono text-gray-700 hidden lg:table-cell">{{ $item->service_tag ? Str::limit($item->service_tag, 8) : '-' }}</td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-700">{{ $item->processor ? Str::limit($item->processor, 8) : '-' }}</td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-700">{{ $item->ram_gb ? $item->ram_gb . 'G' : '-' }}</td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-700 hidden md:table-cell">{{ $item->tahun ?? '-' }}</td>
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->merk ? Str::limit($item->merk, 8) : '-' }}</td>
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->type ? Str::limit($item->type, 8) : '-' }}</td>
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm font-mono text-gray-700">{{ $item->serial_number ? Str::limit($item->serial_number, 10) : '-' }}</td>
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm font-mono text-gray-700 hidden lg:table-cell">{{ $item->service_tag ? Str::limit($item->service_tag, 8) : '-' }}</td>
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->processor ? Str::limit($item->processor, 8) : '-' }}</td>
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->ram_gb ? $item->ram_gb . 'G' : '-' }}</td>
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700 hidden md:table-cell">{{ $item->tahun ?? '-' }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                               @if(in_array($item->kategori, ['Printer Kertas', 'Printer Barcode']))
+                                    @if($item->isUsed())
+                                        <span class="px-2 py-1 rounded bg-red-100 text-red-800">Digunakan</span>
+                                    @else
+                                        <span class="px-2 py-1 rounded bg-green-100 text-green-800">Tersedia</span>
+                                    @endif
+
+                                @else
+
+                                    {{-- selain printer --}}
+                                    @if($item->status == 'used')
+                                        <span class="px-2 py-1 rounded bg-red-100 text-red-800">Digunakan</span>
+                                    @else
+                                        <span class="px-2 py-1 rounded bg-green-100 text-green-800">Tersedia</span>
+                                    @endif
+
+                                @endif
+                            </td>
                             <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-center text-xs font-medium">
                                 <div class="flex gap-1 md:gap-2 justify-center flex-wrap">
+
+                                    <!-- Tombol Edit -->
                                     <a href="{{ route('items.edit', $item->id) }}" title="Edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition duration-150 flex items-center gap-1">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
+
+                                    <!-- Tombol Hapus -->
                                     <form action="{{ route('items.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus barang ini?');" class="inline">
                                         @csrf
                                         @method('DELETE')
@@ -255,9 +294,12 @@
                                             </svg>
                                         </button>
                                     </form>
+                                    
                                 </div>
                             </td>
                         </tr>
+                    
+                    <!-- Jika Data Kosong -->
                     @empty
                         <tr>
                             <td colspan="10" class="px-3 md:px-4 py-8">
@@ -294,6 +336,7 @@
                 {{ $items->links() }}
             </div>
         </div>
+
     </div>
 </div>
 
@@ -323,4 +366,57 @@
         background-color: #fcfcfc;
     }
 </style>
+<script>
+$(document).ready(function() {
+    var $input = $('#search');
+    var $suggestions = $('#suggestions');
+    var $hidden = $('#item_id_hidden');
+    var searchDelay;
+
+    $input.on('input', function() {
+        var query = $(this).val().trim();
+        $hidden.val(''); // reset hidden
+        clearTimeout(searchDelay);
+
+        if (query.length < 1) {
+            $suggestions.empty().hide();
+            return;
+        }
+
+        searchDelay = setTimeout(function() {
+            $.ajax({
+                url: '{{ route('items.search_items') }}',
+                data: { q: query },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.length === 0) {
+                        $suggestions.html('<div class="px-3 py-2 text-gray-500">Tidak ada hasil</div>').show();
+                        return;
+                    }
+                    var html = '';
+                    $.each(data, function(i, item) {
+                        html += '<div class="px-3 py-2 cursor-pointer hover:bg-green-100" data-id="'+item.id+'" data-text="'+item.text+'">'+item.text+'</div>';
+                    });
+                    $suggestions.html(html).show();
+                }
+            });
+        }, 250);
+    });
+
+    $suggestions.on('click', 'div[data-id]', function() {
+        var id = $(this).data('id');
+        var text = $(this).data('text');
+        $input.val(text);
+        $hidden.val(id);
+        $suggestions.hide();
+    });
+
+    // Hide suggestions on click outside
+    $(document).on('mousedown', function(e) {
+        if (!$(e.target).closest('#search, #suggestions').length) {
+            $suggestions.hide();
+        }
+    });
+});
+</script>
 @endsection

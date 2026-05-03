@@ -50,7 +50,9 @@
             <div>
                 <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Barang Masuk</label>
                 <div class="relative">
-                    <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Cari user, SN, Merk" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari Supplier, SN, Merk, dan kategori" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="hidden" name='item_id' id="item_id_hidden">
+                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto"></div>
                     @if(request('search'))
                         <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold">{{ strlen(request('search')) }} char</span>
                     @endif
@@ -62,7 +64,7 @@
                 <!-- Kategori Filter -->
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Kategori</label>
-                        <select name="kategori" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                        <select name="kategori" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
                             <option value="">Semua</option>
                             <option value="pc">PC</option>
                             <option value="monitor">Monitor</option>
@@ -75,11 +77,11 @@
                  <!-- TANGGAL -->
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Tanggal Dari</label>
-                    <input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
                 </div>
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Tanggal Sampai</label>
-                    <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
                 </div>
             </div>
              <div class="flex items-end gap-2 md:gap-3 sm:col-span-2 lg:col-span-2">
@@ -110,8 +112,23 @@
         </div>
     @endif
 
-    <!--DAFTAR BARANG MASUK -->
+    <!--Daftar Barang Masuk -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+
+        <!-- Result Counter -->
+        <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
+            <div class="text-xs md:text-sm text-gray-600">
+                <span class="font-semibold text-gray-800">{{ $barang_masuk->total() }}</span> 
+                <span>Data Barang Masuk Ditemukan</span>
+                @if(request('search'))
+                    <span class="text-gray-500">(dari total database)</span>
+                @endif
+            </div>
+            <div class="text-xs md:text-sm text-gray-600">
+                Halaman <span class="font-semibold">{{ $barang_masuk->currentPage() }}</span> dari <span class="font-semibold">{{ $barang_masuk->lastPage() }}</span>
+            </div>
+        </div>
+        
         <!-- TABLE -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -132,13 +149,13 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($barang_masuk as $bm)
                     <tr class="hover:bg-gray-50 transition duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $loop->iteration }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $bm->tanggal_masuk }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $bm->items->first()->kategori ?? '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $bm->items->first()->merk ?? '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $bm->supplier ?? '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ $bm->items->count() ?? 0 }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $bm->keterangan ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $loop->iteration }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->tanggal_masuk }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->kategori ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->merk ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->supplier ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase font-semibold text-gray-900">{{ $bm->items->count() ?? 0 }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->keterangan ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                             <div class="inline-flex gap-2">
                                 <!-- DETAIL -->
@@ -168,6 +185,8 @@
                             </div>
                         </td>
                     </tr>
+
+                    <!-- Jika Data Kosong -->
                     @empty
                         <tr>
                             <td colspan="10" class="px-3 md:px-4 py-8">
@@ -182,19 +201,19 @@
                             </td>
                         </tr>
                     @endforelse
+
                 </tbody>
-
             </table>
+        </div>
 
-            <!-- PAGINATION -->
+            <!-- Pagination -->
             <div class="bg-white px-3 md:px-4 py-4 border-t border-gray-200 overflow-x-auto">
                 <div class="flex justify-center md:justify-end">
                     @if($barang_masuk->hasPages()) {{ $barang_masuk->links() }} @endif
                 </div>
             </div>
-        </div>
-    </div>  
 
+    </div>  
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -215,6 +234,58 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+});
+
+$(document).ready(function() {
+    var $input = $('#search');
+    var $suggestions = $('#suggestions');
+    var $hidden = $('#item_id_hidden');
+    var searchDelay;
+
+    $input.on('input', function() {
+        var query = $(this).val().trim();
+        $hidden.val(''); // reset hidden
+        clearTimeout(searchDelay);
+
+        if (query.length < 1) {
+            $suggestions.empty().hide();
+            return;
+        }
+
+        searchDelay = setTimeout(function() {
+            $.ajax({
+                url: '{{ route('barang_masuk.search_barang_masuk') }}',
+                data: { q: query },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.length === 0) {
+                        $suggestions.html('<div class="px-3 py-2 text-gray-500">Tidak ada hasil</div>').show();
+                        return;
+                    }
+                    var html = '';
+                        $.each(data, function(i, item) {
+                        html += '<div class="px-3 py-2 cursor-pointer hover:bg-green-100" data-id="'+item.id+'" data-text="'+item.text+'">'+item.text+'</div>';
+                    });
+                    $suggestions.html(html).show();
+                }
+            });
+        }, 300);
+    });
+
+    $suggestions.on('click', 'div[data-id]', function() {
+        var id = $(this).data('id');
+        var text = $(this).data('text');
+        $input.val(text);
+        $hidden.val(id);
+        $suggestions.hide();
+    });
+
+    // Hide suggestions on click outside
+    $(document).on('mousedown', function(e) {
+        if (!$(e.target).closest('#search, #suggestions').length) {
+            $suggestions.hide();
+        }
+    });
 });
 </script>
 @endsection

@@ -36,8 +36,8 @@
 
                 <!-- PC Name -->
                 <div>
-                    <label for="pc_name" class="block text-sm font-medium text-gray-700 mb-2">PC NAME <span class="text-red-500">*</span></label>
-                    <input type="text" name="pc_name" id="pc_name" value="{{ old('pc_name') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="" required>
+                    <label for="pc_name" class="block text-sm font-medium text-gray-700 mb-2">PC Name </label>
+                    <input type="text" name="pc_name" id="pc_name" value="{{ old('pc_name') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="">
                     @error('pc_name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -45,8 +45,8 @@
 
                  <!-- User Account -->
                 <div>
-                    <label for="user_account" class="block text-sm font-medium text-gray-700 mb-2">User Account <span class="text-red-500">*</span></label>
-                    <input type="text" name="user_account" id="user_account" value="{{ old('user_account') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="" required>
+                    <label for="user_account" class="block text-sm font-medium text-gray-700 mb-2">User Account </span></label>
+                    <input type="text" name="user_account" id="user_account" value="{{ old('user_account') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="">
                     @error('user_account')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror

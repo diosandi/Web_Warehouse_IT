@@ -63,7 +63,7 @@
 
                     <!-- Serial Number -->
                     <div class="mb-3 md:mb-4">
-                        <label for="serial_number" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Serial Number (S/N) <span class="text-blue-500">(jika tidak ada : -)</span> <span class="text-red-500">*</span></label>
+                        <label for="serial_number" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Serial Number (S/N) <span class="text-yellow-500">( jika tidak ada : - )</span> <span class="text-red-500">*</span></label>
                         <input type="text" name="serial_number" id="serial_number" value="{{ old('serial_number') }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="" required>
                         @error('serial_number')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -72,7 +72,7 @@
 
                     <!-- Service Tag -->
                     <div class="mb-0">
-                        <label for="service_tag" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Service Tag <span class="text-blue-500">(jika tidak ada : -)<span class="text-red-500">*</span></label>
+                        <label for="service_tag" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Service Tag <span class="text-yellow-500">( jika tidak ada : - )<span class="text-red-500">*</span></label>
                         <input type="text" name="service_tag" id="service_tag" value="{{ old('service_tag') }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="" required>
                         @error('service_tag')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
