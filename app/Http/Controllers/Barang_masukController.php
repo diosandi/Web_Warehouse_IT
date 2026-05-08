@@ -23,6 +23,7 @@ class Barang_masukController extends Controller
             ->orWhere('keterangan', 'like', $search)
             ->orWhereHas('items', function ($itemQuery) use ($search) {
                 $itemQuery->where('merk', 'like', $search)
+                          ->orWhere('type', 'like', $search)
                           ->orWhere('kategori', 'like', $search);
             })
             ->limit(10)
@@ -31,12 +32,13 @@ class Barang_masukController extends Controller
         $suggestions = $results->map(function($d) {
             $item = $d->items->first();
             $itemText = $item
-                ? ($item->merk . ' - ' . $item->kategori)
+                ? ($item->merk . ' - ' . $item->type . ' - ' . $item->kategori)
                 : '-';
 
             return [
                 'id' => $d->id,
                 'merk' => $item ? $item->merk : '-',
+                'type' => $item ? $item->type : '-',
                 'kategori' => $item ? $item->kategori : '-',
                 'supplier' => $d->supplier,
                 'text' => trim($itemText . ' | supplier: ' . ($d->supplier ?? '-'))
@@ -59,7 +61,8 @@ class Barang_masukController extends Controller
                 ->orWhereHas('items', function($item) use ($request) {
                     $item->where('serial_number', 'like', "%{$request->search}%")
                         ->orWhere('kategori', 'like', "%{$request->search}%")
-                        ->orWhere('merk', 'like', "%{$request->search}%");
+                        ->orWhere('merk', 'like', "%{$request->search}%")
+                        ->orWhere('type', 'like', "%{$request->search}%");
                 });
             });
         }
@@ -105,7 +108,13 @@ class Barang_masukController extends Controller
         $request->validate([
             'kategori'=> 'required',
             'merk'=> 'required',
-            'serial_numbers'=>'required|array'
+            'type'=> 'required',
+            'serial_numbers'=>'required|array',
+            'serial_numbers.*' => 'required|distinct|unique:items,serial_number'
+        ],[
+            'serial_numbers.*.required' => 'Serial Number tidak boleh kosong',
+            'serial_numbers.*.unique' => 'Serial Number harus unik',
+            'serial_numbers.*.distinct' => 'Serial Number tidak boleh duplicate',
         ]);
 
         //simpan header
@@ -123,6 +132,7 @@ class Barang_masukController extends Controller
                 'barang_masuk_id' => $barang_masuk->id,
                 'serial_number'=>$sn,
                 'merk'=>$request->merk,
+                'type'=>$request->type,
                 'kategori'=>$request->kategori,
                 'status'=>'available'
             ]);
@@ -142,7 +152,13 @@ class Barang_masukController extends Controller
         $validated = $request->validate([
            'kategori'=>'required',
            'merk'=>'required',
-           'serial_numbers'=>'required|array'
+           'type'=>'required',
+           'serial_numbers'=>'required|array',
+           'serial_numbers.*' => 'required|distinct'
+        ],[
+            'serial_numbers.*.required' => 'Serial Number tidak boleh kosong',
+            // 'serial_numbers.*.unique' => 'Serial Number harus unik',
+            'serial_numbers.*.distinct' => 'Serial Number tidak boleh duplicate',
         ]);
 
         $barang_masuk = Barang_masuk::findOrfail($id);
@@ -175,6 +191,7 @@ class Barang_masukController extends Controller
                 'barang_masuk_id' => $barang_masuk->id,
                 'serial_number'=>$sn,
                 'merk'=>$request->merk,
+                'type'=>$request->type,
                 'kategori'=>$request->kategori,
                 'status'=>'available'
             ]);

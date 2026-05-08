@@ -55,7 +55,7 @@
                 <p class="text-xs text-gray-500 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
             </div>
 
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <!-- Kategori Filter -->
                 <div>
@@ -97,7 +97,7 @@
          <!-- Result Counter -->
         <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
             <div class="text-xs md:text-sm text-gray-600">
-                <span class="font-semibold text-gray-800">{{ $deviceDetails->total() }}</span> 
+                <span class="font-semibold text-gray-800">{{ $deviceDetails->total() }}</span>
                 <span>Data Device Detail Ditemukan</span>
                 @if(request('search'))
                     <span class="text-gray-500">(dari total database)</span>
@@ -111,16 +111,17 @@
         <!--Table-->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-green-600 to-green-700">
+                <thead class="bg-linear-to-r from-green-600 to-green-700">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Kategori</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">PC Name</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">User Account</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Serial Number</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Merk</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">IP Address</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">MAC LAN</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">MAC WiFi</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Connection Type</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Shared Name</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">OS Version</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-white uppercase tracking-wider">Aksi</th>
                     </tr>
@@ -129,13 +130,33 @@
                     @forelse($deviceDetails as $index => $deviceDetail)
                         <tr class="hover:bg-gray-50 transition duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $deviceDetails->firstItem() + $index }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">
+                                 @if(optional($deviceDetail->item)->kategori === 'PC')
+                                    <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">PC</span>
+                                @elseif(optional($deviceDetail->item)->kategori === 'Monitor')
+                                    <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">Monitor</span>
+                                @elseif(optional($deviceDetail->item)->kategori === 'Printer Kertas')
+                                    <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">P.Kertas</span>
+                                @elseif(optional($deviceDetail->item)->kategori === 'Printer Barcode')
+                                    <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">P.Barcode</span>
+                                @elseif(optional($deviceDetail->item)->kategori === 'Scanner')
+                                    <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Scanner</span>
+                                @elseif(optional($deviceDetail->item)->kategori === 'Lainnya')
+                                    <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-cyan-100 text-cyan-800">Lainnya</span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->pc_name ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->user_account ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase font-semibold text-gray-900">{{ optional($deviceDetail->item)->serial_number ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase font-semibold text-gray-900"><a href="{{ route('items.show', $deviceDetail->item) }}"
+                                                                                                                                                class="text-blue-600 hover:underline font-semibold">
+
+                                                                                                                                                {{ optional($deviceDetail->item)->serial_number ?? '-' }}
+
+                                                                                                                                            </a></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ optional($deviceDetail->item)->merk ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->ip_address ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->mac_lan ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->mac_wifi ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->connection_type ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->shared_name ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->os_version ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                 <div class="inline-flex gap-2">

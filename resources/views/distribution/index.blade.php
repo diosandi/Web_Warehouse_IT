@@ -9,12 +9,12 @@
             <h1 class="text-3xl font-bold text-gray-800">Distribusi Barang</h1>
             <p class="text-gray-600 mt-1">Kelola data distribusi perangkat IT</p>
         </div>
-        <a href="{{route ('distribution.create') }}" 
+        <a href="{{route ('distribution.create') }}"
            class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200 shadow-lg hover:shadow-xl">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg> 
-            Tambah 
+            </svg>
+            Tambah
         </a>
     </div>
 
@@ -67,7 +67,7 @@
                 </div>
                 <p class="text-xs text-gray-500 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
             </div>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <!-- Status Filter -->
                 <div>
@@ -117,7 +117,7 @@
         </form>
         </div>
     </details>
-  
+
 
     <!-- Daftar Distribution  -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -125,7 +125,7 @@
         <!-- Result Counter -->
         <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
             <div class="text-xs md:text-sm text-gray-600">
-                <span class="font-semibold text-gray-800">{{ $distribution->total() }}</span> 
+                <span class="font-semibold text-gray-800">{{ $distribution->total() }}</span>
                 <span>Data Distribusi Ditemukan</span>
                 @if(request('search'))
                     <span class="text-gray-500">(dari total database)</span>
@@ -139,7 +139,7 @@
         <!-- Table -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-green-600 to-green-700">
+                <thead class="bg-linear-to-r from-green-600 to-green-700">
                     <tr>
                         <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
                         <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">PC</th>
@@ -171,22 +171,41 @@
                                 $item = $di->item;
 
                                 if(isset($kategori[$item->kategori])) {
-                                    $kategori[$item->kategori][] = $item->serial_number . ' / ' . ($item->merk ?? '-');
+                                        $kategori[$item->kategori][] = [
+                                        'id' => $item->id,
+                                        'serial_number' => $item->serial_number,
+                                        'merk' => $item->merk,
+                                    ];
                                 }
                             }
                         @endphp
                         <tr>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $loop->iteration + ($distribution->currentPage() - 1) * $distribution->perPage() }}</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['PC']))
-                                                                                                        @foreach($kategori['PC'] as $pc)
-                                                                                                            <div>{{ $pc }}</div>
+                                                                                                       @foreach($kategori['PC'] as $pc)
+                                                                                                            <div>
+                                                                                                                <a href="{{ route('items.show', $pc['id']) }}"
+                                                                                                                title="Lihat detail Item"
+                                                                                                                class="text-green-600 hover:text-green-800 hover:underline font-semibold">
+                                                                                                                    {{ $pc['serial_number'] }}
+                                                                                                                </a>
+                                                                                                                / {{ $pc['merk'] ?? '-' }}
+                                                                                                            </div>
                                                                                                         @endforeach
                                                                                                     @else
                                                                                                         -
                                                                                                     @endif</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Monitor']))
                                                                                                         @foreach($kategori['Monitor'] as $pc)
-                                                                                                            <div>{{ $pc }}</div>
+                                                                                                            <div>
+                                                                                                                <a href="{{ route('items.show', $pc['id']) }}"
+                                                                                                                title="Lihat detail Item"
+                                                                                                                class="text-green-600 hover:underline">
+                                                                                                                    {{ $pc['serial_number'] }}
+                                                                                                                </a>
+
+                                                                                                                / {{ $pc['merk'] }}
+                                                                                                            </div>
                                                                                                         @endforeach
                                                                                                     @else
                                                                                                         -
@@ -195,7 +214,12 @@
                                                                                                         <div class="flex flex-col gap-1">
                                                                                                             @foreach($kategori['Printer Kertas'] as $pk)
                                                                                                                 <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                                                                                                                    {{ $pk }}
+                                                                                                                    <a href="{{ route('items.show', $pk['id']) }}"
+                                                                                                                    title="Lihat detail Item"
+                                                                                                                    class="hover:underline">
+                                                                                                                        {{ $pk['serial_number'] }}
+                                                                                                                    </a>
+                                                                                                                    / {{ $pk['merk'] }}
                                                                                                                 </span>
                                                                                                             @endforeach
                                                                                                             <span class="text-xs text-gray-500">
@@ -209,7 +233,12 @@
                                                                                                         <div class="flex flex-col gap-1">
                                                                                                             @foreach($kategori['Printer Barcode'] as $pb)
                                                                                                                 <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                                                                                                                    {{ $pb }}
+                                                                                                                    <a href="{{ route('items.show', $pb['id']) }}"
+                                                                                                                    title="Lihat detail Item"
+                                                                                                                    class="hover:underline">
+                                                                                                                        {{ $pb['serial_number'] }}
+                                                                                                                    </a>
+                                                                                                                    / {{ $pb['merk'] }}
                                                                                                                 </span>
                                                                                                             @endforeach
                                                                                                             <span class="text-xs text-gray-500">
@@ -221,7 +250,14 @@
                                                                                                     @endif</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Scanner']))
                                                                                                         @foreach($kategori['Scanner'] as $pc)
-                                                                                                            <div>{{ $pc }}</div>
+                                                                                                             <div>
+                                                                                                                <a href="{{ route('items.show', $pc['id']) }}"
+                                                                                                                title="Lihat detail Item"
+                                                                                                                class="text-green-600 hover:underline">
+                                                                                                                    {{ $pc['serial_number'] }}
+                                                                                                                </a>
+                                                                                                                / {{ $pc['merk'] }}
+                                                                                                            </div>
                                                                                                         @endforeach
                                                                                                     @else
                                                                                                         -
@@ -297,13 +333,13 @@
                 {{ $distribution->links() }}
             </div>
         </div>
-        
+
     </div>
 </div>
 <style>
     /* Custom pagination styling untuk responsif */
-    .pagination { 
-        display: flex; 
+    .pagination {
+        display: flex;
         gap: 0.25rem;
         flex-wrap: wrap;
         justify-content: center;

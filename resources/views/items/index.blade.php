@@ -54,7 +54,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
         </summary>
-        
+
         <div class="px-4 md:px-6 pb-4 md:pb-6">
         <form action="{{ route('items.index') }}" method="GET" class="space-y-4">
             <!-- Search Bar -->
@@ -70,7 +70,7 @@
                 </div>
                 <p class="text-xs text-gray-500 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
             </div>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <!-- Kategori Filter -->
                 <div>
@@ -180,8 +180,8 @@
                                 <a href="{{ route('items.index', $merkQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">×</a>
                             </span>
                         @endif
-                        
-                        
+
+
                         <!-- Clear All Button -->
                         <a href="{{ route('items.index') }}" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-full inline-flex items-center gap-1 text-xs md:text-sm font-semibold transition duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,7 +202,7 @@
         <!-- Result Counter -->
         <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
             <div class="text-xs md:text-sm text-gray-600">
-                <span class="font-semibold text-gray-800">{{ $items->total() }}</span> 
+                <span class="font-semibold text-gray-800">{{ $items->total() }}</span>
                 <span>Data Item Ditemukan</span>
                 @if(request('search') || !empty($selectedKategori) || !empty($selectedMerk))
                     <span class="text-gray-500">(dari total database)</span>
@@ -246,11 +246,18 @@
                                     <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">P.Barcode</span>
                                 @elseif($item->kategori === 'Scanner')
                                     <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Scanner</span>
+                                @elseif($item->kategori === 'Lainnya')
+                                    <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-cyan-100 text-cyan-800">Lainnya</span>
                                 @endif
                             </td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->merk ? Str::limit($item->merk, 8) : '-' }}</td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->type ? Str::limit($item->type, 8) : '-' }}</td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm font-mono text-gray-700">{{ $item->serial_number ? Str::limit($item->serial_number, 10) : '-' }}</td>
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->merk ? Str::limit($item->merk, 10) : '-' }}</td>
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->type ? Str::limit($item->type) : '-' }}</td>
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm font-mono text-gray-700"><a href="{{ route('items.show', $item->id) }}"
+                                                                                                                                                class="text-blue-600 hover:underline font-semibold">
+
+                                                                                                                                                {{ $item->serial_number }}
+
+                                                                                                                                            </a></td>
                             <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm font-mono text-gray-700 hidden lg:table-cell">{{ $item->service_tag ? Str::limit($item->service_tag, 8) : '-' }}</td>
                             <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->processor ? Str::limit($item->processor, 8) : '-' }}</td>
                             <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->ram_gb ? $item->ram_gb . 'G' : '-' }}</td>
@@ -294,11 +301,11 @@
                                             </svg>
                                         </button>
                                     </form>
-                                    
+
                                 </div>
                             </td>
                         </tr>
-                    
+
                     <!-- Jika Data Kosong -->
                     @empty
                         <tr>
@@ -342,8 +349,8 @@
 
 <style>
     /* Custom pagination styling untuk responsif */
-    .pagination { 
-        display: flex; 
+    .pagination {
+        display: flex;
         gap: 0.25rem;
         flex-wrap: wrap;
         justify-content: center;
@@ -418,5 +425,10 @@ $(document).ready(function() {
         }
     });
 });
+
+$('select[name="status"]').on('change', function() {
+    $(this).closest('form').submit();
+});
+
 </script>
 @endsection

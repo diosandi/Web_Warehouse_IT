@@ -64,7 +64,7 @@
                 </div>
                 <p class="text-xs text-gray-500 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
             </div>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <!-- Gedung Filter -->
                 <div>
@@ -164,7 +164,7 @@
                                 <a href="{{ route('locations.index', $ruanganQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">×</a>
                             </span>
                         @endif
-                        
+
                         <!-- Clear All Button -->
                         <a href="{{ route('locations.index') }}" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-full inline-flex items-center gap-1 text-xs md:text-sm font-semibold transition duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,7 +185,7 @@
         <!-- Result Counter -->
         <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
             <div class="text-xs md:text-sm text-gray-600">
-                <span class="font-semibold text-gray-800">{{ $locations->total() }}</span> 
+                <span class="font-semibold text-gray-800">{{ $locations->total() }}</span>
                 <span>Data Location Ditemukan</span>
                 @if(request('search') || !empty($selectedGedung) || !empty($selectedRuangan))
                     <span class="text-gray-500">(dari total database)</span>
@@ -204,6 +204,7 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Gedung</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Ruangan</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Type Lokasi</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-white uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -230,6 +231,9 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 uppercase">
                                 {{ $loc->ruangan ?? '-' }}
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 uppercase">
+                                {{ $loc->type ?? '-' }}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                 <div class="flex items-center justify-center gap-2">
                                     <!-- Tombol Edit -->
@@ -238,7 +242,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
-                                    
+
                                     <!-- Tombol Hapus -->
                                     <form action="{{ route('locations.destroy', $loc->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus warehouse ini?')">
                                         @csrf
@@ -252,7 +256,7 @@
                                 </div>
                             </td>
                         </tr>
-                    
+
                     <!-- Jika Data Kosong -->
                     @empty
                         <tr>
@@ -284,8 +288,8 @@
 
 <style>
     /* Custom pagination styling untuk responsif */
-    .pagination { 
-        display: flex; 
+    .pagination {
+        display: flex;
         gap: 0.25rem;
         flex-wrap: wrap;
         justify-content: center;

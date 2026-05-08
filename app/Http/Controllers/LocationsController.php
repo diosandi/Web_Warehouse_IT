@@ -29,7 +29,7 @@ class LocationsController extends Controller
             })
         );
     }
-    
+
 
     public function index(Request $request)
     {
@@ -40,7 +40,7 @@ class LocationsController extends Controller
             if ($request->location_id) {
             // 🔥 kalau pilih dari suggestion → pakai ID saja
             $query->where('id', $request->location_id);
-        } 
+        }
             elseif ($request->filled('search')) {
                 // 🔥 kalau manual ketik → pakai search
                 $search = '%' . $request->search . '%';
@@ -49,7 +49,7 @@ class LocationsController extends Controller
                     ->orWhere('ruangan', 'like', $search);
                 });
         }
-        
+
         //Filter by gedung
         if(!empty($selectedGedung)){
             $query->whereIn('gedung',$selectedGedung);
@@ -70,7 +70,7 @@ class LocationsController extends Controller
             ->orderBy('gedung')
             ->pluck('gedung')
             ->toArray();
-        
+
         // Get distinct ruangan list
         $ruanganList = Locations::select('ruangan')
             ->whereNotNull('ruangan')
@@ -79,7 +79,7 @@ class LocationsController extends Controller
             ->orderBy('ruangan')
             ->pluck('ruangan')
             ->toArray();
-        
+
         // Get current filters for display
         $filters = [
             'gedung' => $selectedGedung,
@@ -96,7 +96,8 @@ class LocationsController extends Controller
      */
     public function create()
     {
-        return view('locations.create');
+        $typeOptions = Locations::gettypeOptions();
+        return view('locations.create', compact('typeOptions'));
     }
 
     /**
@@ -105,6 +106,7 @@ class LocationsController extends Controller
     public function store(Request $request, Locations $location)
     {
         $validated = $request->validate([
+            'type'=> 'required|in:warehouse,distribution,maintenance',
             'gedung'=> 'required|max:255',
             'ruangan'=> ['nullable','string','max:255',
                          Rule::unique('locations')->where (function($query)use($request){
@@ -131,7 +133,8 @@ class LocationsController extends Controller
      */
     public function edit(Locations $location)
     {
-        return view('locations.edit', ['location' => $location]);
+        $typeOptions = Locations::getTypeOptions();
+        return view('locations.edit', ['location' => $location],['typeOptions' => $typeOptions]);
     }
 
     /**
@@ -140,6 +143,7 @@ class LocationsController extends Controller
     public function update(Request $request, Locations $location)
     {
         $validated = $request->validate([
+            'type'=> 'required|in:warehouse,distribution,maintenance',
             'gedung'=> 'required|max:255',
             'ruangan'=> ['nullable','string','max:255',
                          Rule::unique('locations')->where (function($query)use($request){

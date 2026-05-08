@@ -33,12 +33,20 @@
                     <!-- Kategori -->
                     <div class="mb-3 md:mb-4">
                         <label for="kategori" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Kategori <span class="text-red-500">*</span></label>
+                         @if($item->barang_masuk_id)
+                            <input type="text" value="{{ $item->kategori }}" disabled class="bg-gray-100 cursor-not-allowed w-full px-3 py-2 border rounded-lg">
+                            <input type="hidden" name="kategori" value="{{ $item->kategori }}">
+                                <p class="text-sm text-red-500 mt-1">
+                                    ⚠️ Merk tidak bisa diubah karena berasal dari Barang Masuk
+                                </p>
+                        @else
                         <select name="kategori" id="kategori" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
                             <option value="">-- Pilih Kategori --</option>
                             @foreach($kategoriOptions as $value => $label)
                                 <option value="{{ $value }}" {{ $item->kategori == $value ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>
+                        @endif
                         @error('kategori')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
@@ -64,7 +72,15 @@
                     <!-- Type -->
                     <div class="mb-3 md:mb-4">
                         <label for="type" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Type/Series <span class="text-red-500">*</span></label>
-                        <input type="text" name="type" id="type" value="{{ old('type', $item->type) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Model name" required>
+                        @if($item->barang_masuk_id)
+                            <input type="text" value="{{ $item->type}}" disabled class="bg-gray-100 cursor-not-allowed w-full px-3 py-2 border rounded-lg">
+                            <input type="hidden" name="type" value="{{ $item->type }}">
+                                <p class="text-sm text-red-500 mt-1">
+                                    ⚠️ Merk tidak bisa diubah karena berasal dari Barang Masuk
+                                </p>
+                        @else
+                            <input type="text" name="type" id="type" value="{{ old('type', $item->type) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Model name" required>
+                        @endif
                         @error('type')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
@@ -72,7 +88,7 @@
 
                     <!-- Serial Number -->
                     <div class="mb-3 md:mb-4">
-                        <label for="serial_number" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Serial Number (S/N) <span class="text-red-500">*</span></label>
+                        <label for="serial_number" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Serial Number (S/N) <span class="text-yellow-500">( jika tidak ada : - )</span> <span class="text-red-500">*</span></label>
                         <input type="text" name="serial_number" id="serial_number" value="{{ old('serial_number', $item->serial_number) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="SN123456..." required>
                         @error('serial_number')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -81,7 +97,7 @@
 
                     <!-- Service Tag -->
                     <div class="mb-0">
-                        <label for="service_tag" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Service Tag</label>
+                        <label for="service_tag" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Service Tag <span class="text-yellow-500">( jika tidak ada : - )</span> <span class="text-red-500">*</span></label>
                         <input type="text" name="service_tag" id="service_tag" value="{{ old('service_tag', $item->service_tag) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Optional">
                         @error('service_tag')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -151,6 +167,29 @@
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
+                    <select
+                        name="storage_location_id"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+
+                        <option value="">
+                            -- Pilih Lokasi --
+                        </option>
+
+                        @foreach($locations as $location)
+
+                            <option
+                                value="{{ $location->id }}"
+                                {{ old('storage_location_id', $item->storage_location_id) == $location->id ? 'selected' : '' }}>
+
+                                {{ $location->gedung }}
+                                -
+                                {{ $location->ruangan }}
+
+                            </option>
+
+                        @endforeach
+
+                    </select>
 
                 </div>
             </div>
@@ -163,8 +202,8 @@
                     </svg>
                     Update
                 </button>
-                
-                <a href="{{ route('items.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2"> 
+
+                <a href="{{ route('items.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>Batal</a>

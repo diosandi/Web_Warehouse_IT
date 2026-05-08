@@ -11,12 +11,12 @@
                 <p class="text-gray-600 mt-1">Kelola Barang Masuk</p>
         </div>
 
-        <a href="{{ route('barang_masuk.create') }}" 
+        <a href="{{ route('barang_masuk.create') }}"
            class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200 shadow-lg hover:shadow-xl">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
-            Tambah 
+            Tambah
         </a>
     </div>
 
@@ -118,7 +118,7 @@
         <!-- Result Counter -->
         <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
             <div class="text-xs md:text-sm text-gray-600">
-                <span class="font-semibold text-gray-800">{{ $barang_masuk->total() }}</span> 
+                <span class="font-semibold text-gray-800">{{ $barang_masuk->total() }}</span>
                 <span>Data Barang Masuk Ditemukan</span>
                 @if(request('search'))
                     <span class="text-gray-500">(dari total database)</span>
@@ -128,7 +128,7 @@
                 Halaman <span class="font-semibold">{{ $barang_masuk->currentPage() }}</span> dari <span class="font-semibold">{{ $barang_masuk->lastPage() }}</span>
             </div>
         </div>
-        
+
         <!-- TABLE -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -139,6 +139,7 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Tanggal</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Kategori</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Merk</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Type/Series</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Supplier</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Total Item</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Keterangan</th>
@@ -153,6 +154,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->tanggal_masuk }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->kategori ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->merk ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->type ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->supplier ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase font-semibold text-gray-900">{{ $bm->items->count() ?? 0 }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->keterangan ?? '-' }}</td>
@@ -213,7 +215,7 @@
                 </div>
             </div>
 
-    </div>  
+    </div>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {

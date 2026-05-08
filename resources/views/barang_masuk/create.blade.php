@@ -8,13 +8,6 @@
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Tambah Barang Masuk</h1>
             <p class="text-gray-600 mt-1">Input Barang Masuk</p>
-            @if ($errors->any())
-                <div class="bg-red-100 text-red-700 p-3 mb-4">
-                    @foreach ($errors->all() as $error)
-                        <div>{{ $error }}</div>
-                    @endforeach
-                </div>
-            @endif
         </div>
         <a href="{{ route('barang_masuk.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,6 +16,19 @@
             Kembali
         </a>
     </div>
+
+    <!-- Error Message  -->
+    @if ($errors->any())
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6 flex items-center">
+            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-3.536-9.536a1 1 0 011.414-1.414L10 8.586l2.121-2.121a1 1 0 111.414 1.414L11.414 10l2.121 2.121a1 1 0 01-1.414 1.414L10 11.414l-2.121 2.121a1 1 0 01-1.414-1.414L8.586 10 6.464 7.879z" clip-rule="evenodd"></path>
+            </svg>
+            @foreach ($errors->all() as $error)
+                <span class="font-medium">{{ $error }}</span>
+            @endforeach
+        </div>
+    @endif
+
     <!-- From -->
     <div class="bg-white rounded-xl shadow-lg p-8">
         <form action="{{ route('barang_masuk.store') }}" method="POST">
@@ -37,6 +43,7 @@
                     <option>Printer kertas</option>
                     <option>Printer barcode</option>
                     <option>Scanner</option>
+                    <option>Lainnya</option>
                 </select>
             </div>
 
@@ -44,6 +51,12 @@
             <div class="block text-sm font-medium text-gray-700 mb-2">
                 <label>Merk <span class="text-red-500">*</span></label>
                 <input type="text" name="merk" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+            </div>
+
+            <!-- Type -->
+            <div class="block text-sm font-medium text-gray-700 mb-2">
+                <label>Type/Series <span class="text-red-500">*</span></label>
+                <input type="text" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- Supplier -->
@@ -102,9 +115,9 @@
 function addSN() {
     let html = `
     <div class="flex gap-2 mb-2">
-        <input type="text" name="serial_numbers[]" 
+        <input type="text" name="serial_numbers[]"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-        <button type="button" onclick="removeSN(this)" 
+        <button type="button" onclick="removeSN(this)"
             class="bg-red-500 text-white px-3 rounded">✕</button>
     </div>
     `;
@@ -114,6 +127,22 @@ function addSN() {
 function removeSN(button) {
     button.parentElement.remove();
 }
+
+document.querySelector("form").addEventListener("submit", function(e) {
+    let inputs = document.querySelectorAll("input[name='serial_numbers[]']");
+    let filled = 0;
+
+    inputs.forEach(input => {
+        if (input.value.trim() !== "") {
+            filled++;
+        }
+    });
+
+    // if (filled !== inputs.length) {
+    //     e.preventDefault();
+    //     alert("Semua Serial Number wajib diisi!");
+    // }
+});
 </script>
 
 @endsection

@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('ip_address')->nullable();
             $table->string('mac_lan')->nullable();
             $table->string('mac_wifi')->nullable();
+            $table->string('connection_type')->nullable(); // LAN / USB / WIFI
+            $table->string('port')->nullable();
+            $table->string('shared_name')->nullable();
+
 
             $table->string('os_version')->nullable();
             $table->string('build')->nullable();
@@ -24,6 +28,7 @@ return new class extends Migration
             $table->string('office_key')->nullable();
 
             $table->string('antivirus')->nullable();
+            $table->text('catatan')->nullable();
 
             $table->timestamps();
         });

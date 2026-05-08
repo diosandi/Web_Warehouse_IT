@@ -15,11 +15,15 @@ class Device_details extends Model
         'ip_address',
         'mac_lan',
         'mac_wifi',
+        'connection_type',
+        'port',
+        'shared_name',
         'os_version',
         'build',
         'office_version',
         'office_key',
         'antivirus',
+        'catatan',
         ];
 
     public function item()

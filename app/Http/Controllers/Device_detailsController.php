@@ -22,7 +22,7 @@ class Device_detailsController extends Controller
             ->get(['id', 'serial_number', 'merk', 'kategori']);
         return response()->json($items);
     }
-    
+
     public function searchDeviceDetails(Request $request)
     {
         $q = $request->get('q');
@@ -127,11 +127,15 @@ class Device_detailsController extends Controller
             'ip_address' => 'nullable|string|max:255',
             'mac_lan' => 'nullable|string|max:255',
             'mac_wifi' => 'nullable|string|max:255',
+            'connection_type' => 'nullable|string|max:255',
+            'port' => 'nullable|string|max:255',
+            'shared_name' => 'nullable|string|max:255',
             'os_version' => 'nullable|string|max:255',
             'build' => 'nullable|string|max:255',
             'office_version' => 'nullable|string|max:255',
             'office_key' => 'nullable|string|max:255',
-            'antivirus' => 'nullable|string|max:255'
+            'antivirus' => 'nullable|string|max:255',
+            'catatan' => 'nullable|string|max:255'
         ]);
 
         Device_details::create($validated);
@@ -168,11 +172,15 @@ class Device_detailsController extends Controller
             'ip_address' => 'nullable|string|max:255',
             'mac_lan' => 'nullable|string|max:255',
             'mac_wifi' => 'nullable|string|max:255',
+            'connection_type' => 'nullable|string|max:255',
+            'port' => 'nullable|string|max:255',
+            'shared_name' => 'nullable|string|max:255',
             'os_version' => 'nullable|string|max:255',
             'build' => 'nullable|string|max:255',
             'office_version' => 'nullable|string|max:255',
             'office_key' => 'nullable|string|max:255',
-            'antivirus' => 'nullable|string|max:255'
+            'antivirus' => 'nullable|string|max:255',
+            'catatan' => 'nullable|string|max:255'
         ]);
 
         $device_detail->update($validated);

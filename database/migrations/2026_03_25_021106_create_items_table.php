@@ -18,7 +18,7 @@ return new class extends Migration
                   ->onDelete('cascade');
 
             // data utama barang
-            $table->enum('kategori', ['PC','Monitor','Printer Kertas','Printer Barcode','Scanner'])->nullable();
+            $table->enum('kategori', ['PC','Monitor','Printer Kertas','Printer Barcode','Scanner','Lainnya'])->nullable();
             $table->string('merk')->nullable();
             $table->string('type')->nullable();
 

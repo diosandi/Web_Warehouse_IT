@@ -72,8 +72,8 @@
 
                     <!-- Service Tag -->
                     <div class="mb-0">
-                        <label for="service_tag" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Service Tag <span class="text-yellow-500">( jika tidak ada : - )<span class="text-red-500">*</span></label>
-                        <input type="text" name="service_tag" id="service_tag" value="{{ old('service_tag') }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="" required>
+                        <label for="service_tag" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Service Tag </label>
+                        <input type="text" name="service_tag" id="service_tag" value="{{ old('service_tag') }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="">
                         @error('service_tag')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
@@ -142,7 +142,26 @@
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-
+                    <!-- Lokasi Penyimpanan -->
+                    <div class="mb-3 md:mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Lokasi Penyimpanan
+                        </label>
+                        <select
+                            name="storage_location_id"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
+                            <option value="">
+                                -- Pilih Lokasi --
+                            </option>
+                            @foreach($locations as $location)
+                                <option value="{{ $location->id }}">
+                                    {{ $location->gedung }}
+                                    -
+                                    {{ $location->ruangan }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -165,4 +184,3 @@
 </div>
 @endsection
 
-                 

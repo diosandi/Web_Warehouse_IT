@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Items;
 use App\Models\DistributionItem;
+use App\Models\Device_details;
+use App\Models\Locations;
 use Illuminate\Http\Request;
 
 class ItemsController extends Controller
@@ -45,7 +47,7 @@ class ItemsController extends Controller
          if ($request->item_id) {
             // 🔥 kalau pilih dari suggestion → pakai ID saja
             $query->where('id', $request->item_id);
-        } 
+        }
             elseif ($request->filled('search')) {
                 // 🔥 kalau manual ketik → pakai search
                 $search = '%' . $request->search . '%';
@@ -60,40 +62,72 @@ class ItemsController extends Controller
                   ->orWhere('tahun','like', $search);
                 });
         }
-        
+
         // Filter by kategori
         if (!empty($selectedKategori)) {
             $query->whereIn('kategori', $selectedKategori);
         }
-        
+
         // Filter by merk
         if (!empty($selectedMerk)) {
             $query->whereIn('merk', $selectedMerk);
         }
-        
+
+        // Filter by status
+        // if ($request->status) {
+        //     $query->where('status', $request->status == 'digunakan' ? 'used' : 'available');
+        // }
+
         if ($request->status) {
-        $query->where('status', $request->status);
+
+            $query->where(function($q) use ($request) {
+
+                // PRINTER
+                $q->where(function($q2) use ($request) {
+                    $q2->whereIn('kategori', ['Printer Kertas', 'Printer Barcode']);
+
+                    if ($request->status == 'used') {
+                        $q2->whereHas('distributionItems.distribution', function($d) {
+                            $d->where('status', 'dipakai');
+                        });
+                    }
+
+                    if ($request->status == 'available') {
+                        $q2->whereDoesntHave('distributionItems.distribution', function($d) {
+                            $d->where('status', 'dipakai');
+                        });
+                    }
+                })
+
+                // NON PRINTER
+                ->orWhere(function($q2) use ($request) {
+                    $q2->whereNotIn('kategori', ['Printer Kertas', 'Printer Barcode'])
+                    ->where('status', $request->status);
+                });
+
+            });
+
         }
 
         $items = $query->latest()->paginate(10)->appends($request->query());
-        
+
         // Get all kategori options
         $kategoriOptions = Items::getKategoriOptions();
-        
+
         // Get distinct merk list
         $merkList = Items::select('merk')
             ->distinct()
             ->orderBy('merk')
             ->pluck('merk')
             ->toArray();
-        
+
         // Get current filters for display
         $filters = [
             'kategori' => $selectedKategori,
             'merk' => $selectedMerk,
             'search' => $request->search
         ];
-        
+
         return view('items.index', compact('items', 'kategoriOptions', 'merkList', 'filters'));
     }
 
@@ -103,7 +137,9 @@ class ItemsController extends Controller
     public function create()
     {
         $kategoriOptions = Items::getKategoriOptions();
-        return view('items.create', compact('kategoriOptions'));
+        $locations = Locations::where('type', 'warehouse')->get();
+
+        return view('items.create', compact('kategoriOptions','locations'));
     }
 
     /**
@@ -112,7 +148,7 @@ class ItemsController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'kategori' => 'required|in:PC,Monitor,Printer Kertas,Printer Barcode,Scanner',
+            'kategori' => 'required|in:PC,Monitor,Printer Kertas,Printer Barcode,Scanner','Lainnya',
             'merk' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'serial_number' => 'required|string|unique:items,serial_number',
@@ -122,7 +158,9 @@ class ItemsController extends Controller
             'storage_gb' => 'nullable|integer|min:1',
             'vga' => 'nullable|string|max:255',
             'os' => 'nullable|string|max:255',
-            'tahun' => 'nullable|digits:4'
+            'tahun' => 'nullable|digits:4',
+            'storage_location_id' => 'nullable|exists:locations,id',
+
         ]);
 
         Items::create($validated);
@@ -135,7 +173,12 @@ class ItemsController extends Controller
      */
     public function show(Items $item)
     {
-        return view('items.show', compact('item'));
+            $item->load([
+                'device_detail',
+                'distributionItems.distribution.location'
+            ]);
+
+            return view('items.show', compact('item'));
     }
 
     /**
@@ -144,7 +187,8 @@ class ItemsController extends Controller
     public function edit(Items $item)
     {
         $kategoriOptions = Items::getKategoriOptions();
-        return view('items.edit', compact('item', 'kategoriOptions'));
+        $locations = Locations::where('type', 'warehouse')->get();
+        return view('items.edit', compact('item', 'kategoriOptions', 'locations'));
     }
 
     /**
@@ -153,7 +197,7 @@ class ItemsController extends Controller
     public function update(Request $request, Items $item)
     {
         $validated = $request->validate([
-            'kategori' => 'required|in:PC,Monitor,Printer Kertas,Printer Barcode,Scanner',
+            'kategori' => 'required|in:PC,Monitor,Printer Kertas,Printer Barcode,Scanner,Lainnya',
             'merk' =>  $item->barang_masuk_id ?'nullable':'required|string|max:255',
             'type' => 'required|string|max:255',
             'serial_number' => 'required|string|unique:items,serial_number,' . $item->id,
@@ -163,13 +207,15 @@ class ItemsController extends Controller
             'storage_gb' => 'nullable|integer|min:1',
             'vga' => 'nullable|string|max:255',
             'os' => 'nullable|string|max:255',
-            'tahun' => 'nullable|digits:4'
+            'tahun' => 'nullable|digits:4',
+            'storage_location_id' => 'nullable|exists:locations,id',
+
         ]);
         // $item->update([
         //     'is_active' => false
         // ]);
         // Items::where('is_active', true)->get();
-        // 🔥 HANDLE MERK DI SINI
+        // HANDLE MERK DI SINI
         if ($item->barang_masuk_id) {
             $validated['merk'] = $item->merk; // paksa pakai yang lama
         }
@@ -204,7 +250,7 @@ class ItemsController extends Controller
         $barangMasuk->quantity = $barangMasuk->items()->count();
         $barangMasuk->save();
 
-        
+
         return redirect()->route('items.index')->with('success', 'Item berhasil dihapus !');
     }
 }

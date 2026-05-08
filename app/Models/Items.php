@@ -22,7 +22,8 @@ class Items extends Model
         'os',
         'tahun',
         'status',
-        'barang_masuk_id'
+        'barang_masuk_id',
+        'storage_location_id'
     ];
 
     public function distributions()
@@ -37,7 +38,7 @@ class Items extends Model
 
     public function device_detail()
     {
-        return $this->hasOne(Device_details::class);
+        return $this->hasOne(Device_details::class,'item_id');
     }
 
     public function distributionItems()
@@ -54,16 +55,42 @@ class Items extends Model
             'Monitor' => 'Monitor',
             'Printer Kertas' => 'Printer Kertas',
             'Printer Barcode' => 'Printer Barcode',
-            'Scanner' => 'Scanner'
+            'Scanner' => 'Scanner',
+            'Lainnya' => 'Lainnya'
         ];
+    }
+
+    // 🔥 cek apakah masih dipakai
+    public function refreshStatus()
+    {
+        $isUsed = $this->distributionItems()
+            ->whereHas('distribution', function($q) {
+                $q->where('status', 'dipakai');
+            })
+            ->exists();
+
+        $this->status = $isUsed ? 'used' : 'available';
+        $this->save();
     }
 
     public function isUsed()
     {
-        return $this->distributionItems()
-            ->whereHas('distribution', function ($q) {
+        return \App\Models\DistributionItem::where('item_id', $this->id)
+            ->whereHas('distribution', function($q) {
                 $q->where('status', 'dipakai');
             })
             ->exists();
     }
+
+    public function storageLocation()
+    {
+        return $this->belongsTo(Locations::class, 'storage_location_id');
+    }
+
+    // protected static function booted()
+    // {
+    //     static::created(function ($item) {
+    //         $item->deviceDetail()->create([]);
+    //     });
+    // }
 }

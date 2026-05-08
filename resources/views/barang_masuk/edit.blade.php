@@ -8,13 +8,6 @@
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Edit Barang Masuk</h1>
             <p class="text-gray-600 mt-1">Input Edit Barang Masuk</p>
-            @if ($errors->any())
-                <div class="bg-red-100 text-red-700 p-3 mb-4">
-                    @foreach ($errors->all() as $error)
-                        <div>{{ $error }}</div>
-                    @endforeach
-                </div>
-            @endif
         </div>
         <a href="{{ route('barang_masuk.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,6 +16,19 @@
             Kembali
         </a>
     </div>
+
+    <!-- Error Message  -->
+    @if ($errors->any())
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6 flex items-center">
+            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-3.536-9.536a1 1 0 011.414-1.414L10 8.586l2.121-2.121a1 1 0 111.414 1.414L11.414 10l2.121 2.121a1 1 0 01-1.414 1.414L10 11.414l-2.121 2.121a1 1 0 01-1.414-1.414L8.586 10 6.464 7.879z" clip-rule="evenodd"></path>
+            </svg>
+            @foreach ($errors->all() as $error)
+                <span class="font-medium">{{ $error }}</span>
+            @endforeach
+        </div>
+    @endif
+
     <!-- From -->
     <div class="bg-white rounded-xl shadow-lg p-8">
         <form action="{{ route('barang_masuk.update', $barang_masuk->id) }}" method="POST">
@@ -38,6 +44,7 @@
                     <option value="Printer Kertas" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'Printer Kertas') ? 'selected' : '' }}>Printer kertas</option>
                     <option value="Printer Barcode" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'Printer Barcode') ? 'selected' : '' }}>Printer barcode</option>
                     <option value="Scanner" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'Scanner') ? 'selected' : '' }}>Scanner</option>
+                    <option value="Lainnya" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'Lainnya') ? 'selected' : '' }}>Lainnya</option>
                 </select>
             </div>
 
@@ -45,6 +52,12 @@
             <div class="block text-sm font-medium text-gray-700 mb-2">
                 <label>Merk <span class="text-red-500">*</label>
                 <input type="text" name="merk" value="{{ old('merk', $barang_masuk->items->first()->merk ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+            </div>
+
+            <!-- Type -->
+            <div class="block text-sm font-medium text-gray-700 mb-2">
+                <label>Type/Series <span class="text-red-500">*</label>
+                <input type="text" name="type" value="{{ old('type', $barang_masuk->items->first()->type ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- Supplier -->
@@ -70,8 +83,8 @@
                         @foreach (old('serial_numbers') as $sn)
                             <div class="flex gap-2 mb-2">
                                 <input type="text" name="serial_numbers[]" value="{{ $sn }}"
-                                    class="w-full px-3 py-2 border rounded-lg" required>
-                                <button type="button" onclick="removeSN(this)" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+                                <button type="button" onclick="removeSN(this)"
                                     class="bg-red-500 text-white px-3 rounded">✕</button>
                             </div>
                         @endforeach
@@ -82,7 +95,7 @@
                             <div class="flex gap-2 mb-2">
                                 <input type="text" name="serial_numbers[]" value="{{ $item->serial_number }}"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
-                                <button type="button" onclick="removeSN(this)" 
+                                <button type="button" onclick="removeSN(this)"
                                     class="bg-red-500 text-white px-3 rounded">✕</button>
                             </div>
                         @endforeach
@@ -90,16 +103,16 @@
                     {{-- DEFAULT --}}
                     @else
                         <div class="flex gap-2 mb-2">
-                            <input type="text" name="serial_numbers[]" 
+                            <input type="text" name="serial_numbers[]"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
-                            <button type="button" onclick="removeSN(this)" 
+                            <button type="button" onclick="removeSN(this)"
                                 class="bg-red-500 text-white px-3 rounded">✕</button>
                         </div>
                     @endif
 
                 </div>
 
-                <button type="button" onclick="addSN()" 
+                <button type="button" onclick="addSN()"
                     class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 mt-2 rounded-lg font-semibold transition duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
                     + Tambah SN
                 </button>
@@ -134,9 +147,9 @@
 function addSN() {
     let html = `
     <div class="flex gap-2 mb-2">
-        <input type="text" name="serial_numbers[]" 
+        <input type="text" name="serial_numbers[]"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-        <button type="button" onclick="removeSN(this)" 
+        <button type="button" onclick="removeSN(this)"
             class="bg-red-500 text-white px-3 rounded">✕</button>
     </div>
     `;
@@ -146,6 +159,22 @@ function addSN() {
 function removeSN(button) {
     button.parentElement.remove();
 }
+
+document.querySelector("form").addEventListener("submit", function(e) {
+    let inputs = document.querySelectorAll("input[name='serial_numbers[]']");
+    let filled = 0;
+
+    inputs.forEach(input => {
+        if (input.value.trim() !== "") {
+            filled++;
+        }
+    });
+
+    // if (filled !== inputs.length) {
+    //     e.preventDefault();
+    //     alert("Semua Serial Number wajib diisi!");
+    // }
+});
 </script>
 
 @endsection

@@ -10,7 +10,17 @@ class Locations extends Model
     use HasFactory;
     protected $fillable = [
         'gedung',
-        'ruangan'
+        'ruangan',
+        'type'
     ];
+
+    public static function getTypeOptions()
+    {
+        return [
+         'warehouse' => 'Warehouse',
+         'distribution' => 'Distribution',
+        //  'maintenance' => 'Maintenance'
+        ];
+    }
 
 }

@@ -24,15 +24,34 @@
             @csrf
             @method('PUT')
 
+            <!-- Type Lokasi -->
+            <div class="mb-6">
+                <label for="type" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Type Lokasi <span class="text-red-500">*</span>
+                </label>
+                <select
+                    name="type"
+                    id="type"
+                    class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+                        <option value="">-- Pilih Kategori --</option>
+                            @foreach($typeOptions as $value => $label)
+                        <option value="{{ $value }}" {{ $location->type == $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                </select>
+                        @error('kategori')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+            </div>
+
             <!-- Nama Gedung -->
             <div class="mb-6">
                 <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
                     Nama Gedung <span class="text-red-500">*</span>
                 </label>
-                <input 
-                    type="text" 
-                    name="gedung" 
-                    id="gedung" 
+                <input
+                    type="text"
+                    name="gedung"
+                    id="gedung"
                     value="{{ old('gedung', $location->gedung) }}"
                     class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
                     @error('gedung') border-red-500 @enderror"
@@ -49,10 +68,10 @@
                 <label for="ruangan" class="block text-sm font-semibold text-gray-700 mb-2">
                     Nama Ruangan
                 </label>
-                <input 
-                    type="text" 
-                    name="ruangan" 
-                    id="ruangan" 
+                <input
+                    type="text"
+                    name="ruangan"
+                    id="ruangan"
                     value="{{ old('ruangan', $location->ruangan) }}"
                     class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('ruangan') border-red-500 @enderror"
                     placeholder="Contoh: Lt 1 IT"
@@ -64,16 +83,16 @@
 
             <!-- Tombol Aksi -->
             <div class="flex flex-col sm:flex-row gap-2 md:gap-4 border-t pt-4 md:pt-6 mt-4 md:mt-6">
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     Update
                 </button>
-                <a 
-                    href="{{ route('locations.index') }}" 
+                <a
+                    href="{{ route('locations.index') }}"
                     class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
