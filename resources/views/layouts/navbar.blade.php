@@ -7,7 +7,7 @@
                 <!-- Toggle Button (Always Visible) -->
                 <button 
                     id="sidebar-toggle" 
-                    class="p-2 rounded-lg hover:bg-gray-100 transition duration-200 flex-shrink-0"
+                    class="btn btn-icon btn-light flex-shrink-0"
                     type="button"
                     aria-label="Toggle sidebar"
                     title="Buka/Tutup Menu">
@@ -48,12 +48,12 @@
                     @csrf
                     <button 
                         type="submit" 
-                        class="bg-red-500 hover:bg-red-600 text-white px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition duration-200 flex items-center gap-1 md:gap-2 shadow-md hover:shadow-lg flex-shrink-0"
-                        title="Logout">
+                        class="btn btn-danger btn-sm flex-shrink-0"
+                        title="Keluar">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                         </svg>
-                        <span class="hidden sm:inline">Logout</span>
+                        <span class="hidden sm:inline">Keluar</span>
                     </button>
                 </form>
             </div>

@@ -6,10 +6,10 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Edit Device Details</h1>
-            <p class="text-gray-600 mt-1">Update data device details {{ optional($device_detail->item)->serial_number ?? '-' }}</p>
+            <h1 class="text-3xl font-bold text-gray-800">Edit Detail Perangkat</h1>
+            <p class="text-gray-600 mt-1">Update data detail perangkat {{ optional($device_detail->item)->serial_number ?? '-' }}</p>
         </div>
-        <a href="{{ route('device_details.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200">
+        <a href="{{ $redirect }}" class="btn btn-secondary">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -22,6 +22,8 @@
         <form action="{{ route('device_details.update', $device_detail) }}" method="POST">
             @csrf
             @method('PUT')
+
+            <input type="hidden" name="redirect" value="{{ $redirect }}">
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
                 <div class="lg:border-l-4 border-blue-500 lg:pl-4">
@@ -39,7 +41,7 @@
 
                         <!-- PC Name-->
                         <div class="mb-3 md:mb-4">
-                            <label for="pc_name" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">PC Name</label>
+                            <label for="pc_name" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Nama PC</label>
                             <input type="text" name="pc_name" id="pc_name" value="{{ old('pc_name', $device_detail->pc_name) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="">
                             @error('pc_name')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -48,7 +50,7 @@
 
                         <!-- User Account -->
                         <div class="mb-0">
-                            <label for="user_account" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">User Account</label>
+                            <label for="user_account" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Akun Pengguna</label>
                             <input type="text" name="user_account" id="user_account" value="{{ old('user_account', $device_detail->user_account) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="">
                             @error('user_account')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -60,7 +62,7 @@
                     <h3 class="text-base md:text-lg font-bold text-gray-700 mb-3 md:mb-4 pb-2 lg:pb-0 lg:border-none border-b-2 border-purple-200">🛜 Koneksi & Network</h3>
                         <!-- ip address -->
                         <div class="mb-3 md:mb-4">
-                            <label for="ip_address" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">IP Address <span class="text-red-500">*</span></label>
+                            <label for="ip_address" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">IP Address <span class="text-yellow-500">( jika tidak ada : - )</span> <span class="text-red-500">*</span></label>
                             <input type="text" name="ip_address" id="ip_address" value="{{ old('ip_address', $device_detail->ip_address) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="">
                             @error('ip_address')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -87,9 +89,9 @@
 
                         <!-- Connection type -->
                         <div class="mb-3 md:mb-4">
-                            <label for="connection_type" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Connection Type</label>
+                            <label for="connection_type" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Jenis Koneksi</label>
                             <select name="connection_type" id="connection_type" value="{{ old('connection_type', $device_detail->connection_type) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>">
-                                <option value="">-- Pilih Connection Type --</option>
+                                <option value="">-- Pilih Jenis Koneksi --</option>
                                 <option value="LAN" {{ (old('connection_type', $device_detail->connection_type) == 'LAN') ? 'selected' : '' }}>LAN</option>
                                 <option value="USB" {{ (old('connection_type', $device_detail->connection_type) == 'USB') ? 'selected' : '' }}>USB</option>
                                 <option value="WIFI" {{  (old('connection_type', $device_detail->connection_type) == 'WIFI') ? 'selected' : '' }}>WIFI</option>
@@ -101,7 +103,7 @@
 
                         <!-- Shared name -->
                         <div class="mb-3 md:mb-4">
-                            <label for="shared_name" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Shared Name</label>
+                            <label for="shared_name" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Nama Sharing</label>
                             <input type="text" name="shared_name" id="shared_name" value="{{ old('shared_name', $device_detail->shared_name) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="">
                             @error('shared_name')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -122,7 +124,7 @@
                     <h3 class="text-base md:text-lg font-bold text-gray-700 mb-3 md:mb-4 pb-2 lg:pb-0 lg:border-none border-b-2 border-green-200">💻 System & Software</h3>
                         <!-- os version -->
                         <div class="mb-3 md:mb-4">
-                            <label for="os_version" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">OS Version</label>
+                            <label for="os_version" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Versi OS</label>
                             <input type="text" name="os_version" id="os_version" value="{{ old('os_version', $device_detail->os_version) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="">
                             @error('os_version')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -140,7 +142,7 @@
 
                         <!-- office version -->
                         <div class="mb-3 md:mb-4">
-                            <label for="office_version" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Office Version</label>
+                            <label for="office_version" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Versi Office</label>
                             <input type="text" name="office_version" id="office_version" value="{{ old('office_version', $device_detail->office_version) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="">
                             @error('office_version')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -165,18 +167,27 @@
                             @enderror
                         </div>
                  </div>
-
             </div>
+
+             <!-- Notes -->
+            <div class="mt-6">
+                <label for="catatan" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Catatan</label>
+                <textarea name="catatan" id="catatan" rows="3" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Catatan tambahan...">{{ old('notes') }}</textarea>
+                @error('catatan')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Submit Button -->
             <div class="flex flex-col sm:flex-row gap-2 md:gap-4 border-t pt-4 md:pt-6 mt-4 md:mt-6">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                <button type="submit" class="btn btn-success">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    Simpan
+                    Perbarui
                 </button>
 
-                <a href="{{ route('device_details.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2">
+                <a href="{{ $redirect }}" class="btn btn-secondary">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>Batal

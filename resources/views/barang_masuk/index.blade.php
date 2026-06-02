@@ -1,23 +1,57 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $kategoriLabels = [
+        'PC' => 'PC',
+        'Monitor' => 'Monitor',
+        'Printer Kertas' => 'Printer Kertas',
+        'Printer Barcode' => 'Printer Barcode',
+        'Scanner' => 'Scanner',
+        'Lainnya' => 'Lainnya',
+    ];
+
+    $hasActiveFilter = request()->filled('search')
+        || request()->filled('kategori')
+        || request()->filled('tanggal_dari')
+        || request()->filled('tanggal_sampai');
+@endphp
 <br>
 <div class="container mx-auto px-4 py-12">
 
     <!-- HEADER -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Barang Masuk</h1>
                 <p class="text-gray-600 mt-1">Kelola Barang Masuk</p>
         </div>
 
-        <a href="{{ route('barang_masuk.create') }}"
-           class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200 shadow-lg hover:shadow-xl">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <a href="{{ route('barang_masuk.export', array_merge(request()->query(), ['format' => 'excel'])) }}"
+               class="btn btn-success">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m4 5H5a2 2 0 01-2-2V6a2 2 0 012-2h8l6 6v8a2 2 0 01-2 2z"></path>
+                </svg>
+                Export Excel
+            </a>
+
+            <a href="{{ route('barang_masuk.export', array_merge(request()->query(), ['format' => 'pdf'])) }}"
+               target="_blank"
+               class="btn btn-danger">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m4 5H5a2 2 0 01-2-2V6a2 2 0 012-2h8l6 6v8a2 2 0 01-2 2z"></path>
+                </svg>
+                Export PDF
+            </a>
+
+            <a href="{{ route('barang_masuk.create', ['redirect' => url()->full()]) }}"
+            class="btn btn-success">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
-            Tambah
-        </a>
+                Tambah
+            </a>
+        </div>
     </div>
 
     <!-- ALERT -->
@@ -31,7 +65,7 @@
     @endif
 
     <!-- Filter Section -->
-     <details class="bg-white rounded-xl shadow-lg mb-6 group" {{ request('search') ? 'open' : '' }}>
+     <details class="bg-white rounded-xl shadow-lg mb-6 group" {{ $hasActiveFilter ? 'open' : '' }}>
         <summary class="list-none p-4 md:p-6 cursor-pointer flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,9 +84,9 @@
             <div>
                 <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Barang Masuk</label>
                 <div class="relative">
-                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari Supplier, SN, Merk, dan kategori" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari Supplier, SN, Merk, dan kategori" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                     <input type="hidden" name='item_id' id="item_id_hidden">
-                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto"></div>
+                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
                     @if(request('search'))
                         <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold">{{ strlen(request('search')) }} char</span>
                     @endif
@@ -60,17 +94,15 @@
                 <p class="text-xs text-gray-500 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                 <!-- Kategori Filter -->
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Kategori</label>
-                        <select name="kategori" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                        <select name="kategori" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                             <option value="">Semua</option>
-                            <option value="pc">PC</option>
-                            <option value="monitor">Monitor</option>
-                            <option value="printer_kertas">Printer Kertas</option>
-                            <option value="printer_barcode">Printer Barcode</option>
-                            <option value="scanner">Scanner</option>
+                            @foreach($kategoriLabels as $value => $label)
+                                <option value="{{ $value }}" {{ request('kategori') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
                         </select>
                 </div>
 
@@ -84,20 +116,69 @@
                     <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
                 </div>
             </div>
-             <div class="flex items-end gap-2 md:gap-3 sm:col-span-2 lg:col-span-2">
-                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition duration-200 flex items-center justify-center gap-2 text-sm md:text-base shadow-md hover:shadow-lg">
+             <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+                    <button type="submit" class="btn btn-success btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         <span class="hidden sm:inline">Cari</span>
                     </button>
-                    <a href="{{ route('barang_masuk.index') }}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition duration-200 flex items-center justify-center gap-2 text-sm md:text-base shadow-md hover:shadow-lg">
+                    <a href="{{ route('barang_masuk.index') }}" class="btn btn-secondary btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
                         <span class="hidden sm:inline">Reset</span>
                     </a>
                 </div>
+                @if($hasActiveFilter)
+                    <div class="text-xs md:text-sm text-gray-600 pt-3 border-t border-gray-200">
+                        <span class="font-semibold text-gray-700 block mb-2">Filter aktif:</span>
+                        <div class="flex flex-wrap gap-2">
+                            @if(request('search'))
+                                @php
+                                    $searchQuery = request()->query();
+                                    unset($searchQuery['search'], $searchQuery['item_id']);
+                                @endphp
+                                <span class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                    <span>Cari: <strong>"{{ request('search') }}"</strong></span>
+                                    <a href="{{ route('barang_masuk.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">×</a>
+                                </span>
+                            @endif
+
+                            @if(request('kategori'))
+                                @php
+                                    $kategoriQuery = request()->query();
+                                    unset($kategoriQuery['kategori']);
+                                @endphp
+                                <span class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                    <span>Kategori: <strong>{{ $kategoriLabels[request('kategori')] ?? request('kategori') }}</strong></span>
+                                    <a href="{{ route('barang_masuk.index', $kategoriQuery) }}" class="hover:text-green-900 font-bold text-lg leading-none">×</a>
+                                </span>
+                            @endif
+
+                            @if(request('tanggal_dari') || request('tanggal_sampai'))
+                                @php
+                                    $tanggalQuery = request()->query();
+                                    unset($tanggalQuery['tanggal_dari'], $tanggalQuery['tanggal_sampai']);
+                                    $tanggalLabel = request('tanggal_dari') && request('tanggal_sampai')
+                                        ? request('tanggal_dari') . ' sampai ' . request('tanggal_sampai')
+                                        : (request('tanggal_dari') ? 'Mulai ' . request('tanggal_dari') : 'Sampai ' . request('tanggal_sampai'));
+                                @endphp
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                    <span>Tanggal: <strong>{{ $tanggalLabel }}</strong></span>
+                                    <a href="{{ route('barang_masuk.index', $tanggalQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">×</a>
+                                </span>
+                            @endif
+
+                            <a href="{{ route('barang_masuk.index') }}" class="btn btn-soft-danger btn-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Hapus Semua
+                            </a>
+                        </div>
+                    </div>
+                @endif
         </form>
         </div>
      </details>
@@ -120,7 +201,7 @@
             <div class="text-xs md:text-sm text-gray-600">
                 <span class="font-semibold text-gray-800">{{ $barang_masuk->total() }}</span>
                 <span>Data Barang Masuk Ditemukan</span>
-                @if(request('search'))
+                @if($hasActiveFilter)
                     <span class="text-gray-500">(dari total database)</span>
                 @endif
             </div>
@@ -139,9 +220,10 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Tanggal</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Kategori</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Merk</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Type/Series</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Tipe/Series</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Supplier</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Total Item</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Nomor PO</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Total Barang</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Keterangan</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Aksi</th>
                     </tr>
@@ -156,33 +238,35 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->merk ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->type ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->supplier ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->po_number ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase font-semibold text-gray-900">{{ $bm->items->count() ?? 0 }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->keterangan ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                             <div class="inline-flex gap-2">
-                                <!-- DETAIL -->
-                                <a href="{{ route('barang_masuk.show', $bm->id) }}" title="Detail" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition duration-150  flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <circle cx="1" cy="1" r="1" transform="matrix(1 0 0 -1 11 9)" fill="#1C274C"></circle>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 17V11 M 7 3.33782 C 8.47087 2.48697 10.1786 2 12 2 C 17.5228 2 22 6.47715 22 12 C 22 17.5228 17.5228 22 12 22 C 6.47715 22 2 17.5228 2 12 C 2 10.1786 2.48697 8.47087 3.33782 7"></path>
-                                    </svg>
-                                </a>
                                 <!-- EDIT -->
-                                <a href="{{ route('barang_masuk.edit', $bm->id) }}" title="Edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition duration-150 flex items-center gap-1">
+                                <a href="{{ route('barang_masuk.edit', [$bm->id, 'redirect' => url()->full()]) }}" title="Edit" class="btn btn-warning btn-icon">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
                                 </a>
-                                <!-- HAPUS -->
-                                <form action="{{ route('barang_masuk.destroy', $bm->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button title="Hapus" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition duration-150 flex items-center gap-1">
+                                <!-- KOREKSI SN -->
+                                @if(Auth::user()->isSuperAdmin())
+                                    <a href="{{ route('barang_masuk.koreksi_sn', [$bm->id, 'redirect' => url()->full()]) }}" title="Koreksi SN" class="btn btn-indigo btn-icon">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v6h6M20 20v-6h-6M20 9A8 8 0 006.7 4.7L4 10M4 15a8 8 0 0013.3 4.3L20 14"></path>
                                         </svg>
-                                    </button>
-                                </form>
+                                    </a>
+                                    <!-- HAPUS -->
+                                    <form action="{{ route('barang_masuk.destroy', [$bm->id, 'redirect' => url()->full()]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button title="Hapus" class="btn btn-danger btn-icon">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
 
                             </div>
                         </td>
@@ -196,9 +280,13 @@
                                     <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                                     </svg>
-                                    <p class="text-sm md:text-base text-gray-600 font-semibold mb-2">Belum ada barang masuk</p>
-                                    <p class="text-xs md:text-sm text-gray-500 mb-4">silakan tambahkan data terlebih dahulu</p>
-                                    <a href="{{ route('barang_masuk.create') }}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-xs md:text-sm transition duration-200">+ Tambah Device Detail</a>
+                                    <p class="text-sm md:text-base text-gray-600 font-semibold mb-2">
+                                        @if(request()->filled('search') || request()->filled('kategori') || request()->filled('tanggal_dari') || request()->filled('tanggal_sampai'))
+                                            Tidak ada hasil yang cocok
+                                        @else
+                                            Belum ada data barang masuk
+                                        @endif
+                                    </p>
                                   </div>
                             </td>
                         </tr>
@@ -227,13 +315,6 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             this.form.submit();
         }
-    });
-
-    // filter tetap auto submit
-    document.querySelectorAll('select, input[type="checkbox"]').forEach(el => {
-        el.addEventListener('change', function () {
-            this.form.submit();
-        });
     });
 
 });

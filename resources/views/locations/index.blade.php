@@ -1,15 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $selectedType = $selectedType ?? ($filters['type'] ?? []);
+    $typeLabels = [
+        'warehouse' => 'Warehouse',
+        'distribution' => 'Distribution',
+        'maintenance' => 'Maintenance',
+    ];
+@endphp
 <br>
 <div class="container mx-auto px-4 py-12">
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Master Location</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Master Lokasi</h1>
             <p class="text-gray-600 mt-1">Kelola data lokasi/ruangan penyimpanan barang</p>
         </div>
-        <a href="{{ route('locations.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200 shadow-lg hover:shadow-xl">
+        <a href="{{ route('locations.create', ['redirect' => url()->full()]) }}" class="btn btn-success">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -37,7 +45,7 @@
     @endif
 
     <!-- Filter Selection -->
-    <details class="bg-white rounded-xl shadow-lg mb-6 group" {{ request('search') || !empty($selectedGedung) || !empty($selectedRuangan) ? 'open' : '' }}>
+    <details class="bg-white rounded-xl shadow-lg mb-6 group" {{ request('search') || !empty($selectedGedung) || !empty($selectedRuangan) || !empty($selectedType) ? 'open' : '' }}>
         <summary class="list-none p-4 md:p-6 cursor-pointer flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,28 +63,28 @@
             <div>
                 <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Lokasi</label>
                 <div class="relative">
-                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari nama gedung dan ruangan" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
-                    <input type="hidden" name="location_id" id="location_id_hidden">
-                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto"></div>
+                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari nama gedung dan ruangan" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase ">
+                    <input type="hidden" name="location_id" id="location_id_hidden" > 
+                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
                     @if(request('search'))
-                        <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold">{{ strlen(request('search')) }} char</span>
+                        <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold ">{{ strlen(request('search')) }} char</span>
                     @endif
                 </div>
-                <p class="text-xs text-gray-500 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
+                <p class="text-xs text-gray-500 mt-1 ">Tekan Enter atau klik Cari untuk mencari di semua field</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                 <!-- Gedung Filter -->
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Gedung</label>
                     <details class="relative filter-dropdown">
-                        <summary class="filter-summary list-none w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white cursor-pointer flex items-center justify-between gap-3 transition duration-200">
+                        <summary class="filter-summary list-none w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white cursor-pointer flex items-center justify-between gap-3 transition duration-200 text-xs uppercase">
                             <span class="text-gray-700 truncate">
                                 {{ empty($selectedGedung) ? '-- Semua Gedung --' : implode(', ', $selectedGedung) }}
                             </span>
                             <span class="text-gray-400 text-xs">Pilih</span>
                         </summary>
-                        <div class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-3 max-h-64 overflow-y-auto">
+                        <div class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-3 max-h-64 overflow-y-auto text-xs uppercase">
                             <div class="space-y-2">
                                 @foreach($gedungList as $gedung)
                                     <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
@@ -93,13 +101,13 @@
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Ruangan</label>
                    <details class="relative filter-dropdown">
-                        <summary class="filter-summary list-none w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white cursor-pointer flex items-center justify-between gap-3 transition duration-200">
+                        <summary class="filter-summary list-none w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white cursor-pointer flex items-center justify-between gap-3 transition duration-200 text-xs uppercase">
                             <span class="text-gray-700 truncate">
                                 {{ empty($selectedRuangan) ? '-- Semua Ruangan --' : implode(', ', $selectedRuangan) }}
                             </span>
                             <span class="text-gray-400 text-xs">Pilih</span>
                         </summary>
-                        <div class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-3 max-h-64 overflow-y-auto">
+                        <div class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-3 max-h-64 overflow-y-auto text-xs uppercase">
                             <div class="space-y-2">
                                 @foreach($ruanganList as $ruangan)
                                     <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
@@ -111,26 +119,36 @@
                         </div>
                     </details>
                 </div>
+                <!-- Filter Type Distribution -->
+                <div>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Tipe</label>
+                        <select name="type" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
+                            <option value="">Semua</option>
+                            <option value="warehouse" {{ request('type')=='warehouse'?'selected':'' }}>gedung</option>
+                            <option value="distribution" {{ request('type')=='distribution'?'selected':'' }}>distribusi</option>
+                            <option value="maintenance" {{ request('type')=='maintenance'?'selected':'' }}>pemeliharaan</option>
+                        </select>
+                </div>
+            </div>
 
                 <!-- Buttons -->
-                <div class="flex items-end gap-2 md:gap-3 sm:col-span-2 lg:col-span-2">
-                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition duration-200 flex items-center justify-center gap-2 text-sm md:text-base shadow-md hover:shadow-lg">
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+                    <button type="submit" class="btn btn-success btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         <span class="hidden sm:inline">Cari</span>
                     </button>
-                    <a href="{{ route('locations.index') }}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition duration-200 flex items-center justify-center gap-2 text-sm md:text-base shadow-md hover:shadow-lg">
+                    <a href="{{ route('locations.index') }}" class="btn btn-secondary btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
-                        <span class="hidden sm:inline">Reset</span>
+                        <span class="hidden sm:inline">Bersihkan</span>
                     </a>
                 </div>
-            </div>
 
             <!-- Active Filters Display -->
-            @if(request('search') || !empty($selectedGedung) || !empty($selectedRuangan))
+            @if(request('search') || !empty($selectedGedung) || !empty($selectedRuangan) || request('type'))
                 <div class="text-xs md:text-sm text-gray-600 pt-3 border-t border-gray-200">
                     <span class="font-semibold text-gray-700 block mb-2">Filter aktif:</span>
                     <div class="flex flex-wrap gap-2">
@@ -164,9 +182,19 @@
                                 <a href="{{ route('locations.index', $ruanganQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">×</a>
                             </span>
                         @endif
+                        @if(request('type'))
+                            @php
+                                $typeQuery = request()->query();
+                                unset($typeQuery['type']);
+                            @endphp
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                <span>Tipe: <strong>{{ $typeLabels[request('type')] ?? request('type') }}</strong></span>
+                                <a href="{{ route('locations.index', $typeQuery) }}" class="hover:text-purple-900 font-bold text-lg leading-none">×</a>
+                            </span>
+                        @endif
 
                         <!-- Clear All Button -->
-                        <a href="{{ route('locations.index') }}" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-full inline-flex items-center gap-1 text-xs md:text-sm font-semibold transition duration-200">
+                        <a href="{{ route('locations.index') }}" class="btn btn-soft-danger btn-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -186,8 +214,8 @@
         <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
             <div class="text-xs md:text-sm text-gray-600">
                 <span class="font-semibold text-gray-800">{{ $locations->total() }}</span>
-                <span>Data Location Ditemukan</span>
-                @if(request('search') || !empty($selectedGedung) || !empty($selectedRuangan))
+                <span>Data Lokasi Ditemukan</span>
+                @if(request('search') || !empty($selectedGedung) || !empty($selectedRuangan) || request('type'))
                     <span class="text-gray-500">(dari total database)</span>
                 @endif
             </div>
@@ -204,7 +232,7 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Gedung</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Ruangan</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Type Lokasi</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Tipe Lokasi</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-white uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -237,17 +265,17 @@
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                 <div class="flex items-center justify-center gap-2">
                                     <!-- Tombol Edit -->
-                                    <a href="{{ route('locations.edit', $loc->id) }}" title="Edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition duration-150 flex items-center gap-1">
+                                    <a href="{{ route('locations.edit', [$loc->id, 'redirect' => url()->full()]) }}" title="Edit" class="btn btn-warning btn-icon">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
 
                                     <!-- Tombol Hapus -->
-                                    <form action="{{ route('locations.destroy', $loc->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus warehouse ini?')">
+                                    <form action="{{ route('locations.destroy', [$loc->id, 'redirect' => url()->full()]) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus gudang ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" title="Hapus" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition duration-150 flex items-center gap-1">
+                                        <button type="submit" title="Hapus" class="btn btn-danger btn-icon">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                             </svg>
@@ -265,8 +293,13 @@
                                     <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                                     </svg>
-                                    <p class="text-gray-500 text-lg font-medium">Belum ada data warehouse</p>
-                                    <p class="text-gray-400 text-sm mt-1">Klik tombol "Tambah Warehouse" untuk menambah data</p>
+                                    <p class="text-sm md:text-base text-gray-600 font-semibold mb-2">
+                                        @if(request('search') || !empty($selectedGedung) || !empty($selectedRuangan))
+                                            Tidak ada hasil yang cocok
+                                        @else
+                                            Belum ada data master barang
+                                        @endif
+                                    </p>
                                 </div>
                             </td>
                         </tr>
@@ -324,7 +357,7 @@ $(document).ready(function() {
         $hidden.val(''); // reset hidden
         clearTimeout(searchDelay);
 
-        if (query.length < 1) {
+        if (query.length < 3) {
             $suggestions.empty().hide();
             return;
         }

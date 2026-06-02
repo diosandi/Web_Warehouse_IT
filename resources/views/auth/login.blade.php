@@ -169,10 +169,10 @@
                             </div>
                         @endif
 
-                        <!-- Email Input -->
+                        <!-- Username Input -->
                         <div>
-                            <label for="email" class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                Email
+                            <label for="username" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                Username
                             </label>
                             <div class="relative">
                                 <div class="input-icon">
@@ -181,14 +181,14 @@
                                     </svg>
                                 </div>
                                 <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autocomplete="email"
+                                    id="username"
+                                    name="username"
+                                    type="text"
+                                    autocomplete="username"
                                     required
-                                    value="{{ old('email') }}"
+                                    value="{{ old('username') }}"
                                     class="input-with-icon appearance-none block w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-                                    placeholder="admin@rscm.co.id"
+                                    placeholder=""
                                 >
                             </div>
                         </div>

@@ -15,9 +15,12 @@ class UserSeeder extends Seeder
     {
         // Buat user admin default
         User::create([
-            'name' => 'Admin',
-            'email' => 'admin@rscm.co.id',
+            'name' => 'SuperAdmin',
+            'username' => 'SA',
+            'email' => 'sa@rscm.co.id',
             'password' => Hash::make('password'),
+            'role' => 'super_admin',
+            'is_active' => true,
             'email_verified_at' => now(),
         ]);
     }

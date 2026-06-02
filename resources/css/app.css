@@ -1,2 +1,152 @@
 @import "tailwindcss";
 
+@layer components {
+    .btn {
+        display: inline-flex;
+        min-height: 2.5rem;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: 0.5rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        line-height: 1.25rem;
+        color: #ffffff;
+        border: 0;
+        cursor: pointer;
+        white-space: nowrap;
+        text-decoration: none;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+    }
+
+    .btn:hover {
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    .btn:focus-visible {
+        outline: 2px solid #22c55e;
+        outline-offset: 2px;
+    }
+
+    .btn svg {
+        width: 1.125rem;
+        height: 1.125rem;
+        flex-shrink: 0;
+    }
+
+    .btn-sm {
+        min-height: 2.25rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+        line-height: 1rem;
+    }
+
+    .btn-lg {
+        min-height: 3rem;
+        padding: 0.75rem 1.25rem;
+    }
+
+    .btn-icon {
+        width: 2.25rem;
+        min-width: 2.25rem;
+        height: 2.25rem;
+        padding: 0;
+    }
+
+    .btn-icon svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .btn-block {
+        width: 100%;
+    }
+
+    .btn-success {
+        background-color: #16a34a;
+    }
+
+    .btn-success:hover {
+        background-color: #15803d;
+    }
+
+    .btn-primary {
+        background-color: #2563eb;
+    }
+
+    .btn-primary:hover {
+        background-color: #1d4ed8;
+    }
+
+    .btn-secondary {
+        background-color: #4b5563;
+    }
+
+    .btn-secondary:hover {
+        background-color: #374151;
+    }
+
+    .btn-light {
+        background-color: #f3f4f6;
+        color: #374151;
+        box-shadow: none;
+    }
+
+    .btn-light:hover {
+        background-color: #e5e7eb;
+        box-shadow: none;
+    }
+
+    .btn-danger {
+        background-color: #dc2626;
+    }
+
+    .btn-danger:hover {
+        background-color: #b91c1c;
+    }
+
+    .btn-warning {
+        background-color: #eab308;
+        color: #ffffff;
+    }
+
+    .btn-warning:hover {
+        background-color: #ca8a04;
+    }
+
+    .btn-purple {
+        background-color: #7c3aed;
+    }
+
+    .btn-purple:hover {
+        background-color: #6d28d9;
+    }
+
+    .btn-indigo {
+        background-color: #4f46e5;
+    }
+
+    .btn-indigo:hover {
+        background-color: #4338ca;
+    }
+
+    .btn-soft-danger {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        box-shadow: none;
+    }
+
+    .btn-soft-danger:hover {
+        background-color: #fecaca;
+        box-shadow: none;
+    }
+
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+}

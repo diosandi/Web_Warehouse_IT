@@ -23,7 +23,8 @@ class Items extends Model
         'tahun',
         'status',
         'barang_masuk_id',
-        'storage_location_id'
+        'storage_location_id',
+        'condition_note'
     ];
 
     public function distributions()
@@ -45,6 +46,11 @@ class Items extends Model
     {
         return $this->hasMany(DistributionItem::class,'item_id');
     }
+
+    public function serialNumberCorrections()
+    {
+        return $this->hasMany(SerialNumberCorrection::class, 'item_id');
+    }
         /**
      * Get kategori options untuk dropdown
      */
@@ -64,10 +70,15 @@ class Items extends Model
     public function refreshStatus()
     {
         $isUsed = $this->distributionItems()
+            ->where('status', 'dipakai')
             ->whereHas('distribution', function($q) {
                 $q->where('status', 'dipakai');
             })
             ->exists();
+
+        if (!$isUsed && in_array($this->status, ['maintenance', 'retired'])) {
+            return;
+        }
 
         $this->status = $isUsed ? 'used' : 'available';
         $this->save();
@@ -76,6 +87,7 @@ class Items extends Model
     public function isUsed()
     {
         return \App\Models\DistributionItem::where('item_id', $this->id)
+            ->where('status', 'dipakai')
             ->whereHas('distribution', function($q) {
                 $q->where('status', 'dipakai');
             })

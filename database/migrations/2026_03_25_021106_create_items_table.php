@@ -16,6 +16,11 @@ return new class extends Migration
                   ->nullable()
                   ->constrained('barang_masuk')
                   ->onDelete('cascade');
+            
+            $table->foreignId('storage_location_id')
+                  ->nullable()
+                  ->constrained('locations')
+                  ->nullOnDelete();
 
             // data utama barang
             $table->enum('kategori', ['PC','Monitor','Printer Kertas','Printer Barcode','Scanner','Lainnya'])->nullable();
@@ -35,9 +40,11 @@ return new class extends Migration
             $table->year('tahun')->nullable();
 
             // status barang
-            $table->enum('status', ['available','used','maintenance'])
+            $table->enum('status', ['available','used','maintenance','retired'])
                   ->default('available');
             // $table->boolean('is_active')->default(true);
+
+            $table->text('condition_note')->nullable();
 
             $table->timestamps();
         });

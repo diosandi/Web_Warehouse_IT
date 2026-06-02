@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('distribution_id')->constrained()->cascadeOnDelete();
             $table->foreignId('item_id')->constrained()->cascadeOnDelete();
+            $table->enum('status', ['dipakai','dikembalikan','maintenance'])->default('dipakai');
+            $table->timestamp('returned_at')->nullable();
+            $table->enum('return_condition_status', ['available','maintenance'])->nullable();
+            $table->text('return_note')->nullable();
             $table->timestamps();
         });
     }

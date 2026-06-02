@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('gedung');
             $table->string('ruangan');
+            $table->enum('type', ['warehouse','distribution','maintenance'])->default('warehouse');
             $table->timestamps();
         });
     }

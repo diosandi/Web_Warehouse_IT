@@ -6,7 +6,7 @@
                 <p>&copy; 2026 <strong>RSCM</strong> - Rumah Sakit Cipto Mangunkusumo</p>
             </div>
             <div class="text-gray-500 text-xs">
-                <p>Warehouse IT Management System v1.0</p>
+                <p>Sistem Informasi Manajemen Warehouse v1.0</p>
             </div>
         </div>
     </div>

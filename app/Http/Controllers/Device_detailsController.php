@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Device_details;
 use App\Models\Items;
+use App\Http\Controllers\Concerns\ResolvesRedirects;
 use Illuminate\Http\Request;
 
 class Device_detailsController extends Controller
 {
+    use ResolvesRedirects;
         /**
      * AJAX search SN untuk Select2
      */
@@ -61,7 +63,9 @@ class Device_detailsController extends Controller
     {
         $query = Device_details::with('item');
 
-                if ($request->filled('search')) {
+                if ($request->filled('item_id')) {
+                    $query->whereKey($request->item_id);
+                } elseif ($request->filled('search')) {
                     $search = '%' . $request->search . '%';
                     $query->where(function ($q) use ($search) {
                         $q->where('ip_address', 'like', $search)
@@ -100,10 +104,12 @@ class Device_detailsController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
+        $item = Items::findOrFail($request->item_id);
         $items = Items::all();
-        return view('device_details.create', compact('items'));
+        $redirect = $this->redirectTarget($request, route('items.show', $item));
+        return view('device_details.create', compact('items','item', 'redirect'));
     }
 
     /**
@@ -139,8 +145,10 @@ class Device_detailsController extends Controller
         ]);
 
         Device_details::create($validated);
+        return redirect($this->redirectTarget($request, route('items.index')))->with('success', 'Data berhasil diperbarui!');
+        // return redirect($request->redirect_to)->with('success', 'Device detail berhasil ditambahkan');
 
-        return redirect()->route('device_details.index')->with('success', 'device detail berhasil ditambahkan!');
+        // return redirect()->route('device_details.index')->with('success', 'device detail berhasil ditambahkan!');
     }
 
     /**
@@ -157,7 +165,8 @@ class Device_detailsController extends Controller
     public function edit(Device_details $device_detail)
     {
         $items = Items::all();
-        return view('device_details.edit', compact('device_detail', 'items'));
+        $redirect = $this->redirectTarget(request(), route('items.show', $device_detail->item_id));
+        return view('device_details.edit', compact('device_detail', 'items', 'redirect'));
     }
 
     /**
@@ -184,8 +193,10 @@ class Device_detailsController extends Controller
         ]);
 
         $device_detail->update($validated);
-
-        return redirect()->route('device_details.index')->with('success', 'Device detail berhasil diperbarui!');
+        return redirect($this->redirectTarget($request, route('items.index')))->with('success', 'Data berhasil diperbarui!');
+        // return redirect($request->redirect)->with('success', 'Berhasil update');
+        // return redirect($request->redirect_to)->with('success', 'Device detail berhasil diupdate');
+        // return redirect()->route('device_details.index')->with('success', 'Device detail berhasil diperbarui!');
     }
 
     /**
@@ -194,6 +205,6 @@ class Device_detailsController extends Controller
     public function destroy(Device_details $device_detail)
     {
         $device_detail->delete();
-        return redirect()->route('device_details.index')->with('success', 'Device detail berhasil dihapus!');
+        return redirect($this->redirectTarget(request(), route('device_details.index')))->with('success', 'Device detail berhasil dihapus!');
     }
 }

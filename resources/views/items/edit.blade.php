@@ -7,9 +7,9 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-6">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Edit Master Data Barang</h1>
-            <p class="text-xs md:text-sm text-gray-600 mt-1">Update data perangkat IT</p>
+            <p class="text-xs md:text-sm text-gray-600 mt-1">Perbarui data perangkat IT</p>
         </div>
-        <a href="{{ route('items.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200 whitespace-nowrap text-xs md:text-base">
+        <a href="{{ $redirect }}" class="btn btn-secondary">
             <svg class="w-4 md:w-5 h-4 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -18,11 +18,22 @@
         </a>
     </div>
 
+    @if(session('error'))
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6 flex items-center">
+            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-3.536-9.536a1 1 0 011.414-1.414L10 8.586l2.121-2.121a1 1 0 111.414 1.414L11.414 10l2.121 2.121a1 1 0 01-1.414 1.414L10 11.414l-2.121 2.121a1 1 0 01-1.414-1.414L8.586 10 6.464 7.879z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="font-medium">{{ session('error') }}</span>
+        </div>
+    @endif
+
     <!-- Form -->
     <div class="bg-white rounded-xl shadow-lg p-3 md:p-6 lg:p-8">
         <form action="{{ route('items.update', $item->id) }}" method="POST" class="space-y-4 md:space-y-6">
             @csrf
             @method('PUT')
+
+            <input type="hidden" name="redirect" value="{{ $redirect }}">
 
             <!-- 3-Column Grid for Lg, 1-Column otherwise -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
@@ -37,7 +48,7 @@
                             <input type="text" value="{{ $item->kategori }}" disabled class="bg-gray-100 cursor-not-allowed w-full px-3 py-2 border rounded-lg">
                             <input type="hidden" name="kategori" value="{{ $item->kategori }}">
                                 <p class="text-sm text-red-500 mt-1">
-                                    ⚠️ Merk tidak bisa diubah karena berasal dari Barang Masuk
+                                    ⚠️ Kategori tidak bisa diubah karena berasal dari Barang Masuk
                                 </p>
                         @else
                         <select name="kategori" id="kategori" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
@@ -71,12 +82,12 @@
 
                     <!-- Type -->
                     <div class="mb-3 md:mb-4">
-                        <label for="type" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Type/Series <span class="text-red-500">*</span></label>
+                        <label for="type" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Tipe/Series <span class="text-red-500">*</span></label>
                         @if($item->barang_masuk_id)
                             <input type="text" value="{{ $item->type}}" disabled class="bg-gray-100 cursor-not-allowed w-full px-3 py-2 border rounded-lg">
                             <input type="hidden" name="type" value="{{ $item->type }}">
                                 <p class="text-sm text-red-500 mt-1">
-                                    ⚠️ Merk tidak bisa diubah karena berasal dari Barang Masuk
+                                    ⚠️ Tipe tidak bisa diubah karena berasal dari Barang Masuk
                                 </p>
                         @else
                             <input type="text" name="type" id="type" value="{{ old('type', $item->type) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Model name" required>
@@ -97,7 +108,7 @@
 
                     <!-- Service Tag -->
                     <div class="mb-0">
-                        <label for="service_tag" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Service Tag <span class="text-yellow-500">( jika tidak ada : - )</span> <span class="text-red-500">*</span></label>
+                        <label for="service_tag" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Service Tag </label>
                         <input type="text" name="service_tag" id="service_tag" value="{{ old('service_tag', $item->service_tag) }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Optional">
                         @error('service_tag')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -167,43 +178,99 @@
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    <select
-                        name="storage_location_id"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg">
 
-                        <option value="">
-                            -- Pilih Lokasi --
-                        </option>
+                    @if($item->status != 'used')
+                        <div class="mb-3 md:mb-4">
+                            <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Lokasi Penyimpanan</label>
+                                <select
+                                    name="storage_location_id"
+                                    class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
 
-                        @foreach($locations as $location)
+                                    <option value="">
+                                        -- Pilih Lokasi --
+                                    </option>
 
-                            <option
-                                value="{{ $location->id }}"
-                                {{ old('storage_location_id', $item->storage_location_id) == $location->id ? 'selected' : '' }}>
+                                    @foreach($locations as $location)
 
-                                {{ $location->gedung }}
-                                -
-                                {{ $location->ruangan }}
+                                        <option
+                                            value="{{ $location->id }}"
+                                            {{ old('storage_location_id', $item->storage_location_id) == $location->id ? 'selected' : '' }}>
 
+                                            {{ $location->gedung }}
+                                            -
+                                            {{ $location->ruangan }}
+
+                                        </option>
+
+                                    @endforeach
+
+                                </select>
+                        </div>
+                    @endif
+
+                    <div class="mb-3 md:mb-4">
+                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
+                            Status
+                        </label>
+
+                        <select name="status" id="status" {{ $item->status == 'used' ? 'disabled' : '' }}
+                            class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+
+                            <option value="available"
+                                {{ old('status', $item->status) == 'available' ? 'selected' : '' }}>
+                                Tersedia
                             </option>
 
-                        @endforeach
+                            <option value="maintenance"
+                                {{ old('status', $item->status) == 'maintenance' ? 'selected' : '' }}>
+                                Pemeliharaan
+                            </option>
 
-                    </select>
+                            <option value="retired"
+                                {{ old('status', $item->status) == 'retired' ? 'selected' : '' }}>
+                                Tidak Digunakan
+                            </option>
+                        </select>
+
+                        @if($item->status == 'used')
+                            <input type="hidden" name="status" value="used">
+                        @endif
+
+                        {{-- Info --}}
+                        @if($item->status == 'used')
+                            <p class="text-red-500 text-sm mt-1">
+                                Barang sedang dipakai, status hanya bisa diubah dari distribution.
+                            </p>
+                        @endif
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
+                            Keterangan Kondisi
+                        </label>
+
+                        <textarea
+                            name="condition_note"
+                            id="condition_note"
+                            rows="3"
+                            class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="Contoh: LCD rusak, motherboard mati, dll"
+                        >{{ old('condition_note', $item->condition_note) }}</textarea>
+                    </div>
 
                 </div>
             </div>
 
             <!-- Buttons -->
             <div class="flex flex-col sm:flex-row gap-2 md:gap-4 border-t pt-4 md:pt-6 mt-4 md:mt-6">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                <button type="submit" class="btn btn-success">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    Update
+                    Perbarui
                 </button>
 
-                <a href="{{ route('items.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2">
+                <a href="{{ $redirect }}" class="btn btn-secondary">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>Batal</a>
@@ -211,4 +278,36 @@
         </form>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const statusSelect = document.getElementById('status');
+    const noteField = document.getElementById('condition_note');
+
+    function toggleConditionNote() {
+
+        const status = statusSelect.value;
+
+        // note aktif hanya untuk maintenance/retired
+        if (status === 'maintenance' || status === 'retired') {
+
+            noteField.disabled = false;
+            noteField.classList.remove('bg-gray-100');
+
+        } else {
+
+            noteField.disabled = true;
+            noteField.classList.add('bg-gray-100');
+
+            // optional kosongkan note
+            noteField.value = '';
+        }
+    }
+
+    toggleConditionNote();
+
+    statusSelect.addEventListener('change', toggleConditionNote);
+
+});
+</script>
 @endsection

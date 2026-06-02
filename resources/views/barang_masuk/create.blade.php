@@ -9,7 +9,7 @@
             <h1 class="text-3xl font-bold text-gray-800">Tambah Barang Masuk</h1>
             <p class="text-gray-600 mt-1">Input Barang Masuk</p>
         </div>
-        <a href="{{ route('barang_masuk.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200">
+        <a href="{{ $redirect }}" class="btn btn-secondary">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -33,6 +33,7 @@
     <div class="bg-white rounded-xl shadow-lg p-8">
         <form action="{{ route('barang_masuk.store') }}" method="POST">
             @csrf
+            <input type="hidden" name="redirect" value="{{ $redirect }}">
             <!-- Kategori -->
             <div class="mb-3 md:mb-4">
                 <label for="kategori" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Kategori <span class="text-red-500">*</span></label>
@@ -55,7 +56,7 @@
 
             <!-- Type -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Type/Series <span class="text-red-500">*</span></label>
+                <label>Tipe/Series <span class="text-red-500">*</span></label>
                 <input type="text" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
@@ -65,6 +66,12 @@
                 <input type="text" name="supplier" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
 
+             <!-- PO Number -->
+            <div class="block text-sm font-medium text-gray-700 mb-2">
+                <label>Nomor PO</label>
+                <input type="text" name="po_number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            </div>
+            
             <!-- Tanggal -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
                 <label>Tanggal Masuk <span class="text-red-500">*</span></label>
@@ -77,11 +84,11 @@
                 <div id="sn-wrapper">
                     <div class="flex gap-2 mb-2">
                         <input type="text" name="serial_numbers[]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
-                        <button type="button" onclick="removeSN(this)" class="bg-red-500 text-white px-3 rounded">✕</button>
+                        <button type="button" onclick="removeSN(this)" class="btn btn-danger btn-icon">✕</button>
                     </div>
                 </div>
 
-                <button type="button" onclick="addSN()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 mt-2 rounded-lg font-semibold transition duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                <button type="button" onclick="addSN()" class="btn btn-success btn-sm mt-2">
                     + Tambah SN
                 </button>
             </div>
@@ -94,14 +101,14 @@
 
             <!-- Submit Button -->
             <div class="flex flex-col sm:flex-row gap-2 md:gap-4 border-t pt-4 md:pt-6 mt-4 md:mt-6">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                <button type="submit" class="btn btn-success">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     Simpan
                 </button>
 
-                <a href="{{ route('barang_masuk.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2">
+                <a href="{{ $redirect }}" class="btn btn-secondary">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>Batal
@@ -118,7 +125,7 @@ function addSN() {
         <input type="text" name="serial_numbers[]"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
         <button type="button" onclick="removeSN(this)"
-            class="bg-red-500 text-white px-3 rounded">✕</button>
+            class="btn btn-danger btn-icon">✕</button>
     </div>
     `;
     document.getElementById('sn-wrapper').insertAdjacentHTML('beforeend', html);

@@ -6,10 +6,13 @@ use App\Models\Distribution;
 use App\Models\Items;
 use App\Models\DistributionItem;
 use App\Models\Locations;
+use App\Http\Controllers\Concerns\ResolvesRedirects;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DistributionController extends Controller
 {
+    use ResolvesRedirects;
     //Search item per produk
     public function search(Request $request)
     {
@@ -37,6 +40,7 @@ class DistributionController extends Controller
 
         return response()->json($items);
     }
+    
     //Search index
     public function searchDistribution(Request $request)
     {
@@ -61,8 +65,21 @@ class DistributionController extends Controller
             ->limit(10)
             ->get();
 
-        $suggestions = $results->map(function($d) {
-        $item = $d->distributionItems->first()?->item;
+        $keyword = strtolower($q);
+        $suggestions = $results->map(function($d) use ($keyword) {
+        $matchedDistributionItem = $d->distributionItems->first(function ($distributionItem) use ($keyword) {
+            $item = $distributionItem->item;
+
+            if (!$item) {
+                return false;
+            }
+
+            return str_contains(strtolower((string) $item->serial_number), $keyword)
+                || str_contains(strtolower((string) $item->merk), $keyword)
+                || str_contains(strtolower((string) $item->kategori), $keyword);
+        });
+
+        $item = $matchedDistributionItem?->item ?? $d->distributionItems->first()?->item;
         $location = $d->location;
 
         $itemText = $item
@@ -75,13 +92,17 @@ class DistributionController extends Controller
 
 
             return [
-                'id' => $d->id,
-                'merk' => $item ? $item->merk : '-',
-                'serial_number' => $item ? $item->serial_number : '-',
-                'gedung'=> $location ? $location->gedung : '-',
-                'ruangan'=>$location ? $location->ruangan : '-',
-                'nama_user' => $d->nama_user,
-                'text' => trim($itemText .' | Lokasi: '. $locationText . ' | Nama User: ' . ($d->nama_user ?? '-'))
+                    'id' => $item ? $item->id : null,
+                    'merk' => $item ? $item->merk : '-',
+                    'serial_number' => $item ? $item->serial_number : '-',
+                    'gedung'=> $location ? $location->gedung : '-',
+                    'ruangan'=>$location ? $location->ruangan : '-',
+                    'nama_user' => $d->nama_user,
+                    'text' => trim(
+                        $itemText .
+                    ' | Lokasi: '. $locationText .
+                    ' | Nama User: ' . ($d->nama_user ?? '-')
+                )
             ];
         });
 
@@ -90,7 +111,13 @@ class DistributionController extends Controller
     //Search dapat ruangan
     public function getRuangan(Request $request)
     {
-        $ruangan = Locations::where('gedung', $request->gedung)->get();
+        $ruangan = Locations::where('type', 'distribution')
+            ->when($request->filled('gedung'), function ($query) use ($request) {
+                $query->where('gedung', $request->gedung);
+            })
+            ->select('id', 'ruangan')
+            ->orderBy('ruangan')
+            ->get();
 
         return response()->json($ruangan);
     }
@@ -98,8 +125,13 @@ class DistributionController extends Controller
     public function index(Request $request)
     {
         $query = Distribution::with(['distributionItems.item', 'location']);
+
         // SEARCH
-        if ($request->search) {
+        if ($request->item_id) {
+            $query->whereHas('distributionItems', function($q) use ($request) {
+                $q->where('item_id', $request->item_id);
+            });
+        } elseif ($request->search) {
             $query->where(function($q) use ($request) {
                 $q->where('nama_user', 'like', "%{$request->search}%")
                 ->orWhere('divisi', 'like', "%{$request->search}%")
@@ -138,41 +170,81 @@ class DistributionController extends Controller
         }
 
         // FILTER LOKASI
-        if ($request->location_id) {
-            $query->where('location_id', $request->location_id);
+        if ($request->gedung) {
+            $query->whereHas('location', function($q) use ($request) {
+                $q->where('gedung', $request->gedung);
+            });
+        }
+
+        if ($request->ruangan) {
+            $query->where('location_id', $request->ruangan);
         }
 
         $distribution = $query->latest()->paginate(10)->withQueryString();
 
-        $locations = Locations::all();
+        $locations = Locations::where('type', 'distribution')->get();
+        $warehouseLocations = Locations::where('type', 'warehouse')->get();
 
-        return view('distribution.index', compact('distribution', 'locations'));
+        return view('distribution.index', compact('distribution', 'locations','warehouseLocations'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        Location::where('type', 'distribution')->get();
+        Locations::where('type', 'distribution')->get();
+        $redirect = $this->redirectTarget($request, route('distribution.index'));
 
         // Get distinct gedung list
-        $gedungList = Locations::select('gedung')
-        ->distinct()
-        ->pluck('gedung');
+        $gedungList = Locations::where('type', 'distribution')
+            ->distinct()
+            ->pluck('gedung');
 
         return view('distribution.create', [
-            'pcs' => Items::where('kategori','PC')->where('status','available')->get(),
-            'monitors' => Items::where('kategori','Monitor')->where('status','available')->get(),
-            'printers_kertas' => Items::where('kategori','Printer Kertas')->where('status','available')->get(),
-            'printers_barcode' => Items::where('kategori','Printer Barcode')->where('status','available')->get(),
-            'scanners' => Items::where('kategori','Scanner')->where('status','available')->get(),
+            'pcs' => Items::where('kategori','PC')
+                ->where('status','available')
+                ->whereDoesntHave('distributionItems', function($q){
+                        $q->where('status', 'dipakai');
+                    })
+                    ->get(),
+            'monitors' => Items::where('kategori','Monitor')
+                ->where('status','available')
+                ->whereDoesntHave('distributionItems', function($q){
+                        $q->where('status', 'dipakai');
+                    })
+                    ->get(),
+            'printers_kertas' => Items::where('kategori','Printer Kertas')
+                ->where('status','available')
+                ->whereDoesntHave('distributionItems', function($q){
+                        $q->where('status', 'dipakai');
+                    })
+                    ->get(),
+            'printers_barcode' => Items::where('kategori','Printer Barcode')
+                ->where('status','available')
+                ->whereDoesntHave('distributionItems', function($q){
+                        $q->where('status', 'dipakai');
+                    })
+                    ->get(),
+            'lainnya' => Items::where('kategori','Lainnya')
+                ->where('status','available')
+                ->whereDoesntHave('distributionItems', function($q){
+                        $q->where('status', 'dipakai');
+                    })
+                    ->get(),
+            'scanners' => Items::where('kategori','Scanner')
+                ->where('status','available')
+                ->whereDoesntHave('distributionItems', function($q){
+                        $q->where('status', 'dipakai');
+                    })
+                    ->get(),
             'locations' => Locations::all(),
-            'gedungList' => $gedungList
+            'gedungList' => $gedungList,
+            'redirect' => $redirect
         ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'location_id' => 'required',
+            'location_id' => 'required|integer|exists:locations,id',
             'nama_user' => 'nullable',
             'divisi' => 'nullable',
             'tanggal_distribusi' => 'required|date',
@@ -182,11 +254,14 @@ class DistributionController extends Controller
             'printer_kertas_ids.*' => 'exists:items,id',
             'printer_barcode_ids' => 'nullable|array',
             'printer_barcode_ids.*' => 'exists:items,id',
+            'lainnya_ids' => 'nullable|array',
+            'lainnya_ids.*' => 'exists:items,id',
         ]);
 
         $items = collect($request->input('items', []))
             ->merge($request->input('printer_kertas_ids', []))
             ->merge($request->input('printer_barcode_ids', []))
+            ->merge($request->input('lainnya_ids',[]))
             ->filter()
             ->unique()
             ->values();
@@ -201,13 +276,21 @@ class DistributionController extends Controller
             $item = Items::find($itemId);
             $item->refreshStatus();
 
-            if (in_array($item->kategori, ['PC', 'Monitor', 'Scanner'])) {
+            if (in_array($item->kategori, ['PC', 'Monitor', 'Scanner', 'Lainnya'])) {
 
                 $dipakai = DistributionItem::where('item_id', $itemId)
                     ->whereHas('distribution', function($q) {
                         $q->where('status', 'dipakai');
                     })
                     ->exists();
+
+                if($dipakai){
+                    $item = Items::find($itemId);
+                    $item->update([
+                        'status' => 'used',
+                        'storage_location_id' => null
+                    ]);
+                }
 
                 if ($dipakai) {
                     return back()->with('error', $item->serial_number . ' sudah dipakai!');
@@ -240,93 +323,167 @@ class DistributionController extends Controller
                 $item->update(['status' => 'used']);
             }
         }
-        return redirect()->route('distribution.index')
+        return redirect($this->redirectTarget($request, route('distribution.index')))
             ->with('success', 'Distribusi berhasil disimpan');
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         $distribution = Distribution::with('distributionItems.item')->findOrFail($id);
+        $redirect = $this->redirectTarget($request, route('distribution.index'));
 
-        $selectedItems = $distribution->distributionItems->pluck('item_id')->toArray();
+        $activeDistributionItems = $distribution->distributionItems->where('status', 'dipakai');
+        $selectedItems = $activeDistributionItems->pluck('item_id')->toArray();
 
-        $pc_selected = $distribution->distributionItems
+        $pc_selected = $activeDistributionItems
         ->where('item.kategori', 'PC')
         ->first()?->item;
 
-        $monitor_selected = $distribution->distributionItems
+        $monitor_selected = $activeDistributionItems
         ->where('item.kategori', 'Monitor')
         ->first()?->item;
 
-        $printer_kertas_selected = $distribution->distributionItems
+        $printer_kertas_selected = $activeDistributionItems
         ->filter(fn ($distributionItem) => optional($distributionItem->item)->kategori === 'Printer Kertas')
         ->pluck('item');
 
-        $printer_barcode_selected = $distribution->distributionItems
+        $printer_barcode_selected = $activeDistributionItems
         ->filter(fn ($distributionItem) => optional($distributionItem->item)->kategori === 'Printer Barcode')
         ->pluck('item');
 
-        $scanner_selected = $distribution->distributionItems
+        $scanner_selected = $activeDistributionItems
         ->where('item.kategori', 'Scanner')
         ->first()?->item;
 
+        $lainnya_selected = $activeDistributionItems
+        ->filter(fn ($distributionItem) => optional($distributionItem->item)->kategori === 'Lainnya')
+        ->pluck('item');
+
         $pcs = Items::where('kategori','PC')
             ->where(function($q) use ($selectedItems){
-                $q->where('status','available')
+
+                $q->where(function($sub){
+
+                    $sub->where('status','available')
+                        ->whereDoesntHave('distributionItems', function($qq){
+                            $qq->where('status','dipakai');
+                        });
+
+                })
+
                 ->orWhereIn('id', $selectedItems);
+
             })->get();
 
-        $monitors = Items::where('kategori','Monitor')
+        $monitors= Items::where('kategori','Monitor')
             ->where(function($q) use ($selectedItems){
-                $q->where('status','available')
+
+                $q->where(function($sub){
+
+                    $sub->where('status','available')
+                        ->whereDoesntHave('distributionItems', function($qq){
+                            $qq->where('status','dipakai');
+                        });
+
+                })
+
                 ->orWhereIn('id', $selectedItems);
+
             })->get();
 
         $printers_kertas = Items::where('kategori','Printer Kertas')
             ->where(function($q) use ($selectedItems){
-                $q->where('status','available')
+
+                $q->where(function($sub){
+
+                    $sub->where('status','available')
+                        ->whereDoesntHave('distributionItems', function($qq){
+                            $qq->where('status','dipakai');
+                        });
+
+                })
+
                 ->orWhereIn('id', $selectedItems);
+
             })->get();
 
         $printers_barcode = Items::where('kategori','Printer Barcode')
             ->where(function($q) use ($selectedItems){
-                $q->where('status','available')
+
+                $q->where(function($sub){
+
+                    $sub->where('status','available')
+                        ->whereDoesntHave('distributionItems', function($qq){
+                            $qq->where('status','dipakai');
+                        });
+
+                })
+
                 ->orWhereIn('id', $selectedItems);
+
             })->get();
 
         $scanners = Items::where('kategori','Scanner')
             ->where(function($q) use ($selectedItems){
-                $q->where('status','available')
+
+                $q->where(function($sub){
+
+                    $sub->where('status','available')
+                        ->whereDoesntHave('distributionItems', function($qq){
+                            $qq->where('status','dipakai');
+                        });
+
+                })
+
                 ->orWhereIn('id', $selectedItems);
+
             })->get();
 
-        Location::where('type', 'distribution')->get();
+        $lainnya = Items::where('kategori','Lainnya')
+            ->where(function($q) use ($selectedItems){
+
+                $q->where(function($sub){
+
+                    $sub->where('status','available')
+                        ->whereDoesntHave('distributionItems', function($qq){
+                            $qq->where('status','dipakai');
+                        });
+
+                })
+
+                ->orWhereIn('id', $selectedItems);
+
+            })->get();
+
+        Locations::where('type', 'distribution')->get();
 
         // Get distinct gedung list
-        $gedungList = Locations::select('gedung')
-        ->distinct()
-        ->pluck('gedung');
+        $gedungList = Locations::where('type', 'distribution')
+            ->distinct()
+            ->pluck('gedung');
 
         $locations = Locations::all();
 
         return view('distribution.edit', compact(
             'distribution',
             'selectedItems',
-            'pcs','monitors','printers_kertas','printers_barcode','scanners',
+            'pcs','monitors','printers_kertas','printers_barcode','scanners','lainnya',
             'locations',
             'gedungList',
             'pc_selected',
             'monitor_selected',
             'printer_kertas_selected',
             'printer_barcode_selected',
-            'scanner_selected'
+            'scanner_selected',
+            'lainnya_selected',
+            'redirect'
         ));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'location_id' => 'required',
+            'location_id' => 'required|integer|exists:locations,id',
             'tanggal_distribusi' => 'required|date',
 
             // TAMBAHAN
@@ -336,12 +493,15 @@ class DistributionController extends Controller
             'printer_kertas_ids.*' => 'exists:items,id',
             'printer_barcode_ids' => 'nullable|array',
             'printer_barcode_ids.*' => 'exists:items,id',
+            'lainnya_ids' => 'nullable|array',
+            'lainnya_ids.*' => 'exists:items,id'
         ]);
-        $distribution = Distribution::findOrFail($id);
+        $distribution = Distribution::with('distributionItems.item')->findOrFail($id);
 
         $items = collect($request->input('items', []))
             ->merge($request->input('printer_kertas_ids', []))
             ->merge($request->input('printer_barcode_ids', []))
+            ->merge($request->input('lainnya_ids',[]))
             ->filter()
             ->unique()
             ->values();
@@ -350,14 +510,27 @@ class DistributionController extends Controller
             return back()->with(['error' => 'Minimal pilih 1 device!'])->withInput();
         }
 
-        // CEK KHUSUS DEVICE EXCLUSIVE, kecuali device yang memang sudah ada di distribusi ini
+        $activeDistributionItems = $distribution->distributionItems
+            ->where('status', 'dipakai')
+            ->keyBy('item_id');
+
+        // CEK KHUSUS DEVICE EXCLUSIVE, kecuali device yang memang sedang aktif di distribusi ini
         foreach ($items as $itemId) {
             $item = Items::find($itemId);
-            $item->refreshStatus();
+            $alreadyActiveHere = $activeDistributionItems->has($itemId);
+            $isPrinter = in_array($item->kategori, ['Printer Kertas', 'Printer Barcode']);
 
-            if (in_array($item->kategori, ['PC', 'Monitor', 'Scanner'])) {
+            if (
+                !$alreadyActiveHere
+                && (($isPrinter && !in_array($item->status, ['available', 'used'])) || (!$isPrinter && $item->status !== 'available'))
+            ) {
+                return back()->with('error', $item->serial_number . ' tidak tersedia untuk distribusi!')->withInput();
+            }
+
+            if (in_array($item->kategori, ['PC', 'Monitor', 'Scanner', 'Lainnya'])) {
                 $dipakai = DistributionItem::where('item_id', $itemId)
                     ->where('distribution_id', '!=', $distribution->id)
+                    ->where('status', 'dipakai')
                     ->whereHas('distribution', function($q) {
                         $q->where('status', 'dipakai');
                     })
@@ -369,100 +542,306 @@ class DistributionController extends Controller
             }
         }
 
-        // ambil item lama
-        $oldItems = DistributionItem::where('distribution_id', $id)->get();
-
-        foreach ($oldItems as $old) {
-
-            $item = Items::find($old->item_id);
-
-            // hanya non-printer yang direset
-            if (!in_array($item->kategori, ['Printer Kertas', 'Printer Barcode'])) {
-                $item->update(['status' => 'available']);
-            }
-
-            $old->delete();
-        }
-
         $status = $items->isNotEmpty() ? 'dipakai' : 'dikembalikan';
-        // update header
-        $distribution->update([
-            'location_id' => $request->location_id,
-            'nama_user' => $request->nama_user,
-            'divisi' => $request->divisi,
-            'tanggal_distribusi' => $request->tanggal_distribusi,
-            'keterangan' => $request->keterangan,
-            'status' => $status,
-        ]);
 
-        // insert ulang item
-        foreach ($items as $itemId) {
-            DistributionItem::create([
-                'distribution_id' => $distribution->id,
-                'item_id' => $itemId
+        DB::transaction(function () use ($request, $distribution, $items, $activeDistributionItems, $status) {
+            $distribution->update([
+                'location_id' => $request->location_id,
+                'nama_user' => $request->nama_user,
+                'divisi' => $request->divisi,
+                'tanggal_distribusi' => $request->tanggal_distribusi,
+                'keterangan' => $request->keterangan,
+                'status' => $status,
             ]);
 
-            $item = Items::find($itemId);
-            $item->refreshStatus();
+            $newItemIds = $items->all();
+            $removedDistributionItems = $activeDistributionItems
+                ->reject(fn ($distributionItem, $itemId) => in_array($itemId, $newItemIds));
 
-            if (!in_array($item->kategori, ['Printer Kertas', 'Printer Barcode'])) {
-                Items::where('id', $itemId)
-                    ->update(['status' => 'used']);
+            foreach ($removedDistributionItems as $old) {
+                $old->update([
+                    'status' => 'dikembalikan',
+                    'returned_at' => now(),
+                    'return_condition_status' => $old->return_condition_status ?? 'available',
+                    'return_note' => $old->return_note ?? 'Diganti melalui edit distribusi',
+                ]);
+
+                $old->item?->refreshStatus();
             }
-        }
 
-        return redirect()->route('distribution.index')
+            foreach ($items as $itemId) {
+                if (!$activeDistributionItems->has($itemId)) {
+                    DistributionItem::create([
+                        'distribution_id' => $distribution->id,
+                        'item_id' => $itemId,
+                        'status' => 'dipakai',
+                    ]);
+                }
+
+                $item = Items::find($itemId);
+
+                if (!in_array($item->kategori, ['Printer Kertas', 'Printer Barcode'])) {
+                    $item->update([
+                        'status' => 'used',
+                        'storage_location_id' => null,
+                    ]);
+                }
+            }
+        });
+
+        return redirect($this->redirectTarget($request, route('distribution.index')))
             ->with('success', 'Distribusi berhasil diupdate');
     }
 
-    public function destroy($id)
+    public function returnItem(Request $request, $id)
     {
-        $distribution = Distribution::findOrFail($id);
+        $request->validate([
+            'storage_location_id' => 'required|exists:locations,id',
+            'condition_status' => 'required|in:available,maintenance',
+            'condition_note' => 'nullable|string|max:255'
+        ]);
 
-    // 1. ubah status distribusi jadi dikembalikan
-    $distribution->update([
-        'status' => 'dikembalikan'
-    ]);
+        if ($request->isMethod('post')) {
+            $distribution = Distribution::with('distributionItems.item')->findOrFail($id);
+            $activeItems = $distribution->distributionItems->where('status', 'dipakai');
 
-    Location::whereIn('type', [
-        'warehouse',
-        'maintenance'
-    ])->get();
+            if ($activeItems->isEmpty()) {
+                return redirect()->back()
+                    ->with('error', 'Tidak ada barang aktif yang bisa dikembalikan');
+            }
 
-    // 2. loop semua item dalam distribusi
-    foreach ($distribution->distributionItems as $d) {
+            DB::transaction(function () use ($request, $distribution, $activeItems) {
+                foreach ($activeItems as $distributionItem) {
+                    $this->returnDistributionItem(
+                        $distributionItem,
+                        $request->condition_status,
+                        $request->storage_location_id,
+                        $request->condition_note
+                    );
+                }
 
-        $item = $d->item;
+                $this->closeDistributionIfNoActiveItems($distribution);
+            });
 
-        // =========================
-        // PRINTER (LOGIC PENTING)
-        // =========================
-        if (in_array($item->kategori, ['Printer Kertas', 'Printer Barcode'])) {
-
-            // cek apakah masih ada distribusi lain yang "dipakai"
-            $masihDipakai = $item->distributionItems()
-                ->whereHas('distribution', function ($q) {
-                    $q->where('status', 'dipakai');
-                })
-                ->exists();
-
-            // kalau masih dipakai → tetap used
-            // kalau tidak → available
-            $item->update([
-                'status' => $masihDipakai ? 'used' : 'available'
-            ]);
+            return redirect()->back()
+                ->with('success', 'Barang berhasil dikembalikan');
         }
 
-        // =========================
-        // NON PRINTER
-        // =========================
-        else {
+        // ambil distribution item
+        $distributionItem = DistributionItem::with([
+            'item',
+            'distribution'
+        ])->findOrFail($id);
+
+        DB::transaction(function () use ($request, $distributionItem) {
+            $this->returnDistributionItem(
+                $distributionItem,
+                $request->condition_status,
+                $request->storage_location_id,
+                $request->condition_note
+            );
+        });
+
+        return redirect()->back()
+            ->with('success', 'Barang berhasil dikembalikan');
+    }
+
+    private function returnDistributionItem(
+        DistributionItem $distributionItem,
+        string $conditionStatus,
+        int $storageLocationId,
+        ?string $conditionNote
+    ): void {
+        $distributionItem->loadMissing(['item', 'distribution']);
+
+        if (!$distributionItem->item || $distributionItem->status !== 'dipakai') {
+            return;
+        }
+
+        if ($conditionStatus === 'maintenance' && $this->isSharedPrinter($distributionItem->item)) {
+            $activePrinterItems = DistributionItem::with(['item', 'distribution'])
+                ->where('item_id', $distributionItem->item_id)
+                ->where('status', 'dipakai')
+                ->get();
+
+            foreach ($activePrinterItems as $activePrinterItem) {
+                $this->markDistributionItemReturned(
+                    $activePrinterItem,
+                    $conditionStatus,
+                    $conditionNote
+                );
+
+                $this->closeDistributionIfNoActiveItems($activePrinterItem->distribution);
+            }
+
+            $distributionItem->item->update([
+                'status' => 'maintenance',
+                'storage_location_id' => $storageLocationId,
+                'condition_note' => $conditionNote,
+            ]);
+
+            return;
+        }
+
+        $this->markDistributionItemReturned(
+            $distributionItem,
+            $conditionStatus,
+            $conditionNote
+        );
+
+        $this->syncReturnedItemStatus(
+            $distributionItem->item,
+            $conditionStatus,
+            $storageLocationId,
+            $conditionNote
+        );
+
+        $this->closeDistributionIfNoActiveItems($distributionItem->distribution);
+    }
+
+    private function markDistributionItemReturned(
+        DistributionItem $distributionItem,
+        string $conditionStatus,
+        ?string $conditionNote
+    ): void {
+        $distributionItem->update([
+            'status' => 'dikembalikan',
+            'returned_at' => now(),
+            'return_condition_status' => $conditionStatus,
+            'return_note' => $conditionNote,
+        ]);
+    }
+
+    private function syncReturnedItemStatus(
+        Items $item,
+        string $conditionStatus,
+        int $storageLocationId,
+        ?string $conditionNote
+    ): void {
+        if ($conditionStatus === 'maintenance') {
             $item->update([
-                'status' => 'available'
+                'status' => 'maintenance',
+                'storage_location_id' => $storageLocationId,
+                'condition_note' => $conditionNote,
+            ]);
+
+            return;
+        }
+
+        $stillUsed = $item->distributionItems()
+            ->where('status', 'dipakai')
+            ->whereHas('distribution', function($q) {
+                $q->where('status', 'dipakai');
+            })
+            ->exists();
+
+        $item->update([
+            'status' => $stillUsed ? 'used' : 'available',
+            'storage_location_id' => $stillUsed ? null : $storageLocationId,
+            'condition_note' => null,
+        ]);
+    }
+
+    private function closeDistributionIfNoActiveItems(?Distribution $distribution): void
+    {
+        if (!$distribution) {
+            return;
+        }
+
+        $hasActiveItems = $distribution->distributionItems()
+            ->where('status', 'dipakai')
+            ->exists();
+
+        if (!$hasActiveItems) {
+            $distribution->update([
+                'status' => 'dikembalikan'
             ]);
         }
     }
 
-    return back()->with('success', 'Barang berhasil dikembalikan');
+    private function isSharedPrinter(Items $item): bool
+    {
+        return in_array($item->kategori, ['Printer Kertas', 'Printer Barcode']);
+    }
+
+    public function reportDetail(Request $request)
+    {
+        $reports = $this->reportDetailQuery($request)
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('distribution.report_detail', compact('reports'));
+    }
+
+    public function exportReportDetail(Request $request, string $format)
+    {
+        $reports = $this->reportDetailQuery($request)
+            ->latest()
+            ->get();
+
+        $filename = 'laporan-detail-distribusi-' . now()->format('Ymd-His');
+
+        if ($format === 'excel') {
+            return response()->streamDownload(function () use ($reports) {
+                echo view('distribution.report_detail_excel', [
+                    'reports' => $reports,
+                ])->render();
+            }, $filename . '.xls', [
+                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+            ]);
+        }
+
+        if ($format === 'pdf') {
+            return view('distribution.report_detail_pdf', [
+                'reports' => $reports,
+            ]);
+        }
+
+        abort(404);
+    }
+
+    private function reportDetailQuery(Request $request)
+    {
+        $query = Distribution::with([
+            'location',
+            'distributionItems.item.device_detail',
+        ]);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_distribusi', '>=', $request->tanggal_dari);
+        }
+
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_distribusi', '<=', $request->tanggal_sampai);
+        }
+
+        if ($request->filled('gedung')) {
+            $query->whereHas('location', function ($location) use ($request) {
+                $location->where('gedung', $request->gedung);
+            });
+        }
+
+        if ($request->filled('ruangan')) {
+            $query->where('location_id', $request->ruangan);
+        }
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama_user', 'like', "%{$request->search}%")
+                    ->orWhere('divisi', 'like', "%{$request->search}%")
+                    ->orWhereHas('distributionItems.item', function ($item) use ($request) {
+                        $item->where('serial_number', 'like', "%{$request->search}%")
+                            ->orWhere('merk', 'like', "%{$request->search}%")
+                            ->orWhere('type', 'like', "%{$request->search}%");
+                    });
+            });
+        }
+
+        return $query;
     }
 }

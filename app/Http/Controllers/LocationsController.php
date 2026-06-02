@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 use App\Models\Locations;
 use App\Models\Distribution;
+use App\Http\Controllers\Concerns\ResolvesRedirects;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 
 class LocationsController extends Controller
 {
+    use ResolvesRedirects;
     /**
      * Display a listing of the resource.
      */
@@ -17,6 +19,7 @@ class LocationsController extends Controller
 
         $locations = Locations::where('gedung', 'like', "%$q%")
             ->orWhere('ruangan', 'like', "%$q%")
+            ->orWhere('type', 'like', "%$q%")
             ->limit(10)
             ->get();
 
@@ -24,7 +27,7 @@ class LocationsController extends Controller
             $locations->map(function ($loc) {
                 return [
                     'id' => $loc->id,
-                    'text' => $loc->gedung . ' - ' . $loc->ruangan
+                    'text' => $loc->gedung . ' - ' . $loc->ruangan . ' - ' . $loc->type
                 ];
             })
         );
@@ -36,6 +39,7 @@ class LocationsController extends Controller
         $query = Locations::query();
         $selectedGedung = array_values(array_filter((array) $request->input('gedung','')));
         $selectedRuangan = array_values(array_filter((array) $request->input('ruangan','')));
+        $selectedType = array_values(array_filter((array) $request->input('type', '')));
 
             if ($request->location_id) {
             // 🔥 kalau pilih dari suggestion → pakai ID saja
@@ -46,7 +50,8 @@ class LocationsController extends Controller
                 $search = '%' . $request->search . '%';
                 $query->where(function ($q) use ($search) {
                     $q->where('gedung', 'like', $search)
-                    ->orWhere('ruangan', 'like', $search);
+                    ->orWhere('ruangan', 'like', $search)
+                    ->orWhere('type','like', $search);
                 });
         }
 
@@ -59,6 +64,12 @@ class LocationsController extends Controller
         if(!empty($selectedRuangan)){
             $query->whereIn('ruangan',$selectedRuangan);
         }
+
+        //Filter by type
+        if(!empty($selectedType)){
+            $query->whereIn('type',$selectedType);
+        }
+
 
         $locations = $query->latest()->paginate(10)->appends($request->query());
 
@@ -84,20 +95,22 @@ class LocationsController extends Controller
         $filters = [
             'gedung' => $selectedGedung,
             'ruangan' => $selectedRuangan,
+            'type' => $selectedType,
             'search' => $request->search
         ];
 
-        return view('locations.index',compact('locations','gedungList','ruanganList','selectedGedung','selectedRuangan','filters'));
+        return view('locations.index',compact('locations','gedungList','ruanganList','selectedGedung','selectedRuangan','selectedType','filters'));
         // return view('warehouse.index');
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         $typeOptions = Locations::gettypeOptions();
-        return view('locations.create', compact('typeOptions'));
+        $redirect = $this->redirectTarget($request, route('locations.index'));
+        return view('locations.create', compact('typeOptions', 'redirect'));
     }
 
     /**
@@ -117,7 +130,7 @@ class LocationsController extends Controller
 
         Locations::create($validated);
 
-        return redirect()->route('locations.index')->with('success','Lokasi berhasil dibuat !');
+        return redirect($this->redirectTarget($request, route('locations.index')))->with('success','Lokasi berhasil dibuat !');
     }
 
     /**
@@ -131,10 +144,11 @@ class LocationsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Locations $location)
+    public function edit(Request $request, Locations $location)
     {
         $typeOptions = Locations::getTypeOptions();
-        return view('locations.edit', ['location' => $location],['typeOptions' => $typeOptions]);
+        $redirect = $this->redirectTarget($request, route('locations.index'));
+        return view('locations.edit', compact('location', 'typeOptions', 'redirect'));
     }
 
     /**
@@ -154,13 +168,13 @@ class LocationsController extends Controller
 
         $location->update($validated);
 
-        return redirect()->route('locations.index')->with('success','Lokasi berhasil diperbarui !');
+        return redirect($this->redirectTarget($request, route('locations.index')))->with('success','Lokasi berhasil diperbarui !');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $location = Locations::findOrfail($id);
         // Cek lokasi dipakai atau tidak di distribusi
@@ -171,6 +185,6 @@ class LocationsController extends Controller
             ->with ('error', 'Lokasi tidak bisa dihapus karena sedang digunakan !');
         }
         $location->delete();
-        return redirect()->route('locations.index')->with('success','Lokasi berhasil dihapus !');
+        return redirect($this->redirectTarget($request, route('locations.index')))->with('success','Lokasi berhasil dihapus !');
     }
 }

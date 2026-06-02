@@ -9,7 +9,7 @@
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Tambah Lokasi</h1>
                 <p class="text-xs md:text-sm text-gray-600 mt-1">Input Lokasi Gedung dan Ruangan</p>
             </div>
-            <a href="{{ route('locations.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200 whitespace-nowrap text-xs md:text-base">
+            <a href="{{ $redirect }}" class="btn btn-secondary">
                 <svg class="w-4 md:w-5 h-4 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
@@ -21,14 +21,15 @@
     <div class="bg-white rounded-xl shadow-lg p-3 md:p-6 lg:p-8">
         <form action="{{route('locations.store') }}" method="POST">
             @csrf
+            <input type="hidden" name="redirect" value="{{ $redirect }}">
             <!-- Type Lokasi -->
             <div class="mb-6">
                 <label for="type" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
-                    Type Lokasi
+                    Jenis Lokasi
                     <span class="text-red-500"></span>
                 </label>
                 <select name="type" id="type" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
-                    <option value="">-- Pilih Type --</option>
+                    <option value="">-- Pilih Jenis --</option>
                     @foreach($typeOptions as $value => $label)
                         <option value="{{ $value }}" {{ old('type') == $value ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
@@ -69,15 +70,13 @@
             <div class="flex flex-col sm:flex-row gap-2 md:gap-4 border-t pt-4 md:pt-6 mt-4 md:mt-6">
                 <button
                     type="submit"
-                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200
-                    flex items-center gap-2 shadow-lg hover:shadow-xl">
+                    class="btn btn-success">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg> Simpan
                 </button>
-                <a  href="{{ route('locations.index') }}"
-                    class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-200
-                    flex items-center gap-2">
+                <a  href="{{ $redirect }}"
+                    class="btn btn-secondary">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>

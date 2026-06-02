@@ -4,6 +4,12 @@
 @php
     $selectedKategori = $filters['kategori'] ?? [];
     $selectedMerk = $filters['merk'] ?? [];
+    $statusLabels = [
+        'used' => 'Digunakan',
+        'available' => 'Tersedia',
+        'maintenance' => 'Maintenance',
+        'retired' => 'Retired',
+    ];
 @endphp
 <br>
 <div class="container mx-auto px-4 py-12">
@@ -13,7 +19,7 @@
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Master Data Barang</h1>
             <p class="text-sm md:text-base text-gray-600 mt-1">Kelola data perangkat IT (PC, Monitor, Printer, Scanner)</p>
         </div>
-        <a href="{{ route('items.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200 shadow-lg hover:shadow-xl whitespace-nowrap text-sm md:text-base">
+        <a href="{{ route('items.create', ['redirect' => url()->full()]) }}" class="btn btn-success">
             <svg class="w-4 md:w-5 h-4 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -42,7 +48,7 @@
     @endif
 
     <!-- Filter Section -->
-    <details class="bg-white rounded-xl shadow-lg mb-6 group" {{ request('search') || !empty($selectedKategori) || !empty($selectedMerk) ? 'open' : '' }}>
+    <details class="bg-white rounded-xl shadow-lg mb-6 group" {{ request('search') || !empty($selectedKategori) || !empty($selectedMerk) || request('status') ? 'open' : '' }}>
         <summary class="list-none p-4 md:p-6 cursor-pointer flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,9 +67,9 @@
             <div>
                 <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Barang</label>
                 <div class="relative">
-                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari S/N, Service Tag, Merk, Type, Processor, OS, PO..." class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari S/N, Service Tag, Merk, Type, Processor, OS, PO..." class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                     <input type="hidden" name='item_id' id="item_id_hidden">
-                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto"></div>
+                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
                     @if(request('search'))
                         <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold">{{ strlen(request('search')) }} char</span>
                     @endif
@@ -71,13 +77,13 @@
                 <p class="text-xs text-gray-500 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                 <!-- Kategori Filter -->
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Kategori</label>
                     <details class="relative filter-dropdown">
                         <summary class="filter-summary list-none w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white cursor-pointer flex items-center justify-between gap-3 transition duration-200">
-                            <span class="text-gray-700 truncate">
+                            <span class="text-gray-700 truncate text-xs uppercase">
                                 {{ empty($selectedKategori) ? '-- Semua Kategori --' : collect($selectedKategori)->map(fn ($kategori) => $kategoriOptions[$kategori] ?? $kategori)->implode(', ') }}
                             </span>
                             <span class="text-gray-400 text-xs">Pilih</span>
@@ -87,7 +93,7 @@
                                 @foreach($kategoriOptions as $value => $label)
                                     <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                                         <input type="checkbox" name="kategori[]" value="{{ $value }}" {{ in_array($value, $selectedKategori, true) ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-                                        <span>{{ $label }}</span>
+                                        <span class="text-xs uppercase">{{ $label }}</span>
                                     </label>
                                 @endforeach
                             </div>
@@ -100,7 +106,7 @@
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Merk</label>
                     <details class="relative filter-dropdown">
                         <summary class="filter-summary list-none w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white cursor-pointer flex items-center justify-between gap-3 transition duration-200">
-                            <span class="text-gray-700 truncate">
+                            <span class="text-gray-700 truncate text-xs uppercase">
                                 {{ empty($selectedMerk) ? '-- Semua Merk --' : implode(', ', $selectedMerk) }}
                             </span>
                             <span class="text-gray-400 text-xs">Pilih</span>
@@ -110,7 +116,7 @@
                                 @foreach($merkList as $merk)
                                     <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                                         <input type="checkbox" name="merk[]" value="{{ $merk }}" {{ in_array($merk, $selectedMerk, true) ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-                                        <span>{{ $merk }}</span>
+                                        <span class="text-xs uppercase">{{ $merk }}</span>
                                     </label>
                                 @endforeach
                             </div>
@@ -121,32 +127,35 @@
                 <!-- Status Filter -->
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Status</label>
-                        <select name="status" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
+                        <select name="status" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                             <option value="">Semua</option>
                             <option value="used" {{ request('status')=='used'?'selected':'' }}>Digunakan</option>
                             <option value="available" {{ request('status')=='available'?'selected':'' }}>Tersedia</option>
+                            <option value="maintenance" {{ request('status')=='maintenance'?'selected':'' }}>Pemeliharaan</option>
+                            <option value="retired" {{ request('status')=='retired'?'selected':'' }}>Tidak Digunakan</option>
                         </select>
                 </div>
+            </div>
 
                 <!-- Buttons -->
-                <div class="flex items-end gap-2 md:gap-3 sm:col-span-2 lg:col-span-2">
-                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition duration-200 flex items-center justify-center gap-2 text-sm md:text-base shadow-md hover:shadow-lg">
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+                    <button type="submit" class="btn btn-success btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         <span class="hidden sm:inline">Cari</span>
                     </button>
-                    <a href="{{ route('items.index') }}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition duration-200 flex items-center justify-center gap-2 text-sm md:text-base shadow-md hover:shadow-lg">
+                    <a href="{{ route('items.index') }}" class="btn btn-secondary btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
-                        <span class="hidden sm:inline">Reset</span>
+                        <span class="hidden sm:inline">Bersihkan</span>
                     </a>
                 </div>
-            </div>
+            
 
             <!-- Active Filters Display -->
-            @if(request('search') || !empty($selectedKategori) || !empty($selectedMerk))
+            @if(request('search') || !empty($selectedKategori) || !empty($selectedMerk) || request('status'))
                 <div class="text-xs md:text-sm text-gray-600 pt-3 border-t border-gray-200">
                     <span class="font-semibold text-gray-700 block mb-2">Filter aktif:</span>
                     <div class="flex flex-wrap gap-2">
@@ -180,10 +189,20 @@
                                 <a href="{{ route('items.index', $merkQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">×</a>
                             </span>
                         @endif
+                        @if(request('status'))
+                            @php
+                                $statusQuery = request()->query();
+                                unset($statusQuery['status']);
+                            @endphp
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                <span>Status: <strong>{{ $statusLabels[request('status')] ?? request('status') }}</strong></span>
+                                <a href="{{ route('items.index', $statusQuery) }}" class="hover:text-purple-900 font-bold text-lg leading-none">×</a>
+                            </span>
+                        @endif
 
 
                         <!-- Clear All Button -->
-                        <a href="{{ route('items.index') }}" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-full inline-flex items-center gap-1 text-xs md:text-sm font-semibold transition duration-200">
+                        <a href="{{ route('items.index') }}" class="btn btn-soft-danger btn-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -204,7 +223,7 @@
             <div class="text-xs md:text-sm text-gray-600">
                 <span class="font-semibold text-gray-800">{{ $items->total() }}</span>
                 <span>Data Item Ditemukan</span>
-                @if(request('search') || !empty($selectedKategori) || !empty($selectedMerk))
+                @if(request('search') || !empty($selectedKategori) || !empty($selectedMerk) || request('status'))
                     <span class="text-gray-500">(dari total database)</span>
                 @endif
             </div>
@@ -221,7 +240,7 @@
                         <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
                         <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Kategori</th>
                         <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Merk</th>
-                        <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Type</th>
+                        <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Tipe</th>
                         <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">S/N</th>
                         <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider hidden lg:table-cell">Service Tag</th>
                         <th class="px-3 md:px-4 py-3 md:py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Processor</th>
@@ -252,8 +271,8 @@
                             </td>
                             <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->merk ? Str::limit($item->merk, 10) : '-' }}</td>
                             <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm text-gray-700">{{ $item->type ? Str::limit($item->type) : '-' }}</td>
-                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm font-mono text-gray-700"><a href="{{ route('items.show', $item->id) }}"
-                                                                                                                                                class="text-blue-600 hover:underline font-semibold">
+                            <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs uppercase md:text-sm font-mono text-gray-700"><a href="{{ route('items.show', [$item->id, 'redirect' => url()->full()]) }}"
+                                                                                                                                                class="text-green-600 hover:text-green-800 hover:underline font-semibold">
 
                                                                                                                                                 {{ $item->serial_number }}
 
@@ -266,8 +285,12 @@
                                @if(in_array($item->kategori, ['Printer Kertas', 'Printer Barcode']))
                                     @if($item->isUsed())
                                         <span class="px-2 py-1 rounded bg-red-100 text-red-800">Digunakan</span>
-                                    @else
+                                    @elseif($item->status == 'available')
                                         <span class="px-2 py-1 rounded bg-green-100 text-green-800">Tersedia</span>
+                                    @elseif($item->status == 'maintenance')
+                                        <span class="px-2 py-1 rounded bg-yellow-100 text-yellow-800">Pemeliharaan</span>
+                                    @else
+                                        <span class="px-2 py-1 rounded bg-gray-100 text-gray-800">Tidak Digunakan</span>
                                     @endif
 
                                 @else
@@ -275,27 +298,38 @@
                                     {{-- selain printer --}}
                                     @if($item->status == 'used')
                                         <span class="px-2 py-1 rounded bg-red-100 text-red-800">Digunakan</span>
-                                    @else
+                                    @elseif($item->status == 'available')
                                         <span class="px-2 py-1 rounded bg-green-100 text-green-800">Tersedia</span>
+                                    @elseif($item->status == 'maintenance')
+                                        <span class="px-2 py-1 rounded bg-yellow-100 text-yellow-800">Pemeliharaan</span>
+                                    @else
+                                        <span class="px-2 py-1 rounded bg-gray-100 text-gray-800">Tidak Digunakan</span>
                                     @endif
 
                                 @endif
                             </td>
                             <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-center text-xs font-medium">
                                 <div class="flex gap-1 md:gap-2 justify-center flex-wrap">
+                                     <!-- DETAIL -->
+                                    <a href="{{route('items.detail', ['item' => $item->id,'redirect'=> url()->full()]) }}" title="Detail" class="btn btn-primary btn-icon">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <circle cx="1" cy="1" r="1" transform="matrix(1 0 0 -1 11 9)" fill="#1C274C"></circle>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 17V11 M 7 3.33782 C 8.47087 2.48697 10.1786 2 12 2 C 17.5228 2 22 6.47715 22 12 C 22 17.5228 17.5228 22 12 22 C 6.47715 22 2 17.5228 2 12 C 2 10.1786 2.48697 8.47087 3.33782 7"></path>
+                                        </svg>
+                                    </a>
 
                                     <!-- Tombol Edit -->
-                                    <a href="{{ route('items.edit', $item->id) }}" title="Edit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition duration-150 flex items-center gap-1">
+                                    <a href="{{ route('items.edit', ['item' => $item->id,'redirect' => url()->full()]) }}" title="Edit" class="btn btn-warning btn-icon">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
 
                                     <!-- Tombol Hapus -->
-                                    <form action="{{ route('items.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus barang ini?');" class="inline">
+                                    <form action="{{ route('items.destroy', [$item->id, 'redirect' => url()->full()]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus barang ini?');" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" title="Hapus" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition duration-150 flex items-center gap-1">
+                                        <button type="submit" title="Hapus" class="btn btn-danger btn-icon">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                             </svg>
@@ -315,20 +349,12 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                                     </svg>
                                     <p class="text-sm md:text-base text-gray-600 font-semibold mb-2">
-                                        @if(request('search') || !empty($selectedKategori) || !empty($selectedMerk))
+                                        @if(request('search') || !empty($selectedKategori) || !empty($selectedMerk) || request('status'))
                                             Tidak ada hasil yang cocok
                                         @else
                                             Belum ada data master barang
                                         @endif
                                     </p>
-                                    <p class="text-xs md:text-sm text-gray-500 mb-4">
-                                        @if(request('search') || !empty($selectedKategori) || !empty($selectedMerk))
-                                            Coba ubah filter atau pencarian Anda
-                                        @else
-                                            Silakan tambahkan data perangkat terlebih dahulu
-                                        @endif
-                                    </p>
-                                    <a href="{{ route('items.create') }}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-xs md:text-sm transition duration-200">+ Tambah Barang</a>
                                 </div>
                             </td>
                         </tr>
@@ -385,7 +411,7 @@ $(document).ready(function() {
         $hidden.val(''); // reset hidden
         clearTimeout(searchDelay);
 
-        if (query.length < 1) {
+        if (query.length < 3) {
             $suggestions.empty().hide();
             return;
         }
@@ -424,10 +450,6 @@ $(document).ready(function() {
             $suggestions.hide();
         }
     });
-});
-
-$('select[name="status"]').on('change', function() {
-    $(this).closest('form').submit();
 });
 
 </script>

@@ -9,7 +9,7 @@
             <h1 class="text-3xl font-bold text-gray-800">Edit Distribusi Barang</h1>
             <p class="text-gray-600 mt-1">Edit Input Barang Distribusi</p>
         </div>
-        <a href="{{ route('distribution.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200">
+        <a href="{{ $redirect }}" class="btn btn-secondary">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -32,10 +32,11 @@
         <form action="{{ route('distribution.update', $distribution->id) }}" method="POST" class="">
             @csrf
             @method('PUT')
+            <input type="hidden" name="redirect" value="{{ $redirect }}">
 
             <!-- USER -->
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nama User</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pengguna</label>
                 <input type="text" name="nama_user" value="{{ $distribution->nama_user }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
             <!-- DIVISI -->
@@ -71,7 +72,7 @@
 
             <hr class="my-6">
 
-            <h2 class="font-bold mb-4">Pilih Device <span class="text-red-500">*</span></h2>
+            <h2 class="font-bold mb-4">Pilih Perangkat <span class="text-red-500">*</span></h2>
 
             <!-- PC -->
             <div class="mb-4 relative">
@@ -166,6 +167,28 @@
                     class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto"></div>
             </div>
 
+            <!-- Lainnya -->
+            <div class="mb-4 relative">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Lainnya</label>
+                <input type="text"
+                    id="lainnya_search"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Ketik SN Lainnya...">
+
+                <div id="lainnya_selected" class="mt-2 flex flex-wrap gap-2">
+                    @foreach($lainnya_selected as $lainnya)
+                        <input type="hidden" name="lainnya_ids[]" value="{{ $lainnya->id }}">
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center gap-1">
+                            {{ $lainnya->serial_number }}
+                            <button type="button" class="remove-item text-red-500" data-id="{{ $lainnya->id }}">×</button>
+                        </span>
+                    @endforeach
+                </div>
+
+                <div id="lainnya_suggestions"
+                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto"></div>
+            </div>
+
             <!-- KETERANGAN -->
             <div class="mb-4">
                 <label>Keterangan</label>
@@ -174,14 +197,14 @@
 
             <!-- Submit Button -->
             <div class="flex flex-col sm:flex-row gap-2 md:gap-4 border-t pt-4 md:pt-6 mt-4 md:mt-6">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200 shadow-lg hover:shadow-xl">
+                <button type="submit" class="btn btn-success">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    Update
+                    Perbarui
                 </button>
 
-                <a href="{{ route('distribution.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center gap-2">
+                <a href="{{ $redirect }}" class="btn btn-secondary">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>Batal
@@ -205,7 +228,7 @@ function setupSearch(inputId, suggestionId, hiddenId, kategori, containerId = nu
 
         clearTimeout(timeout);
 
-        if (query.length < 1) {
+        if (query.length < 3) {
             $suggestions.hide();
             return;
         }
@@ -320,14 +343,27 @@ $(document).ready(function () {
         '#printer_barcode_selected',
         'printer_barcode_ids'
     );
+
+    setupSearch(
+        '#lainnya_search',
+        '#lainnya_suggestions',
+        null,
+        'Lainnya',
+        '#lainnya_selected',
+        'lainnya_ids'
+    );
 });
 
 $(document).on('click', '.remove-item', function () {
-    let id = $(this).data('id');
-    let $container = $(this).closest('div');
 
-    $(this).parent().remove();
-    $container.find(`input[value="${id}"]`).remove();
+    let id = $(this).data('id');
+
+    // hapus hidden input
+    $(`input[value="${id}"]`).remove();
+
+    // hapus badge
+    $(this).closest('span').remove();
+
 });
 
 //Search ambil ruangan
@@ -354,11 +390,16 @@ $(document).ready(function() {
                 let html = '<option value="">-- Pilih Ruangan --</option>';
 
                 data.forEach(r => {
-                    let selected = (r.id == selectedId) ? 'selected' : '';
 
-                    html += `<option value="${r.id}" ${selected}>
-                                ${r.ruangan}
-                             </option>`;
+                                if (!r.id) return;
+
+                                let selected = (r.id == selectedId) ? 'selected' : '';
+
+                                html += `
+                                    <option value="${r.id}" ${selected}>
+                                        ${r.ruangan}
+                                    </option>
+                                `;
                 });
 
                 $('#ruangan').html(html);
