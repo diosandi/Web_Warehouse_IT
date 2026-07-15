@@ -2,7 +2,7 @@
 
 @section('content')
 <br>
-<div class="container mx-auto px-4 py-12">
+<div class="distribution-page mx-auto w-full px-3 py-8 sm:px-4 lg:px-6 lg:py-12">
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
         <p class="text-gray-600 mt-1">Selamat datang di Warehouse IT RSCM</p>
@@ -13,7 +13,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Barang</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['total_items'])}}</h3> 
+                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['total_items'])}}</h3>
                 </div>
                 <div class="bg-blue-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +29,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Tersedia</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['available'])}}</h3> 
+                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['available'])}}</h3>
                 </div>
                 <div class="bg-green-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,12 +40,12 @@
                 </div>
             </div>
         </div>
-        {{-- card 3 --}}    
+        {{-- card 3 --}}
         <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
             <div class="flex items-center justify-between">
-                <div>           
+                <div>
                     <p class="text-gray-500 text-sm font-medium">Digunakan</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['used'])}}</h3> 
+                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['used'])}}</h3>
                 </div>
                 <div class="bg-yellow-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,13 +55,13 @@
                     </svg>
                 </div>
             </div>
-        </div>      
+        </div>
         {{-- card 4 --}}
         <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
             <div class="flex items-center justify-between">
-                <div>           
+                <div>
                     <p class="text-gray-500 text-sm font-medium">Pemeliharaan</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['maintenance'])}}</h3>    
+                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['maintenance'])}}</h3>
                 </div>
                 <div class="bg-red-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,9 +75,9 @@
         {{-- card 5 --}}
         <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-gray-500">
             <div class="flex items-center justify-between">
-                <div>           
+                <div>
                     <p class="text-gray-500 text-sm font-medium">Tidak Digunakan</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['retired'])}}</h3>    
+                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['retired'])}}</h3>
                 </div>
                 <div class="bg-gray-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,13 +87,28 @@
                     </svg>
                 </div>
             </div>
-        </div>      
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Dibawa Vendor</p>
+                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['vendor'])}}</h3>
+                </div>
+                <div class="bg-purple-100 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 6h4m-7 4h10m-9 8h8a4 4 0 004-4v-4a2 2 0 00-2-2h-1.5A2.5 2.5 0 0014 5.5h-4A2.5 2.5 0 007.5 8H6a2 2 0 00-2 2v4a4 4 0 004 4z">
+                        </path>
+                    </svg>
+                </div>
+            </div>
+        </div>
         {{-- card 6 --}}
         <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
             <div class="flex items-center justify-between">
-                <div>           
+                <div>
                     <p class="text-gray-500 text-sm font-medium">Aktif Distribusi</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['active_distributions'])}}</h3>    
+                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['active_distributions'])}}</h3>
                 </div>
                 <div class="bg-purple-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,7 +154,7 @@
             </div>
         </div>
     </div>
-    
+
 <!-- Chart Status Barang + Stok Per Kategori-->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
@@ -176,6 +191,7 @@
                             <th class="pb-3 text-center font-semibold">Dipakai</th>
                             <th class="pb-3 text-center font-semibold">Pemeliharaan</th>
                             <th class="pb-3 text-center font-semibold">Tidak Digunakan</th>
+                            <th class="pb-3 text-center font-semibold">Vendor</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -207,8 +223,150 @@
                                         {{ number_format($stok['retired']) }}
                                     </span>
                                 </td>
+                                <td class="py-3 text-center">
+                                    <span class="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
+                                        {{ number_format($stok['vendor']) }}
+                                    </span>
+                                </td>
                             </tr>
                         @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{{-- Dashboard Asset --}}
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+        {{-- Stok Berdasarkan Asset --}}
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-800">Stok Berdasarkan Asset</h2>
+                <p class="text-sm text-gray-500 mt-1">Ringkasan kepemilikan barang berdasarkan asset.</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[860px] text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200 text-left text-xs uppercase text-gray-500">
+                            <th class="pb-3 font-semibold">Asset</th>
+                            <th class="pb-3 text-center font-semibold">Total</th>
+                            <th class="pb-3 text-center font-semibold">Tersedia</th>
+                            <th class="pb-3 text-center font-semibold">Dipakai</th>
+                            <th class="pb-3 text-center font-semibold">Pemeliharaan</th>
+                            <th class="pb-3 text-center font-semibold">Tidak Digunakan</th>
+                            <th class="pb-3 text-center font-semibold">Vendor</th>
+                            <th class="pb-3 text-center font-semibold">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse($stokPerAsset as $asset)
+                            <tr class="cursor-pointer hover:bg-blue-50"
+                                data-dashboard-asset-url="{{ $asset['url'] }}"
+                                role="link"
+                                tabindex="0"
+                                title="Lihat item asset {{ $asset['asset'] }}">
+                                <td class="py-3 font-semibold uppercase text-gray-800">{{ $asset['asset'] }}</td>
+                                <td class="py-3 text-center font-bold text-gray-900">{{ number_format($asset['total']) }}</td>
+                                <td class="py-3 text-center">
+                                    <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                        {{ number_format($asset['available']) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-center">
+                                    <span class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
+                                        {{ number_format($asset['used']) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-center">
+                                    <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+                                        {{ number_format($asset['maintenance']) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-center">
+                                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                                        {{ number_format($asset['retired']) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-center">
+                                    <span class="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
+                                        {{ number_format($asset['vendor']) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-center">
+                                    <a href="{{ $asset['url'] }}" class="btn btn-primary btn-sm">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                        </svg>
+                                        Lihat
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="py-8 text-center text-sm font-medium text-gray-500">
+                                    Belum ada data asset.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Distribusi Aktif Berdasarkan Asset --}}
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-800">Distribusi Aktif Berdasarkan Asset</h2>
+                <p class="text-sm text-gray-500 mt-1">Barang fisik yang sedang dipakai, dikelompokkan berdasarkan asset.</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[900px] text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200 text-left text-xs uppercase text-gray-500">
+                            <th class="pb-3 font-semibold">Asset</th>
+                            <th class="pb-3 text-center font-semibold">PC</th>
+                            <th class="pb-3 text-center font-semibold">Monitor</th>
+                            <th class="pb-3 text-center font-semibold">Printer Kertas</th>
+                            <th class="pb-3 text-center font-semibold">Printer Barcode</th>
+                            <th class="pb-3 text-center font-semibold">Scanner</th>
+                            <th class="pb-3 text-center font-semibold">Lainnya</th>
+                            <th class="pb-3 text-center font-semibold">Total</th>
+                            <th class="pb-3 text-center font-semibold">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse($distribusiAktifPerAsset as $asset)
+                            <tr class="cursor-pointer hover:bg-green-50"
+                                data-dashboard-asset-url="{{ $asset['url'] }}"
+                                role="link"
+                                tabindex="0"
+                                title="Lihat distribusi aktif asset {{ $asset['asset'] }}">
+                                <td class="py-3 font-semibold uppercase text-gray-800">{{ $asset['asset'] }}</td>
+                                <td class="py-3 text-center">{{ number_format($asset['PC']) }}</td>
+                                <td class="py-3 text-center">{{ number_format($asset['Monitor']) }}</td>
+                                <td class="py-3 text-center">{{ number_format($asset['Printer Kertas']) }}</td>
+                                <td class="py-3 text-center">{{ number_format($asset['Printer Barcode']) }}</td>
+                                <td class="py-3 text-center">{{ number_format($asset['Scanner']) }}</td>
+                                <td class="py-3 text-center">{{ number_format($asset['Lainnya']) }}</td>
+                                <td class="py-3 text-center font-bold text-gray-900">{{ number_format($asset['total']) }}</td>
+                                <td class="py-3 text-center">
+                                    <a href="{{ $asset['url'] }}" class="btn btn-success btn-sm">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                        </svg>
+                                        Lihat
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="9" class="py-8 text-center text-sm font-medium text-gray-500">
+                                    Belum ada distribusi aktif berdasarkan asset.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -295,7 +453,7 @@
                             </td>
 
                             <td class="py-4 pr-4 text-gray-700">
-                               {{ $distribusi->tanggal_distribusi ? \Carbon\Carbon::parse($distribusi->tanggal_distribusi)->format('d-m-Y') : '-' }}
+                               {{ \App\Support\DateFormatter::date($distribusi->tanggal_distribusi) }}
                             </td>
 
                             <td class="py-4">
@@ -336,11 +494,16 @@
                         <th class="pb-3 text-center font-semibold">Scanner</th>
                         <th class="pb-3 text-center font-semibold">Lainnya</th>
                         <th class="pb-3 text-center font-semibold">Total</th>
+                        <th class="pb-3 text-center font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($distribusiPerLokasi as $lokasi)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="cursor-pointer hover:bg-green-50"
+                            data-dashboard-location-url="{{ $lokasi['url'] }}"
+                            role="link"
+                            tabindex="0"
+                            title="Lihat distribusi aktif lokasi ini">
                             <td class="py-3 font-semibold uppercase text-gray-800">{{ $lokasi['gedung'] }}</td>
                             <td class="py-3 uppercase text-gray-700">{{ $lokasi['ruangan'] }}</td>
                             <td class="py-3 text-center">{{ number_format($lokasi['PC']) }}</td>
@@ -350,10 +513,18 @@
                             <td class="py-3 text-center">{{ number_format($lokasi['Scanner']) }}</td>
                             <td class="py-3 text-center">{{ number_format($lokasi['Lainnya']) }}</td>
                             <td class="py-3 text-center font-bold text-gray-900">{{ number_format($lokasi['total']) }}</td>
+                            <td class="py-3 text-center">
+                                <a href="{{ $lokasi['url'] }}" class="btn btn-primary btn-sm">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                    Lihat
+                                </a>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="py-8 text-center text-sm font-medium text-gray-500">
+                            <td colspan="10" class="py-8 text-center text-sm font-medium text-gray-500">
                                 Belum ada distribusi aktif.
                             </td>
                         </tr>
@@ -394,6 +565,12 @@
                                 'border' => 'border-blue-500',
                                 'text' => 'text-blue-700',
                                 'badge' => 'bg-blue-100 text-blue-700',
+                            ],
+                            'purple' => [
+                                'bg' => 'bg-purple-50',
+                                'border' => 'border-purple-500',
+                                'text' => 'text-purple-700',
+                                'badge' => 'bg-purple-100 text-purple-700',
                             ],
                             'gray' => [
                                 'bg' => 'bg-gray-50',
@@ -493,76 +670,390 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-dashboard-location-url], [data-dashboard-asset-url]').forEach(function (row) {
+        const rowUrl = row.dataset.dashboardLocationUrl || row.dataset.dashboardAssetUrl;
+
+        if (!rowUrl) {
+            return;
+        }
+
+        row.addEventListener('click', function (event) {
+            if (event.target.closest('a, button')) {
+                return;
+            }
+
+            window.location.href = rowUrl;
+        });
+
+        row.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                window.location.href = rowUrl;
+            }
+        });
+    });
+
     const statusChartElement = document.getElementById('statusBarangChart');
 
     if (!statusChartElement) {
         return;
     }
 
-    new Chart(statusChartElement, {
-        type: 'doughnut',
-        data: {
-            labels: [
-                'Tersedia',
-                'Digunakan',
-                'Pemeliharaan',
-                'Tidak Digunakan'
-            ],
-            datasets: [{
-                data: [
-                    {{ $summary['available'] }},
-                    {{ $summary['used'] }},
-                    {{ $summary['maintenance'] }},
-                    {{ $summary['retired'] }}
-                ],
-                backgroundColor: [
-                    '#22c55e',
-                    '#eab308',
-                    '#ef4444',
-                    '#6b7280'
-                ],
-                borderColor: '#ffffff',
-                borderWidth: 4,
-                hoverOffset: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '65%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                        padding: 18,
-                        font: {
-                            size: 12,
-                            weight: '600'
-                        }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            const total = context.dataset.data.reduce((sum, item) => sum + item, 0);
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+    renderDoughnutChart(statusChartElement, [
+        { label: 'Tersedia', value: @json((int) $summary['available']), color: '#22c55e' },
+        { label: 'Digunakan', value: @json((int) $summary['used']), color: '#eab308' },
+        { label: 'Pemeliharaan', value: @json((int) $summary['maintenance']), color: '#ef4444' },
+        { label: 'Tidak Digunakan', value: @json((int) $summary['retired']), color: '#6b7280' },
+        { label: 'Dibawa Vendor', value: @json((int) $summary['vendor']), color: '#a855f7' }
+    ]);
+});
 
-                            return label + ': ' + value + ' barang (' + percentage + '%)';
-                        }
-                    }
-                }
+function renderDoughnutChart(canvas, rawItems) {
+    const context = canvas.getContext('2d');
+    const parent = canvas.parentElement || canvas;
+    const items = rawItems.map(function (item) {
+        return {
+            label: item.label,
+            value: Math.max(Number(item.value) || 0, 0),
+            color: item.color
+        };
+    });
+    let hoveredIndex = null;
+    let chartState = {
+        centerX: 0,
+        centerY: 0,
+        radius: 0,
+        innerRadius: 0,
+        slices: []
+    };
+    const tooltip = document.createElement('div');
+
+    Object.assign(tooltip.style, {
+        position: 'fixed',
+        zIndex: '9999',
+        display: 'none',
+        pointerEvents: 'none',
+        padding: '8px 10px',
+        borderRadius: '8px',
+        background: 'rgba(17, 24, 39, 0.95)',
+        color: '#ffffff',
+        font: '600 12px Arial, sans-serif',
+        boxShadow: '0 12px 28px rgba(15, 23, 42, 0.28)',
+        whiteSpace: 'nowrap'
+    });
+    document.body.appendChild(tooltip);
+
+    function getTotal() {
+        return items.reduce(function (sum, item) {
+            return sum + item.value;
+        }, 0);
+    }
+
+    function formatNumber(value) {
+        return value.toLocaleString('id-ID');
+    }
+
+    function buildLegendRows(width) {
+        context.font = '600 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        const rows = [];
+        let currentRow = [];
+        let currentWidth = 0;
+        const maxWidth = Math.max(width - 32, 180);
+
+        items.forEach(function (item) {
+            const itemWidth = context.measureText(item.label).width + 42;
+
+            if (currentRow.length && currentWidth + itemWidth > maxWidth) {
+                rows.push(currentRow);
+                currentRow = [];
+                currentWidth = 0;
             }
+
+            currentRow.push({ item: item, width: itemWidth });
+            currentWidth += itemWidth;
+        });
+
+        if (currentRow.length) {
+            rows.push(currentRow);
+        }
+
+        return rows;
+    }
+
+    function drawLegend(rows, width, height) {
+        const rowHeight = 22;
+        const startY = height - (rows.length * rowHeight) + 8;
+
+        context.font = '600 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        context.textAlign = 'left';
+        context.textBaseline = 'middle';
+
+        rows.forEach(function (row, rowIndex) {
+            const rowWidth = row.reduce(function (sum, entry) {
+                return sum + entry.width;
+            }, 0);
+            let x = Math.max((width - rowWidth) / 2, 12);
+            const y = startY + (rowIndex * rowHeight);
+
+            row.forEach(function (entry) {
+                context.beginPath();
+                context.fillStyle = entry.item.color;
+                context.arc(x + 6, y, 5, 0, Math.PI * 2);
+                context.fill();
+
+                context.fillStyle = '#374151';
+                context.fillText(entry.item.label, x + 18, y);
+                x += entry.width;
+            });
+        });
+    }
+
+    function normalizeAngle(angle) {
+        const fullCircle = Math.PI * 2;
+
+        return ((angle % fullCircle) + fullCircle) % fullCircle;
+    }
+
+    function isAngleBetween(angle, startAngle, endAngle) {
+        const normalizedAngle = normalizeAngle(angle);
+        const normalizedStart = normalizeAngle(startAngle);
+        const normalizedEnd = normalizeAngle(endAngle);
+
+        if (normalizedStart <= normalizedEnd) {
+            return normalizedAngle >= normalizedStart && normalizedAngle <= normalizedEnd;
+        }
+
+        return normalizedAngle >= normalizedStart || normalizedAngle <= normalizedEnd;
+    }
+
+    function getHoveredSliceIndex(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const distanceX = x - chartState.centerX;
+        const distanceY = y - chartState.centerY;
+        const distance = Math.sqrt((distanceX * distanceX) + (distanceY * distanceY));
+
+        if (distance < chartState.innerRadius || distance > chartState.radius + 14) {
+            return null;
+        }
+
+        const angle = Math.atan2(distanceY, distanceX);
+        const slice = chartState.slices.find(function (sliceItem) {
+            return isAngleBetween(angle, sliceItem.startAngle, sliceItem.endAngle);
+        });
+
+        return slice ? slice.index : null;
+    }
+
+    function positionTooltip(event) {
+        const margin = 14;
+        const offset = 14;
+        const rect = tooltip.getBoundingClientRect();
+        let left = event.clientX + offset;
+        let top = event.clientY + offset;
+
+        if (left + rect.width + margin > window.innerWidth) {
+            left = event.clientX - rect.width - offset;
+        }
+
+        if (top + rect.height + margin > window.innerHeight) {
+            top = event.clientY - rect.height - offset;
+        }
+
+        tooltip.style.left = Math.max(margin, left) + 'px';
+        tooltip.style.top = Math.max(margin, top) + 'px';
+    }
+
+    function showTooltip(event, item) {
+        const total = getTotal();
+        const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : '0.0';
+        const titleRow = document.createElement('div');
+        const dot = document.createElement('span');
+        const label = document.createElement('span');
+        const value = document.createElement('div');
+
+        tooltip.innerHTML = '';
+        Object.assign(titleRow.style, {
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '3px'
+        });
+        Object.assign(dot.style, {
+            width: '9px',
+            height: '9px',
+            borderRadius: '999px',
+            background: item.color,
+            boxShadow: '0 0 0 2px rgba(255, 255, 255, 0.25)'
+        });
+
+        label.textContent = item.label;
+        value.textContent = formatNumber(item.value) + ' barang (' + percentage + '%)';
+        value.style.color = '#d1d5db';
+        value.style.fontWeight = '600';
+
+        titleRow.appendChild(dot);
+        titleRow.appendChild(label);
+        tooltip.appendChild(titleRow);
+        tooltip.appendChild(value);
+        tooltip.style.display = 'block';
+        positionTooltip(event);
+    }
+
+    function hideTooltip() {
+        tooltip.style.display = 'none';
+    }
+
+    function draw() {
+        const bounds = parent.getBoundingClientRect();
+        const width = Math.max(Math.floor(bounds.width || canvas.clientWidth || 320), 280);
+        const height = Math.max(Math.floor(bounds.height || canvas.clientHeight || 288), 240);
+        const ratio = Math.min(Math.max(window.devicePixelRatio || 1, 2), 3);
+        const total = getTotal();
+        const legendRows = buildLegendRows(width);
+        const legendHeight = Math.max(46, legendRows.length * 22 + 18);
+        const chartHeight = Math.max(height - legendHeight, 140);
+        const centerX = width / 2;
+        const centerY = chartHeight / 2 + 10;
+        const radius = Math.max(Math.min(width, chartHeight) * 0.50, 60);
+        const innerRadius = radius * 0.65;
+        const slices = [];
+        let startAngle = -Math.PI / 2;
+
+        if (total > 0) {
+            items.forEach(function (item, index) {
+                if (item.value === 0) {
+                    return;
+                }
+
+                const sliceAngle = (item.value / total) * Math.PI * 2;
+                const endAngle = startAngle + sliceAngle;
+
+                slices.push({
+                    index: index,
+                    item: item,
+                    startAngle: startAngle,
+                    endAngle: endAngle,
+                    middleAngle: startAngle + (sliceAngle / 2)
+                });
+
+                startAngle = endAngle;
+            });
+        }
+
+        chartState = {
+            centerX: centerX,
+            centerY: centerY,
+            radius: radius,
+            innerRadius: innerRadius,
+            slices: slices
+        };
+
+        canvas.width = Math.floor(width * ratio);
+        canvas.height = Math.floor(height * ratio);
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
+        context.clearRect(0, 0, width, height);
+
+        if (total === 0) {
+            context.beginPath();
+            context.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            context.arc(centerX, centerY, innerRadius, Math.PI * 2, 0, true);
+            context.closePath();
+            context.fillStyle = '#e5e7eb';
+            context.fill();
+        } else {
+            const drawSlice = function (sliceItem) {
+                const isHovered = sliceItem.index === hoveredIndex;
+                const lift = isHovered ? 6 : 0;
+                const outerRadius = radius + (isHovered ? 3 : 0);
+                const hoverInnerRadius = innerRadius + (isHovered ? 2 : 0);
+                const offsetX = Math.cos(sliceItem.middleAngle) * lift;
+                const offsetY = Math.sin(sliceItem.middleAngle) * lift;
+
+                context.save();
+                if (isHovered) {
+                    context.shadowColor = 'rgba(17, 24, 39, 0.28)';
+                    context.shadowBlur = 16;
+                    context.shadowOffsetY = 6;
+                }
+                context.beginPath();
+                context.arc(centerX + offsetX, centerY + offsetY, outerRadius, sliceItem.startAngle, sliceItem.endAngle);
+                context.arc(centerX + offsetX, centerY + offsetY, hoverInnerRadius, sliceItem.endAngle, sliceItem.startAngle, true);
+                context.closePath();
+                context.fillStyle = sliceItem.item.color;
+                context.fill();
+                context.lineWidth = isHovered ? 5 : 4;
+                context.strokeStyle = '#ffffff';
+                context.stroke();
+                context.restore();
+            };
+
+            slices.filter(function (sliceItem) {
+                return sliceItem.index !== hoveredIndex;
+            }).forEach(drawSlice);
+
+            slices.filter(function (sliceItem) {
+                return sliceItem.index === hoveredIndex;
+            }).forEach(drawSlice);
+        }
+
+        context.textAlign = 'center';
+        context.fillStyle = '#111827';
+        context.font = '800 34px Arial, sans-serif';
+        context.fillText(total.toLocaleString('id-ID'), centerX, centerY - 4);
+        context.fillStyle = '#6b7280';
+        context.font = '700 14px Arial, sans-serif';
+        context.fillText('Total Barang', centerX, centerY + 24);
+
+        drawLegend(legendRows, width, height);
+        canvas.setAttribute('aria-label', items.map(function (item) {
+            const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : '0.0';
+
+            return item.label + ': ' + item.value.toLocaleString('id-ID') + ' barang (' + percentage + '%)';
+        }).join(', '));
+    }
+
+    canvas.addEventListener('mousemove', function (event) {
+        const nextHoveredIndex = getHoveredSliceIndex(event);
+
+        canvas.style.cursor = nextHoveredIndex === null ? 'default' : 'pointer';
+
+        if (nextHoveredIndex === null) {
+            hideTooltip();
+        } else {
+            showTooltip(event, items[nextHoveredIndex]);
+        }
+
+        if (nextHoveredIndex !== hoveredIndex) {
+            hoveredIndex = nextHoveredIndex;
+            draw();
         }
     });
-});
+
+    canvas.addEventListener('mouseleave', function () {
+        canvas.style.cursor = 'default';
+        hideTooltip();
+
+        if (hoveredIndex !== null) {
+            hoveredIndex = null;
+            draw();
+        }
+    });
+
+    let resizeTimer;
+    window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(draw, 150);
+    });
+
+    draw();
+}
 </script>
 @endsection

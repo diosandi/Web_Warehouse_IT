@@ -71,7 +71,7 @@ class LocationsController extends Controller
         }
 
 
-        $locations = $query->latest()->paginate(10)->appends($request->query());
+        $locations = $query->latest()->paginate(50)->appends($request->query());
 
          // Get distinct gedung list
         $gedungList = Locations::select('gedung')
@@ -119,7 +119,7 @@ class LocationsController extends Controller
     public function store(Request $request, Locations $location)
     {
         $validated = $request->validate([
-            'type'=> 'required|in:warehouse,distribution,maintenance',
+            'type'=> ['required', Rule::in(array_keys(Locations::getTypeOptions()))],
             'gedung'=> 'required|max:255',
             'ruangan'=> ['nullable','string','max:255',
                          Rule::unique('locations')->where (function($query)use($request){
@@ -157,7 +157,7 @@ class LocationsController extends Controller
     public function update(Request $request, Locations $location)
     {
         $validated = $request->validate([
-            'type'=> 'required|in:warehouse,distribution,maintenance',
+            'type'=> ['required', Rule::in(array_keys(Locations::getTypeOptions()))],
             'gedung'=> 'required|max:255',
             'ruangan'=> ['nullable','string','max:255',
                          Rule::unique('locations')->where (function($query)use($request){

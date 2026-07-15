@@ -19,7 +19,8 @@ class Locations extends Model
         return [
          'warehouse' => 'Warehouse',
          'distribution' => 'Distribution',
-        //  'maintenance' => 'Maintenance'
+         'maintenance' => 'Maintenance',
+         'vendor' => 'Vendor',
         ];
     }
 

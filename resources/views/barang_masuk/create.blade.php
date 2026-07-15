@@ -60,10 +60,10 @@
                 <input type="text" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
-            <!-- Supplier -->
+            <!-- Asset -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Supplier</label>
-                <input type="text" name="supplier" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <label>Asset</label>
+                <input type="text" name="supplier" value="{{ old('supplier') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
 
              <!-- PO Number -->

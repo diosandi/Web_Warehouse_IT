@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Items;
 use App\Models\DistributionItem;
+use App\Models\ItemStatusHistory;
 use App\Models\Locations;
 use App\Http\Controllers\Concerns\ResolvesRedirects;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ItemsController extends Controller
@@ -21,6 +24,7 @@ class ItemsController extends Controller
 
         $items = Items::where('serial_number', 'like', "%$q%")
             ->orWhere('service_tag', 'like', "%$q%")
+            ->orWhere('asset', 'like', "%$q%")
             ->orWhere('merk', 'like', "%$q%")
             ->orWhere('type', 'like', "%$q%")
             ->orWhere('processor', 'like', "%$q%")
@@ -34,7 +38,7 @@ class ItemsController extends Controller
             $items->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'text' => $item->serial_number . ' - ' . $item->merk . ' - ' . $item->type
+                    'text' => $item->serial_number . ' - ' . $item->merk . ' - ' . $item->type . ' - ' . ($item->asset ?? '-')
                 ];
             })
         );
@@ -42,9 +46,29 @@ class ItemsController extends Controller
 
     public function index(Request $request)
     {
-        $query = Items::query();
+        $activeDistribution = function ($di) {
+            $di->where('status', 'dipakai')
+                ->whereHas('distribution', function ($d) {
+                    $d->where('status', 'dipakai');
+                });
+        };
+
+        $query = Items::with([
+            'barang_masuk',
+            'storageLocation',
+            'distributionItems' => function ($distributionItem) use ($activeDistribution) {
+                $activeDistribution($distributionItem);
+                $distributionItem->with('distribution.location')->latest();
+            },
+        ]);
         $selectedKategori = array_values(array_filter((array) $request->input('kategori', '')));
         $selectedMerk = array_values(array_filter((array) $request->input('merk', '')));
+        $selectedAsset = array_values(array_filter((array) $request->input('asset', '')));
+        $selectedSource = $request->input('source');
+
+        if (! in_array($selectedSource, ['barang_masuk', 'master_item'], true)) {
+            $selectedSource = null;
+        }
 
          if ($request->item_id) {
             // kalau pilih dari suggestion → pakai ID saja
@@ -56,6 +80,7 @@ class ItemsController extends Controller
                 $query->where(function ($q) use ($search) {
                 $q->where('serial_number', 'like', $search)
                   ->orWhere('service_tag', 'like', $search)
+                  ->orWhere('asset', 'like', $search)
                   ->orWhere('merk', 'like', $search)
                   ->orWhere('type', 'like', $search)
                   ->orWhere('processor', 'like', $search)
@@ -76,14 +101,18 @@ class ItemsController extends Controller
             $query->whereIn('merk', $selectedMerk);
         }
 
-       if ($request->status) {
-            $activeDistribution = function ($di) {
-                $di->where('status', 'dipakai')
-                    ->whereHas('distribution', function ($d) {
-                        $d->where('status', 'dipakai');
-                    });
-            };
+        // Filter by asset/kepemilikan
+        if (!empty($selectedAsset)) {
+            $query->whereIn('asset', $selectedAsset);
+        }
 
+        if ($selectedSource === 'barang_masuk') {
+            $query->whereNotNull('barang_masuk_id');
+        } elseif ($selectedSource === 'master_item') {
+            $query->whereNull('barang_masuk_id');
+        }
+
+       if ($request->status) {
             // USED khusus printer dari distribusi
             if ($request->status == 'used') {
 
@@ -109,7 +138,7 @@ class ItemsController extends Controller
 
             } else {
 
-                // available / maintenance / retired harus sesuai status yang tampil di tabel.
+                // Status non-used harus sesuai status yang tampil di tabel.
                 // Printer yang masih punya distribusi aktif tetap dianggap "Digunakan".
                 $query->where('status', $request->status)
                     ->where(function ($q) use ($activeDistribution) {
@@ -128,26 +157,42 @@ class ItemsController extends Controller
             $query->whereDoesntHave('device_detail');
         }
 
-        $items = $query->latest()->paginate(10)->appends($request->query());
+        $items = $query->latest()->paginate(50)->appends($request->query());
+        $items->getCollection()->each(function (Items $item) {
+            $item->refreshStatus();
+        });
 
         // Get all kategori options
         $kategoriOptions = Items::getKategoriOptions();
 
         // Get distinct merk list
         $merkList = Items::select('merk')
+            ->whereNotNull('merk')
+            ->where('merk', '!=', '')
             ->distinct()
             ->orderBy('merk')
             ->pluck('merk')
+            ->toArray();
+
+        // Get distinct asset list
+        $assetList = Items::select('asset')
+            ->whereNotNull('asset')
+            ->where('asset', '!=', '')
+            ->distinct()
+            ->orderBy('asset')
+            ->pluck('asset')
             ->toArray();
 
         // Get current filters for display
         $filters = [
             'kategori' => $selectedKategori,
             'merk' => $selectedMerk,
-            'search' => $request->search
+            'asset' => $selectedAsset,
+            'search' => $request->search,
+            'source' => $selectedSource,
         ];
 
-        return view('items.index', compact('items', 'kategoriOptions', 'merkList', 'filters'));
+        return view('items.index', compact('items', 'kategoriOptions', 'merkList', 'assetList', 'filters'));
     }
 
     /**
@@ -156,7 +201,7 @@ class ItemsController extends Controller
     public function create(Request $request)
     {
         $kategoriOptions = Items::getKategoriOptions();
-        $locations = Locations::where('type', 'warehouse')->get();
+        $locations = $this->itemStorageLocations();
         $redirect = $this->redirectTarget($request, route('items.index'));
 
         return view('items.create', compact('kategoriOptions','locations', 'redirect'));
@@ -171,6 +216,7 @@ class ItemsController extends Controller
             'kategori' => 'required|in:PC,Monitor,Printer Kertas,Printer Barcode,Scanner,Lainnya',
             'merk' => 'required|string|max:255',
             'type' => 'required|string|max:255',
+            'asset' => 'nullable|string|max:255',
             'serial_number' => 'required|string|unique:items,serial_number',
             'service_tag' => 'nullable|string|max:255',
             'processor' => 'nullable|string|max:255',
@@ -190,12 +236,15 @@ class ItemsController extends Controller
 
     public function detail(Request $request,Items $item)
     {
+        $item->refreshStatus();
+        $item->refresh();
+
         $item->load([
         'storageLocation',
         'barang_masuk',
         ]);
 
-        $locations = Locations::where('type', 'warehouse')->get();
+        $locations = $this->itemStorageLocations();
         $redirect = $this->redirectTarget($request, route('items.index'));
         return view('items.detail', compact('item','locations','redirect'));
     }
@@ -205,6 +254,9 @@ class ItemsController extends Controller
      */
     public function show(Items $item, Request $request)
     {
+            $item->refreshStatus();
+            $item->refresh();
+
             $item->load([
                 'device_detail',
                 'storageLocation',
@@ -214,53 +266,260 @@ class ItemsController extends Controller
             $activeDistributions = $item->distributionItems()
                 ->with(['distribution.location'])
                 ->where('status', 'dipakai')
+                ->whereHas('distribution', function ($distribution) {
+                    $distribution->where('status', 'dipakai');
+                })
                 ->latest()
                 ->get();
 
-            $activeDistributionItem = $item->distributionItems() 
-            ->with([ 'distribution.location' ]) 
-            ->where('status', 'dipakai') 
-            ->latest() 
+            $activeDistributionItem = $item->distributionItems()
+            ->with([ 'distribution.location' ])
+            ->where('status', 'dipakai')
+            ->whereHas('distribution', function ($distribution) {
+                $distribution->where('status', 'dipakai');
+            })
+            ->latest()
             ->first();
 
-            $historyDistributions = $this->historyDistributionQuery($item, $request)
-                ->paginate((int) $request->input('history_per_page', 10), ['*'], 'history_page')
-                ->withQueryString();
+            $statusHistoryEvents = $this->statusHistoryEvents($item, $request);
 
-            $locations = Locations::where('type', 'warehouse')->get();
-            $historyFilters = $this->historyFilters($request);
+            $locations = $this->itemStorageLocations();
+            $statusHistoryFilters = $this->statusHistoryFilters($request);
 
             $redirect = $this->redirectTarget($request, route('items.index'));
-            
+
             return view('items.show', compact(
             'item',
-            'historyDistributions',
+            'statusHistoryEvents',
             'activeDistributions',
             'activeDistributionItem',
             'redirect',
             'locations',
-            'historyFilters'
+            'statusHistoryFilters'
             ));
     }
 
     public function exportHistory(Request $request, Items $item, string $format)
     {
-        $histories = $this->historyDistributionQuery($item, $request)->get();
-        $filename = 'history-distribusi-' . $item->serial_number . '-' . now()->format('Ymd-His');
+        $statusHistoryEvents = $this->statusHistoryEvents($item, $request, false);
+        $filename = 'riwayat-status-barang-' . $item->serial_number . '-' . now()->format('Ymd-His');
 
         if ($format === 'excel') {
-            return $this->downloadHistoryExcel($item, $histories, $filename . '.xls');
+            return $this->downloadHistoryExcel($item, $statusHistoryEvents, $filename . '.xls');
         }
 
         if ($format === 'pdf') {
             return view('items.history_pdf', [
                 'item' => $item,
-                'histories' => $histories,
-                'historyFilters' => $this->historyFilters($request),
+                'statusHistoryEvents' => $statusHistoryEvents,
+                'statusHistoryFilters' => $this->statusHistoryFilters($request),
             ]);
         }
 
         abort(404);
+    }
+
+    private function statusHistoryEvents(Items $item, Request $request, bool $paginate = true)
+    {
+        $filters = $this->statusHistoryFilters($request);
+        $events = $this->buildStatusHistoryEvents($item);
+
+        if ($filters['history_date_from']) {
+            $dateFrom = Carbon::parse($filters['history_date_from'])->startOfDay();
+            $events = $events->filter(fn ($event) => $event['sort_at'] && $event['sort_at']->gte($dateFrom));
+        }
+
+        if ($filters['history_date_to']) {
+            $dateTo = Carbon::parse($filters['history_date_to'])->endOfDay();
+            $events = $events->filter(fn ($event) => $event['sort_at'] && $event['sort_at']->lte($dateTo));
+        }
+
+        if ($filters['history_event_type']) {
+            $events = $events->filter(fn ($event) => $event['event_type'] === $filters['history_event_type']);
+        }
+
+        $events = $events
+            ->sortByDesc(fn ($event) => $event['sort_at']?->timestamp ?? 0)
+            ->values();
+
+        if (! $paginate) {
+            return $events;
+        }
+
+        $perPage = max(10, min((int) $filters['history_per_page'], 100));
+        $page = LengthAwarePaginator::resolveCurrentPage('history_page');
+
+        return (new LengthAwarePaginator(
+            $events->forPage($page, $perPage)->values(),
+            $events->count(),
+            $perPage,
+            $page,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'pageName' => 'history_page',
+            ]
+        ))->withQueryString();
+    }
+
+    private function buildStatusHistoryEvents(Items $item)
+    {
+        $events = collect();
+
+        $item->distributionItems()
+            ->with(['distribution.location'])
+            ->get()
+            ->each(function (DistributionItem $distributionItem) use ($events) {
+                $distribution = $distributionItem->distribution;
+                $location = $distribution?->location;
+                $distributionAt = $this->distributionHistoryTimestamp($distributionItem);
+
+                $events->push([
+                    'sort_at' => $distributionAt,
+                    'display_at' => $distributionAt,
+                    'event_type' => 'distribution',
+                    'event_label' => 'Distribusi',
+                    'old_status' => 'available',
+                    'new_status' => 'used',
+                    'old_status_label' => $this->itemStatusLabel('available'),
+                    'new_status_label' => $this->itemStatusLabel('used'),
+                    'new_status_class' => $this->itemStatusClass('used'),
+                    'actor' => $distribution?->nama_user ?: '-',
+                    'actor_label' => 'Pengguna',
+                    'location' => $this->formatLocation($location),
+                    'note' => $distribution?->keterangan ?: 'Barang didistribusikan',
+                ]);
+
+                if (! $distributionItem->returned_at) {
+                    return;
+                }
+
+                $returnedStatus = $this->returnedItemStatus($distributionItem);
+
+                $events->push([
+                    'sort_at' => Carbon::parse($distributionItem->returned_at),
+                    'display_at' => Carbon::parse($distributionItem->returned_at),
+                    'event_type' => 'return',
+                    'event_label' => 'Pengembalian',
+                    'old_status' => 'used',
+                    'new_status' => $returnedStatus,
+                    'old_status_label' => $this->itemStatusLabel('used'),
+                    'new_status_label' => $this->itemStatusLabel($returnedStatus),
+                    'new_status_class' => $this->itemStatusClass($returnedStatus),
+                    'actor' => $distribution?->nama_user ?: '-',
+                    'actor_label' => 'Pengguna',
+                    'location' => $this->formatLocation($location),
+                    'note' => $distributionItem->return_note ?: 'Barang dikembalikan',
+                ]);
+            });
+
+        $item->statusHistories()
+            ->with(['user', 'oldLocation', 'newLocation'])
+            ->get()
+            ->each(function (ItemStatusHistory $history) use ($events) {
+                $events->push([
+                    'sort_at' => $history->created_at,
+                    'display_at' => $history->created_at,
+                    'event_type' => 'manual',
+                    'event_label' => 'Edit Master Barang',
+                    'old_status' => $history->old_status,
+                    'new_status' => $history->new_status,
+                    'old_status_label' => $this->itemStatusLabel($history->old_status),
+                    'new_status_label' => $this->itemStatusLabel($history->new_status),
+                    'new_status_class' => $this->itemStatusClass($history->new_status),
+                    'actor' => $history->user?->name ?: 'System',
+                    'actor_label' => 'Diubah oleh',
+                    'location' => $this->formatLocation($history->newLocation),
+                    'note' => $history->note ?: $history->new_condition_note ?: 'Status barang diperbarui dari master barang',
+                ]);
+            });
+
+        return $events;
+    }
+
+    private function distributionHistoryTimestamp(DistributionItem $distributionItem): ?Carbon
+    {
+        $distribution = $distributionItem->distribution;
+        $createdAt = $distributionItem->created_at
+            ? Carbon::parse($distributionItem->created_at)
+            : ($distribution?->created_at ? Carbon::parse($distribution->created_at) : null);
+
+        if (! $distribution?->tanggal_distribusi) {
+            return $createdAt;
+        }
+
+        $distributionDate = Carbon::parse($distribution->tanggal_distribusi);
+
+        if (! $createdAt) {
+            return $distributionDate;
+        }
+
+        return $distributionDate->setTime(
+            $createdAt->hour,
+            $createdAt->minute,
+            $createdAt->second
+        );
+    }
+
+    private function statusHistoryFilters(Request $request): array
+    {
+        $eventType = $request->input('history_event_type');
+
+        if (! in_array($eventType, ['distribution', 'return', 'manual'], true)) {
+            $eventType = null;
+        }
+
+        return [
+            'history_date_from' => $request->input('history_date_from'),
+            'history_date_to' => $request->input('history_date_to'),
+            'history_event_type' => $eventType,
+            'history_per_page' => (int) $request->input('history_per_page', 10),
+        ];
+    }
+
+    private function returnedItemStatus(DistributionItem $distributionItem): string
+    {
+        $returnNote = strtolower($distributionItem->return_note ?? '');
+
+        if (
+            $distributionItem->return_condition_status === 'maintenance'
+            || str_contains($returnNote, 'rusak')
+            || str_contains($returnNote, 'maintenance')
+        ) {
+            return 'maintenance';
+        }
+
+        return 'available';
+    }
+
+    private function itemStatusLabel(?string $status): string
+    {
+        return [
+            'available' => 'Tersedia',
+            'used' => 'Dipakai',
+            'maintenance' => 'Pemeliharaan',
+            'retired' => 'Tidak Digunakan',
+            'vendor' => 'Dibawa Vendor',
+        ][$status] ?? '-';
+    }
+
+    private function itemStatusClass(?string $status): string
+    {
+        return [
+            'available' => 'bg-green-100 text-green-700',
+            'used' => 'bg-blue-100 text-blue-700',
+            'maintenance' => 'bg-red-100 text-red-700',
+            'retired' => 'bg-gray-100 text-gray-700',
+            'vendor' => 'bg-purple-100 text-purple-700',
+        ][$status] ?? 'bg-gray-100 text-gray-700';
+    }
+
+    private function formatLocation(?Locations $location): string
+    {
+        if (! $location) {
+            return '-';
+        }
+
+        return ($location->gedung ?? '-') . ' - ' . ($location->ruangan ?? '-');
     }
 
     private function historyDistributionQuery(Items $item, Request $request)
@@ -340,12 +599,12 @@ class ItemsController extends Controller
         ];
     }
 
-    private function downloadHistoryExcel(Items $item, $histories, string $filename): StreamedResponse
+    private function downloadHistoryExcel(Items $item, $statusHistoryEvents, string $filename): StreamedResponse
     {
-        return response()->streamDownload(function () use ($item, $histories) {
+        return response()->streamDownload(function () use ($item, $statusHistoryEvents) {
             echo view('items.history_excel', [
                 'item' => $item,
-                'histories' => $histories,
+                'statusHistoryEvents' => $statusHistoryEvents,
             ])->render();
         }, $filename, [
             'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
@@ -357,8 +616,11 @@ class ItemsController extends Controller
      */
     public function edit(Request $request, Items $item)
     {
+        $item->refreshStatus();
+        $item->refresh();
+
         $kategoriOptions = Items::getKategoriOptions();
-        $locations = Locations::where('type', 'warehouse')->get();
+        $locations = $this->itemStorageLocations();
         $redirect = $this->redirectTarget($request, route('items.index'));
         return view('items.edit', compact('item', 'kategoriOptions', 'locations', 'redirect'));
     }
@@ -372,6 +634,7 @@ class ItemsController extends Controller
             'kategori' => 'required|in:PC,Monitor,Printer Kertas,Printer Barcode,Scanner,Lainnya',
             'merk' =>  $item->barang_masuk_id ?'nullable':'required|string|max:255',
             'type' => 'required|string|max:255',
+            'asset' => 'nullable|string|max:255',
             'serial_number' => 'required|string|unique:items,serial_number,' . $item->id,
             'service_tag' => 'nullable|string|max:255',
             'processor' => 'nullable|string|max:255',
@@ -381,17 +644,28 @@ class ItemsController extends Controller
             'os' => 'nullable|string|max:255',
             'tahun' => 'nullable|digits:4',
             'storage_location_id' => 'nullable|exists:locations,id',
-            'status' => 'nullable|in:used,available,maintenance,retired',
+            'status' => 'nullable|in:used,available,maintenance,retired,vendor',
             'condition_note' => 'nullable|string|max:255',
 
         ]);
 
+        $item->refreshStatus();
+        $item->refresh();
+
+        $beforeStatus = [
+            'status' => $item->status,
+            'storage_location_id' => $item->storage_location_id,
+            'condition_note' => $item->condition_note,
+        ];
+
         //TIDAK BOLEH UBAH STATUS JIKA USED
-        if ($item->status=='used'){
+        if ($item->isUsed()){
             // paksa status tetap used
             $validated['status'] = 'used';
              // lokasi juga jangan berubah
             unset($validated['storage_location_id']);
+        } elseif (($validated['status'] ?? null) === 'used') {
+            $validated['status'] = 'available';
         }
 
         // HANDLE MERK DI SINI
@@ -408,8 +682,57 @@ class ItemsController extends Controller
         }
 
         $item->update($validated);
+        $item->refresh();
+        $this->recordMasterStatusHistory($item, $beforeStatus);
 
         return redirect($this->redirectTarget($request, route('items.index')))->with('success', 'Data berhasil diperbarui!');
+    }
+
+    private function recordMasterStatusHistory(Items $item, array $beforeStatus): void
+    {
+        $statusChanged = ($beforeStatus['status'] ?? null) !== $item->status;
+        $locationChanged = (string) ($beforeStatus['storage_location_id'] ?? '') !== (string) ($item->storage_location_id ?? '');
+        $noteChanged = (string) ($beforeStatus['condition_note'] ?? '') !== (string) ($item->condition_note ?? '');
+
+        if (! $statusChanged && ! $locationChanged && ! $noteChanged) {
+            return;
+        }
+
+        ItemStatusHistory::create([
+            'item_id' => $item->id,
+            'user_id' => auth()->id(),
+            'old_location_id' => $beforeStatus['storage_location_id'] ?? null,
+            'new_location_id' => $item->storage_location_id,
+            'source' => 'master_edit',
+            'event' => 'status_changed',
+            'old_status' => $beforeStatus['status'] ?? null,
+            'new_status' => $item->status,
+            'old_condition_note' => $beforeStatus['condition_note'] ?? null,
+            'new_condition_note' => $item->condition_note,
+            'note' => $this->masterStatusHistoryNote($item, $beforeStatus),
+        ]);
+    }
+
+    private function masterStatusHistoryNote(Items $item, array $beforeStatus): string
+    {
+        $notes = [];
+
+        if (($beforeStatus['status'] ?? null) !== $item->status) {
+            $notes[] = 'Status diubah dari ' .
+                $this->itemStatusLabel($beforeStatus['status'] ?? null) .
+                ' ke ' .
+                $this->itemStatusLabel($item->status);
+        }
+
+        if ((string) ($beforeStatus['storage_location_id'] ?? '') !== (string) ($item->storage_location_id ?? '')) {
+            $notes[] = 'Lokasi penyimpanan diperbarui';
+        }
+
+        if ((string) ($beforeStatus['condition_note'] ?? '') !== (string) ($item->condition_note ?? '')) {
+            $notes[] = 'Keterangan kondisi diperbarui';
+        }
+
+        return implode('. ', $notes) ?: 'Data status barang diperbarui';
     }
 
     /**
@@ -418,9 +741,11 @@ class ItemsController extends Controller
     public function destroy(Request $request, Int $id)
     {
         $item = Items::findOrfail($id);
+        $item->refreshStatus();
+        $item->refresh();
 
         // Cek apakah item sedang dipakai
-        if ($item->status=='used'){
+        if ($item->isUsed()){
             return back()->with('error', 'Item sedang digunakan, tidak bisa dihapus !');
         }
         // Cek apakah pernah masuk distribusi
@@ -433,11 +758,22 @@ class ItemsController extends Controller
         $barangMasuk = $item->barang_masuk;
         $item->delete();
 
-        // Update quantity
-        $barangMasuk->quantity = $barangMasuk->items()->count();
-        $barangMasuk->save();
+        if ($barangMasuk) {
+            // Update quantity
+            $barangMasuk->quantity = $barangMasuk->items()->count();
+            $barangMasuk->save();
+        }
 
 
         return redirect($this->redirectTarget($request, route('items.index')))->with('success', 'Item berhasil dihapus !');
+    }
+
+    private function itemStorageLocations()
+    {
+        return Locations::whereIn('type', ['warehouse', 'maintenance', 'vendor'])
+            ->orderBy('type')
+            ->orderBy('gedung')
+            ->orderBy('ruangan')
+            ->get();
     }
 }

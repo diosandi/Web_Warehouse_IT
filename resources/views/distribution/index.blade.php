@@ -15,7 +15,7 @@
         || request()->filled('ruangan');
 @endphp
 <br>
-<div class="container mx-auto px-4 py-12">
+<div class="distribution-page mx-auto w-full px-3 py-8 sm:px-4 lg:px-6 lg:py-12">
     <!-- Header -->
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
@@ -134,7 +134,7 @@
                     </select>
                 </div>
             </div>
-            
+
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                     <button type="submit" class="btn btn-success btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +160,11 @@
                                 @endphp
                                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                     <span>Cari: <strong>"{{ request('search') }}"</strong></span>
-                                    <a href="{{ route('distribution.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">×</a>
+                                    <a href="{{ route('distribution.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
@@ -171,7 +175,11 @@
                                 @endphp
                                 <span class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                     <span>Status: <strong>{{ $statusLabels[request('status')] ?? request('status') }}</strong></span>
-                                    <a href="{{ route('distribution.index', $statusQuery) }}" class="hover:text-purple-900 font-bold text-lg leading-none">×</a>
+                                    <a href="{{ route('distribution.index', $statusQuery) }}" class="hover:text-purple-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
@@ -179,13 +187,15 @@
                                 @php
                                     $tanggalQuery = request()->query();
                                     unset($tanggalQuery['tanggal_dari'], $tanggalQuery['tanggal_sampai']);
-                                    $tanggalLabel = request('tanggal_dari') && request('tanggal_sampai')
-                                        ? request('tanggal_dari') . ' sampai ' . request('tanggal_sampai')
-                                        : (request('tanggal_dari') ? 'Mulai ' . request('tanggal_dari') : 'Sampai ' . request('tanggal_sampai'));
+                                    $tanggalLabel = \App\Support\DateFormatter::dateRange(request('tanggal_dari'), request('tanggal_sampai'));
                                 @endphp
                                 <span class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                     <span>Tanggal: <strong>{{ $tanggalLabel }}</strong></span>
-                                    <a href="{{ route('distribution.index', $tanggalQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">×</a>
+                                    <a href="{{ route('distribution.index', $tanggalQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
@@ -196,7 +206,11 @@
                                 @endphp
                                 <span class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                     <span>Gedung: <strong>{{ request('gedung') }}</strong></span>
-                                    <a href="{{ route('distribution.index', $gedungQuery) }}" class="hover:text-green-900 font-bold text-lg leading-none">×</a>
+                                    <a href="{{ route('distribution.index', $gedungQuery) }}" class="hover:text-green-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
@@ -207,15 +221,19 @@
                                 @endphp
                                 <span class="bg-cyan-100 text-cyan-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                     <span>Ruangan: <strong>{{ $selectedRuangan?->ruangan ?? request('ruangan') }}</strong></span>
-                                    <a href="{{ route('distribution.index', $ruanganQuery) }}" class="hover:text-cyan-900 font-bold text-lg leading-none">×</a>
+                                    <a href="{{ route('distribution.index', $ruanganQuery) }}" class="hover:text-cyan-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
-                            <a href="{{ route('distribution.index') }}" class="btn btn-soft-danger btn-sm">
+                            <a href="{{ route('distribution.index') }}" class="btn btn-soft-danger btn-sm px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                Hapus Semua
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                                Hapus Semua
                             </a>
                         </div>
                     </div>
@@ -243,8 +261,21 @@
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="distribution-table-wrap overflow-x-auto">
+            <table class="distribution-table w-full divide-y divide-gray-200">
+                @php
+                    $baseQuery = request()->except(['sort_by', 'sort_dir', 'page']);
+                    $sortBy = request()->get('sort_by', 'tanggal_distribusi');
+                    $sortDir = request()->get('sort_dir', 'desc');
+
+                    $buildSortUrl = function ($column) use ($baseQuery, $sortBy, $sortDir) {
+                        $nextDir = ($sortBy === $column && $sortDir === 'asc') ? 'desc' : 'asc';
+                        return route('distribution.index', array_merge($baseQuery, [
+                            'sort_by' => $column,
+                            'sort_dir' => $nextDir,
+                        ]));
+                    };
+                @endphp
                 <thead class="bg-gradient-to-r from-green-600 to-green-700">
                     <tr>
                         <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
@@ -256,10 +287,31 @@
                         <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Lainnya</th>
                         <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Pengguna</th>
                         <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Divisi</th>
-                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Lokasi</th>
-                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Tanggal</th>
+                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                            <a href="{{ $buildSortUrl('location') }}" class="flex items-center gap-1 hover:underline">
+                                Lokasi
+                                @if($sortBy === 'location')
+                                    <span>{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </a>
+                        </th>
+                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                            <a href="{{ $buildSortUrl('tanggal_distribusi') }}" class="flex items-center gap-1 hover:underline">
+                                Tanggal Distribusi
+                                @if($sortBy === 'tanggal_distribusi')
+                                    <span>{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </a>
+                        </th>
                         <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Keterangan</th>
-                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                            <a href="{{ $buildSortUrl('status') }}" class="flex items-center gap-1 hover:underline">
+                                Status
+                                @if($sortBy === 'status')
+                                    <span>{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </a>
+                        </th>
                         <th class="px-4 py-4 text-center text-xs font-semibold text-white uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -288,11 +340,12 @@
                                         'id' => $item->id,
                                         'serial_number' => $item->serial_number,
                                         'merk' => $item->merk,
+                                        'asset' => $item->asset,
                                     ];
                                 }
                             }
                         @endphp
-                        <tr class="{{$d->status == 'dikembalikan' ? 'bg-gray-100 opacity-70': ''}}">
+                        <tr class="{{$d->status == 'dikembalikan' ? 'bg-gray-100 opacity-70': ''}} hover:bg-gray-50 transition duration-150">
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $loop->iteration + ($distribution->currentPage() - 1) * $distribution->perPage() }}</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['PC']))
                                                                                                        @foreach($kategori['PC'] as $pc)
@@ -309,6 +362,9 @@
                                                                                                                     </a>
                                                                                                                 @endif
                                                                                                                     / {{ $pc['merk'] ?? '-' }}
+                                                                                                                    <div class="text-xs font-semibold text-gray-500">
+                                                                                                                        Asset: {{ $pc['asset'] ?? '-' }}
+                                                                                                                    </div>
                                                                                                             </div>
                                                                                                         @endforeach
                                                                                                     @else
@@ -329,6 +385,9 @@
                                                                                                                     </a>
                                                                                                                 @endif
                                                                                                                     / {{ $pc['merk'] }}
+                                                                                                                    <div class="text-xs font-semibold text-gray-500">
+                                                                                                                        Asset: {{ $pc['asset'] ?? '-' }}
+                                                                                                                    </div>
                                                                                                             </div>
                                                                                                         @endforeach
                                                                                                     @else
@@ -337,7 +396,7 @@
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Printer Kertas']))
                                                                                                         <div class="flex flex-col gap-1">
                                                                                                             @foreach($kategori['Printer Kertas'] as $pk)
-                                                                                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                                                                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded">
                                                                                                                     @if($d->status == 'dikembalikan')
                                                                                                                         <span class="text-gray-400 cursor-not-allowed font-semibold">
                                                                                                                             {{ $pk['serial_number'] }}
@@ -350,6 +409,9 @@
                                                                                                                         </a>
                                                                                                                     @endif
                                                                                                                         / {{ $pk['merk'] }}
+                                                                                                                        <span class="block text-xs font-semibold text-green-700">
+                                                                                                                            Asset: {{ $pk['asset'] ?? '-' }}
+                                                                                                                        </span>
                                                                                                                 </span>
                                                                                                             @endforeach
                                                                                                             <span class="text-xs text-gray-500">
@@ -362,7 +424,7 @@
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Printer Barcode']))
                                                                                                         <div class="flex flex-col gap-1">
                                                                                                             @foreach($kategori['Printer Barcode'] as $pb)
-                                                                                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                                                                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">
                                                                                                                     @if($d->status == 'dikembalikan')
                                                                                                                         <span class="text-gray-400 cursor-not-allowed font-semibold">
                                                                                                                             {{ $pb['serial_number'] }}
@@ -375,6 +437,9 @@
                                                                                                                         </a>
                                                                                                                     @endif
                                                                                                                         / {{ $pb['merk'] }}
+                                                                                                                        <span class="block text-xs font-semibold text-blue-700">
+                                                                                                                            Asset: {{ $pb['asset'] ?? '-' }}
+                                                                                                                        </span>
                                                                                                                 </span>
                                                                                                             @endforeach
                                                                                                             <span class="text-xs text-gray-500">
@@ -399,6 +464,9 @@
                                                                                                                     </a>
                                                                                                                 @endif
                                                                                                                     / {{ $pc['merk'] }}
+                                                                                                                    <div class="text-xs font-semibold text-gray-500">
+                                                                                                                        Asset: {{ $pc['asset'] ?? '-' }}
+                                                                                                                    </div>
                                                                                                             </div>
                                                                                                         @endforeach
                                                                                                     @else
@@ -419,16 +487,19 @@
                                                                                                                     </a>
                                                                                                                 @endif
                                                                                                                     / {{ $pc['merk'] }}
+                                                                                                                    <div class="block text-xs font-semibold text-gray-500">
+                                                                                                                        Asset: {{ $pc['asset'] ?? '-' }}
+                                                                                                                    </div>
                                                                                                             </div>
                                                                                                         @endforeach
                                                                                                     @else
                                                                                                         -
-                                                                                                    @endif</td>                                                     
+                                                                                                    @endif</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->nama_user }}</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->divisi ?? '-' }}</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->location->gedung ?? '-' }} - {{ $d->location->ruangan ?? '-' }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->tanggal_distribusi }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->keterangan }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ \App\Support\DateFormatter::date($d->tanggal_distribusi) }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->keterangan ??'-' }}</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">
                             @if($d->status == 'dipakai')
                                 <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs">
@@ -479,7 +550,7 @@
                     <!-- Jika Data Kosong -->
                     @empty
                         <tr>
-                            <td colspan="10" class="px-3 md:px-4 py-8">
+                            <td colspan="14" class="px-3 md:px-4 py-8">
                                   <div class="text-center">
                                     <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
@@ -584,13 +655,52 @@
                     Simpan
                 </button>
             </div>
-            
+
         </form>
 
         </div>
     </div>
 </div>
 <style>
+    /* .distribution-page {
+        max-width: min(99vw, 2200px);
+    }
+
+    .distribution-table-wrap {
+        scrollbar-width: thin;
+    }
+
+    .distribution-table {
+        min-width: 1500px;
+        table-layout: auto;
+    }
+
+    .distribution-table th,
+    .distribution-table td {
+        padding: 0.65rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1.25rem;
+        vertical-align: top;
+    }
+
+    @media (min-width: 1280px) {
+        .distribution-page {
+            max-width: min(98vw, 2200px);
+        }
+    }
+
+    @media (min-width: 1536px) {
+        .distribution-table {
+            min-width: 100%;
+        }
+
+        .distribution-table th,
+        .distribution-table td {
+            padding: 0.85rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+    } */
+
     /* Custom pagination styling untuk responsif */
     .pagination {
         display: flex;
@@ -620,13 +730,47 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     const searchInput = document.getElementById('search');
+    const gedungFilter = document.getElementById('filter_gedung');
+    const ruanganFilter = document.getElementById('filter_ruangan');
+    const getRuanganUrl = @json(route('distribution.get_ruangan'));
 
-    searchInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            this.form.submit();
-        }
-    });
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.form.submit();
+            }
+        });
+    }
+
+    if (gedungFilter && ruanganFilter) {
+        gedungFilter.addEventListener('change', function () {
+            const gedung = gedungFilter.value;
+
+            ruanganFilter.innerHTML = '<option value="">Loading...</option>';
+
+            fetch(getRuanganUrl + '?' + new URLSearchParams({ gedung }))
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Gagal mengambil data ruangan');
+                    }
+
+                    return response.json();
+                })
+                .then(function (data) {
+                    let html = '<option value="">Semua Ruangan</option>';
+
+                    data.forEach(function (ruangan) {
+                        html += `<option value="${ruangan.id}">${ruangan.ruangan}</option>`;
+                    });
+
+                    ruanganFilter.innerHTML = html;
+                })
+                .catch(function () {
+                    ruanganFilter.innerHTML = '<option value="">Ruangan gagal dimuat</option>';
+                });
+        });
+    }
 
 });
 
@@ -711,31 +855,6 @@ function closeReturnModal()
     document.getElementById('returnModal')
         .classList.remove('flex');
 }
-
-$('#filter_gedung').on('change', function () {
-
-    let gedung = $(this).val();
-
-    $.ajax({
-        url: '/get-ruangan',
-        data: { gedung: gedung },
-        success: function(data) {
-
-            let html = '<option value="">Semua Ruangan</option>';
-
-            data.forEach(r => {
-                html += `
-                    <option value="${r.id}">
-                        ${r.ruangan}
-                    </option>
-                `;
-            });
-
-            $('#filter_ruangan').html(html);
-        }
-    });
-
-});
 
 </script>
 @endsection

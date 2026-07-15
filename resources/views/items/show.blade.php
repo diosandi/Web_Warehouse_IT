@@ -3,23 +3,34 @@
 @section('content')
 @php
     $showRedirect = route('items.show', [$item->id, 'redirect' => $redirect]);
-    $isUsed = $item->status === 'used';
-    $isMaintenance = $item->status === 'maintenance';
+    $activeDistributionCount = $activeDistributions->count();
+    $isCurrentlyUsed = $activeDistributionCount > 0;
+    $displayStatus = $isCurrentlyUsed
+        ? 'used'
+        : ($item->status === 'used' ? 'available' : $item->status);
+    $isMaintenance = $displayStatus === 'maintenance';
     $statusLabel = [
         'available' => 'Tersedia',
         'used' => 'Dipakai',
         'maintenance' => 'Pemeliharaan',
         'retired' => 'Tidak Digunakan',
-    ][$item->status] ?? ucfirst($item->status ?? '-');
+        'vendor' => 'Dibawa Vendor',
+    ][$displayStatus] ?? ucfirst($displayStatus ?? '-');
     $statusClass = [
         'available' => 'bg-green-100 text-green-700 border-green-200',
         'used' => 'bg-blue-100 text-blue-700 border-blue-200',
         'maintenance' => 'bg-red-100 text-red-700 border-red-200',
         'retired' => 'bg-gray-100 text-gray-700 border-gray-200',
-    ][$item->status] ?? 'bg-gray-100 text-gray-700 border-gray-200';
-    $primaryDistribution = $activeDistributions->first();
-    $currentLocation = $isUsed
-        ? (($primaryDistribution?->distribution?->location?->gedung ?? '-') . ' - ' . ($primaryDistribution?->distribution?->location?->ruangan ?? '-'))
+        'vendor' => 'bg-purple-100 text-purple-700 border-purple-200',
+    ][$displayStatus] ?? 'bg-gray-100 text-gray-700 border-gray-200';
+    $activeLocations = $activeDistributions
+        ->map(fn ($distributionItem) => $distributionItem->distribution?->location)
+        ->filter()
+        ->unique('id')
+        ->map(fn ($location) => ($location->gedung ?? '-') . ' - ' . ($location->ruangan ?? '-'))
+        ->values();
+    $currentLocation = $isCurrentlyUsed
+        ? ($activeLocations->isNotEmpty() ? $activeLocations->implode(', ') : '-')
         : (($item->storageLocation->gedung ?? '-') . ' - ' . ($item->storageLocation->ruangan ?? '-'));
     $detail = $item->device_detail;
 @endphp
@@ -54,19 +65,23 @@
 
     <section class="mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:p-6">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div class="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 <div>
                     <p class="text-xs font-semibold uppercase text-gray-500">Status</p>
                     <span class="mt-2 inline-flex rounded-full border px-3 py-1 text-sm font-semibold {{ $statusClass }}">{{ $statusLabel }}</span>
                 </div>
                 <div>
-                    <p class="text-xs font-semibold uppercase text-gray-500">{{ $isUsed ? 'Lokasi Pemakaian' : 'Lokasi Penyimpanan' }}</p>
+                    <p class="text-xs font-semibold uppercase text-gray-500">Asset/Kepemilikan</p>
+                    <p class="mt-2 text-sm font-semibold uppercase text-gray-900">{{ $item->asset ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold uppercase text-gray-500">{{ $isCurrentlyUsed ? 'Lokasi Pemakaian' : 'Lokasi Penyimpanan' }}</p>
                     <p class="mt-2 text-sm font-semibold uppercase text-gray-900">{{ $currentLocation }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-semibold uppercase text-gray-500">Pengguna Aktif</p>
                     <p class="mt-2 text-sm font-semibold uppercase text-gray-900">
-                        {{ $activeDistributions->count() ? $activeDistributions->count() . ' user' : '-' }}
+                        {{ $activeDistributionCount ? $activeDistributionCount . ' user' : '-' }}
                     </p>
                 </div>
                 <div>
@@ -147,7 +162,7 @@
 
             <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
                 <p class="text-xs font-semibold uppercase text-gray-500">Catatan Perangkat</p>
-                <p class="mt-1 text-sm text-gray-900">{{ $detail->notes ?? '-' }}</p>
+                <p class="mt-1 text-sm text-gray-900">{{ $detail->catatan ?? '-' }}</p>
             </div>
         @else
             <div class="rounded-lg border-l-4 border-yellow-500 bg-yellow-50 p-4 text-sm font-medium text-yellow-700">
@@ -193,7 +208,7 @@
                                     -
                                     {{ $distributionItem->distribution->location->ruangan ?? '-' }}
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $distributionItem->distribution->tanggal_distribusi ?? '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">{{ \App\Support\DateFormatter::date($distributionItem->distribution->tanggal_distribusi ?? null) }}</td>
                                 <td class="px-4 py-3">
                                     <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Dipakai</span>
                                 </td>
@@ -209,12 +224,12 @@
         @endif
     </section>
 
-    <section id="history-distribusi" class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+    <section id="history-status-barang" class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:p-6">
         <div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-                <h2 class="text-lg font-bold text-gray-900">Riwayat Distribusi</h2>
-                <p class="text-sm text-gray-600">Riwayat pemakaian, pengembalian, dan kondisi barang saat dikembalikan.</p>
-                <p class="mt-1 text-xs font-semibold uppercase text-gray-500">Total: {{ $historyDistributions->total() }} riwayat</p>
+                <h2 class="text-lg font-bold text-gray-900">Riwayat Status Barang</h2>
+                <p class="text-sm text-gray-600">Timeline distribusi, pengembalian, dan perubahan status dari master barang.</p>
+                <p class="mt-1 text-xs font-semibold uppercase text-gray-500">Total: {{ $statusHistoryEvents->total() }} riwayat</p>
             </div>
 
             <div class="flex flex-wrap gap-2">
@@ -239,35 +254,26 @@
         <form method="GET" action="{{ route('items.show', $item->id) }}" class="mb-5 rounded-lg border border-gray-200 bg-gray-50 p-4">
             <input type="hidden" name="redirect" value="{{ $redirect }}">
 
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <div>
                     <label class="mb-1 block text-xs font-semibold uppercase text-gray-500">Tanggal Dari</label>
-                    <input type="date" name="history_date_from" value="{{ $historyFilters['history_date_from'] }}"
+                    <input type="date" name="history_date_from" value="{{ $statusHistoryFilters['history_date_from'] }}"
                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                 </div>
 
                 <div>
                     <label class="mb-1 block text-xs font-semibold uppercase text-gray-500">Tanggal Sampai</label>
-                    <input type="date" name="history_date_to" value="{{ $historyFilters['history_date_to'] }}"
+                    <input type="date" name="history_date_to" value="{{ $statusHistoryFilters['history_date_to'] }}"
                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                 </div>
 
                 <div>
-                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-500">Jenis Tanggal</label>
-                    <select name="history_date_type" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
-                        <option value="used" {{ $historyFilters['history_date_type'] === 'used' ? 'selected' : '' }}>Tanggal Pakai</option>
-                        <option value="returned" {{ $historyFilters['history_date_type'] === 'returned' ? 'selected' : '' }}>Tanggal Pengembalian</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-500">Status Pengembalian</label>
-                    <select name="history_return_status" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-500">Jenis Riwayat</label>
+                    <select name="history_event_type" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                         <option value="">Semua</option>
-                        <option value="dipakai" {{ $historyFilters['history_return_status'] === 'dipakai' ? 'selected' : '' }}>Dipakai</option>
-                        <option value="dikembalikan" {{ $historyFilters['history_return_status'] === 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
-                        <option value="normal" {{ $historyFilters['history_return_status'] === 'normal' ? 'selected' : '' }}>Pengembalian Normal</option>
-                        <option value="maintenance" {{ $historyFilters['history_return_status'] === 'maintenance' ? 'selected' : '' }}>Pengembalian Pemeliharaan</option>
+                        <option value="distribution" {{ $statusHistoryFilters['history_event_type'] === 'distribution' ? 'selected' : '' }}>Distribusi</option>
+                        <option value="return" {{ $statusHistoryFilters['history_event_type'] === 'return' ? 'selected' : '' }}>Pengembalian</option>
+                        <option value="manual" {{ $statusHistoryFilters['history_event_type'] === 'manual' ? 'selected' : '' }}>Edit Master Barang</option>
                     </select>
                 </div>
 
@@ -275,7 +281,7 @@
                     <label class="mb-1 block text-xs font-semibold uppercase text-gray-500">Baris</label>
                     <select name="history_per_page" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                         @foreach([10, 20, 50, 100] as $perPage)
-                            <option value="{{ $perPage }}" {{ $historyFilters['history_per_page'] === $perPage ? 'selected' : '' }}>{{ $perPage }}</option>
+                            <option value="{{ $perPage }}" {{ $statusHistoryFilters['history_per_page'] === $perPage ? 'selected' : '' }}>{{ $perPage }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -298,69 +304,57 @@
             </div>
         </form>
 
-        @if($historyDistributions->count())
+        @if($statusHistoryEvents->count())
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[920px] divide-y divide-gray-200">
                     <thead class="bg-green-700">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Pengguna</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Waktu</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Aktivitas</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Perubahan Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Pengguna/Oleh</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Lokasi</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Tanggal Pakai</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Tanggal Pengembalian</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Kondisi Pengembalian</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-white">Keterangan</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
-                        @foreach($historyDistributions as $history)
+                        @foreach($statusHistoryEvents as $event)
                             @php
-                                $returnConditionStatus = $history->return_condition_status;
-                                $returnNote = strtolower($history->return_note ?? '');
-
-                                if (
-                                    $returnConditionStatus !== 'maintenance'
-                                    && ($returnNote !== '')
-                                    && (str_contains($returnNote, 'rusak') || str_contains($returnNote, 'maintenance'))
-                                ) {
-                                    $returnConditionStatus = 'maintenance';
-                                }
+                                $eventClass = [
+                                    'distribution' => 'bg-blue-100 text-blue-700',
+                                    'return' => 'bg-green-100 text-green-700',
+                                    'manual' => 'bg-purple-100 text-purple-700',
+                                ][$event['event_type']] ?? 'bg-gray-100 text-gray-700';
                             @endphp
                             <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-700">
+                                    {{ \App\Support\DateFormatter::datetime($event['display_at']) }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $eventClass }}">
+                                        {{ $event['event_label'] }}
+                                    </span>
+                                </td>
                                 <td class="px-4 py-3 text-sm">
-                                    <p class="font-semibold uppercase text-gray-900">{{ $history->distribution->nama_user ?? '-' }}</p>
-                                    <p class="text-xs uppercase text-gray-500">{{ $history->distribution->divisi ?? '-' }}</p>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                                            {{ $event['old_status_label'] }}
+                                        </span>
+                                        <span class="text-xs font-bold text-gray-400">&rarr;</span>
+                                        <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $event['new_status_class'] }}">
+                                            {{ $event['new_status_label'] }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm">
+                                    <p class="text-xs font-semibold uppercase text-gray-500">{{ $event['actor_label'] }}</p>
+                                    <p class="font-semibold uppercase text-gray-900">{{ $event['actor'] }}</p>
                                 </td>
                                 <td class="px-4 py-3 text-sm uppercase text-gray-700">
-                                    {{ $history->distribution->location->gedung ?? '-' }}
-                                    -
-                                    {{ $history->distribution->location->ruangan ?? '-' }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $history->distribution->tanggal_distribusi ?? '-' }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700">
-                                    {{ $history->returned_at ? $history->returned_at->format('d-m-Y H:i') : '-' }}
-                                </td>
-                                <td class="px-4 py-3">
-                                    @if($history->status == 'dipakai')
-                                        <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Dipakai</span>
-                                    @else
-                                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">Dikembalikan</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3">
-                                    @if($history->status == 'dipakai')
-                                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">-</span>
-                                    @elseif($returnConditionStatus == 'maintenance')
-                                        <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">Pemeliharaan</span>
-                                    @else
-                                        <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">Normal</span>
-                                    @endif
+                                    {{ $event['location'] }}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
-                                    <p>{{ $history->distribution->keterangan ?? '-' }}</p>
-                                    @if($history->return_note)
-                                        <p class="mt-1 text-xs text-red-600">{{ $history->return_note }}</p>
-                                    @endif
+                                    {{ $event['note'] }}
                                 </td>
                             </tr>
                         @endforeach
@@ -369,11 +363,11 @@
             </div>
 
             <div class="mt-4">
-                {{ $historyDistributions->links() }}
+                {{ $statusHistoryEvents->links() }}
             </div>
         @else
             <div class="rounded-lg border-l-4 border-yellow-500 bg-yellow-50 p-4 text-sm font-medium text-yellow-700">
-                Belum ada riwayat distribusi untuk item ini.
+                Belum ada riwayat status untuk item ini.
             </div>
         @endif
     </section>

@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $selectedKategori = $filters['kategori'] ?? [];
+    $selectedMerk = $filters['merk'] ?? [];
+    $selectedAsset = $filters['asset'] ?? [];
+@endphp
 <br>
 <div class="container mx-auto px-4 py-12">
     <div class="mb-6">
@@ -15,7 +20,7 @@
                 <p class="mt-1 text-sm text-gray-500">Filter ini dipakai untuk bagian barang masuk. Ringkasan stok dan distribusi aktif tetap menampilkan kondisi saat ini.</p>
             </div>
 
-            <form method="GET" action="{{ route('laporan.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <form method="GET" action="{{ route('laporan.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
                 <div>
                     <label class="mb-1 block text-xs font-semibold uppercase text-gray-500">Tanggal Dari</label>
                     <input type="date" name="tanggal_dari" value="{{ $tanggalDari }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -26,12 +31,82 @@
                     <input type="date" name="tanggal_sampai" value="{{ $tanggalSampai }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
                 </div>
 
-                <div class="md:col-span-2 flex flex-wrap gap-2 border-t pt-4">
+                <div>
+                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-500">Asset</label>
+                    <details class="relative">
+                        <summary class="list-none flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+                            <span class="truncate text-xs uppercase text-gray-700">
+                                {{ empty($selectedAsset) ? 'Semua Asset' : implode(', ', $selectedAsset) }}
+                            </span>
+                            <span class="text-xs text-gray-400">Pilih</span>
+                        </summary>
+                        <div class="absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+                            <div class="space-y-2">
+                                @forelse($assetList as $asset)
+                                    <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                                        <input type="checkbox" name="asset[]" value="{{ $asset }}" {{ in_array($asset, $selectedAsset, true) ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                        <span class="text-xs uppercase">{{ $asset }}</span>
+                                    </label>
+                                @empty
+                                    <p class="text-xs text-gray-500">Belum ada data asset.</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-500">Kategori</label>
+                    <details class="relative">
+                        <summary class="list-none flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+                            <span class="truncate text-xs uppercase text-gray-700">
+                                {{ empty($selectedKategori) ? 'Semua Kategori' : implode(', ', $selectedKategori) }}
+                            </span>
+                            <span class="text-xs text-gray-400">Pilih</span>
+                        </summary>
+                        <div class="absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+                            <div class="space-y-2">
+                                @foreach($kategoriOptions as $value => $label)
+                                    <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                                        <input type="checkbox" name="kategori[]" value="{{ $value }}" {{ in_array($value, $selectedKategori, true) ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                        <span class="text-xs uppercase">{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-500">Merk</label>
+                    <details class="relative">
+                        <summary class="list-none flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+                            <span class="truncate text-xs uppercase text-gray-700">
+                                {{ empty($selectedMerk) ? 'Semua Merk' : implode(', ', $selectedMerk) }}
+                            </span>
+                            <span class="text-xs text-gray-400">Pilih</span>
+                        </summary>
+                        <div class="absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+                            <div class="space-y-2">
+                                @forelse($merkList as $merk)
+                                    <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                                        <input type="checkbox" name="merk[]" value="{{ $merk }}" {{ in_array($merk, $selectedMerk, true) ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                        <span class="text-xs uppercase">{{ $merk }}</span>
+                                    </label>
+                                @empty
+                                    <p class="text-xs text-gray-500">Belum ada data merk.</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="md:col-span-2 xl:col-span-5 flex flex-wrap gap-2 border-t pt-4">
                     <button type="submit" class="btn btn-success">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707L14 14v4l-4 2v-6L3.293 7.293A1 1 0 013 6.586V4z"></path>
                         </svg>
-                        Terapkan Periode
+                        Terapkan Filter
                     </button>
                     <a href="{{ route('laporan.index') }}" class="btn btn-secondary">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,6 +122,7 @@
             <div class="mb-5">
                 <h2 class="text-xl font-bold text-gray-800">Export</h2>
                 <p class="mt-1 text-sm text-gray-500">Periode: <span class="font-semibold text-gray-700">{{ $periodeLabel }}</span></p>
+                <p class="mt-1 text-sm text-gray-500">Filter: <span class="font-semibold text-gray-700">{{ $filterLabel }}</span></p>
             </div>
 
             <div class="space-y-3">
@@ -76,7 +152,7 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div class="rounded-lg border border-gray-200 p-4">
                 <p class="font-bold text-gray-800">Ringkasan Inventaris</p>
-                <p class="mt-1 text-sm text-gray-600">Total barang, tersedia, digunakan, pemeliharaan, tidak digunakan, dan distribusi aktif.</p>
+                <p class="mt-1 text-sm text-gray-600">Total barang, tersedia, digunakan, pemeliharaan, tidak digunakan, dibawa vendor, dan distribusi aktif.</p>
             </div>
             <div class="rounded-lg border border-gray-200 p-4">
                 <p class="font-bold text-gray-800">Stok Per Kategori</p>
@@ -84,7 +160,7 @@
             </div>
             <div class="rounded-lg border border-gray-200 p-4">
                 <p class="font-bold text-gray-800">Barang Masuk</p>
-                <p class="mt-1 text-sm text-gray-600">Ringkasan dan detail barang masuk sesuai periode yang dipilih.</p>
+                <p class="mt-1 text-sm text-gray-600">Ringkasan dan detail barang masuk sesuai periode, asset, kategori, dan merk yang dipilih.</p>
             </div>
             <div class="rounded-lg border border-gray-200 p-4">
                 <p class="font-bold text-gray-800">Distribusi Per Lokasi</p>

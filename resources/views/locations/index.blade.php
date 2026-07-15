@@ -7,12 +7,13 @@
         'warehouse' => 'Warehouse',
         'distribution' => 'Distribution',
         'maintenance' => 'Maintenance',
+        'vendor' => 'Vendor',
     ];
 @endphp
 <br>
-<div class="container mx-auto px-4 py-12">
+<div class="distribution-page mx-auto w-full px-3 py-8 sm:px-4 lg:px-6 lg:py-12">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Master Lokasi</h1>
             <p class="text-gray-600 mt-1">Kelola data lokasi/ruangan penyimpanan barang</p>
@@ -64,7 +65,7 @@
                 <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Lokasi</label>
                 <div class="relative">
                     <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari nama gedung dan ruangan" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase ">
-                    <input type="hidden" name="location_id" id="location_id_hidden" > 
+                    <input type="hidden" name="location_id" id="location_id_hidden" >
                     <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
                     @if(request('search'))
                         <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold ">{{ strlen(request('search')) }} char</span>
@@ -124,9 +125,10 @@
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Tipe</label>
                         <select name="type" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                             <option value="">Semua</option>
-                            <option value="warehouse" {{ request('type')=='warehouse'?'selected':'' }}>gedung</option>
-                            <option value="distribution" {{ request('type')=='distribution'?'selected':'' }}>distribusi</option>
-                            <option value="maintenance" {{ request('type')=='maintenance'?'selected':'' }}>pemeliharaan</option>
+                            <option value="warehouse" {{ request('type')=='warehouse'?'selected':'' }}>Gudang</option>
+                            <option value="distribution" {{ request('type')=='distribution'?'selected':'' }}>Distribusi</option>
+                            <option value="maintenance" {{ request('type')=='maintenance'?'selected':'' }}>Pemeliharaan</option>
+                            <option value="vendor" {{ request('type')=='vendor'?'selected':'' }}>Vendor</option>
                         </select>
                 </div>
             </div>
@@ -159,7 +161,11 @@
                             @endphp
                             <span class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                 <span>🔍 Cari: <strong>"{{ request('search') }}"</strong></span>
-                                <a href="{{ route('locations.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">×</a>
+                                <a href="{{ route('locations.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </a>
                             </span>
                         @endif
                         @if(!empty($selectedGedung))
@@ -169,7 +175,11 @@
                             @endphp
                             <span class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                  <span>Gedung: <strong>{{ implode(', ', $selectedGedung) }}</strong></span>
-                                <a href="{{ route('locations.index', $gedungQuery) }}" class="hover:text-green-900 font-bold text-lg leading-none">×</a>
+                                <a href="{{ route('locations.index', $gedungQuery) }}" class="hover:text-green-900 font-bold text-lg leading-none">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </a>
                             </span>
                         @endif
                         @if(!empty($selectedRuangan))
@@ -179,7 +189,11 @@
                             @endphp
                             <span class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                 <span>Ruangan: <strong>{{ implode(', ', $selectedRuangan) }}</strong></span>
-                                <a href="{{ route('locations.index', $ruanganQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">×</a>
+                                <a href="{{ route('locations.index', $ruanganQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </a>
                             </span>
                         @endif
                         @if(request('type'))
@@ -189,16 +203,20 @@
                             @endphp
                             <span class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                 <span>Tipe: <strong>{{ $typeLabels[request('type')] ?? request('type') }}</strong></span>
-                                <a href="{{ route('locations.index', $typeQuery) }}" class="hover:text-purple-900 font-bold text-lg leading-none">×</a>
+                                <a href="{{ route('locations.index', $typeQuery) }}" class="hover:text-purple-900 font-bold text-lg leading-none">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </a>
                             </span>
                         @endif
 
                         <!-- Clear All Button -->
-                        <a href="{{ route('locations.index') }}" class="btn btn-soft-danger btn-sm">
+                        <a href="{{ route('locations.index') }}" class="btn btn-soft-danger btn-sm px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                            Hapus Semua
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                            Hapus Semua
                         </a>
                     </div>
                 </div>
@@ -226,8 +244,8 @@
 
         <!-- Table -->
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-green-600 to-green-700">
+        <div class="distribution-table-wrap overflow-x-auto">
+            <table class="distribution-table w-full divide-y divide-gray-200">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Gedung</th>
@@ -260,7 +278,7 @@
                                 {{ $loc->ruangan ?? '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 uppercase">
-                                {{ $loc->type ?? '-' }}
+                                {{ $typeLabels[$loc->type] ?? ($loc->type ?? '-') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                 <div class="flex items-center justify-center gap-2">
@@ -288,7 +306,7 @@
                     <!-- Jika Data Kosong -->
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="14" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>

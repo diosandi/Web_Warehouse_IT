@@ -116,6 +116,12 @@
                 <div class="lg:border-l-4 border-green-500 lg:pl-4">
                     <h3 class="text-base md:text-lg font-bold text-gray-700 mb-3 md:mb-4 pb-2 lg:pb-0 lg:border-none border-b-2 border-green-200">📊 Administratif</h3>
 
+                    <!-- Asset -->
+                    <div class="mb-3 md:mb-4">
+                        <label for="asset" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Asset/Kepemilikan</label>
+                        <input type="text" name="asset" id="asset" value="{{ $item->asset ?? '-' }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed" disabled>
+                    </div>
+
                     <!-- Tahun -->
                     <div class="mb-3 md:mb-4">
                         <label for="tahun" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Tahun</label>
@@ -143,6 +149,61 @@
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+                    <!-- Keterangan -->
+                    <div class="mb-3 md:mb-4">
+                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
+                            Status
+                        </label>
+
+                        <select name="status" id="status" {{ $item->status == 'used' ? 'disabled' : '' }}
+                            class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed" disabled>
+
+                            <option value="available"
+                                {{ old('status', $item->status) == 'available' ? 'selected' : '' }}>
+                                Tersedia
+                            </option>
+
+                            <option value="maintenance"
+                                {{ old('status', $item->status) == 'maintenance' ? 'selected' : '' }}>
+                                Pemeliharaan
+                            </option>
+
+                            <option value="retired"
+                                {{ old('status', $item->status) == 'retired' ? 'selected' : '' }}>
+                                Tidak Digunakan
+                            </option>
+
+                            <option value="vendor"
+                                {{ old('status', $item->status) == 'vendor' ? 'selected' : '' }}>
+                                Dibawa Vendor
+                            </option>
+                        </select>
+
+                        @if($item->status == 'used')
+                            <input type="hidden" name="status" value="used">
+                        @endif
+
+                        {{-- Info --}}
+                        @if($item->status == 'used')
+                            <p class="text-red-500 text-sm mt-1">
+                                Barang sedang dipakai, status hanya bisa diubah dari distribution.
+                            </p>
+                        @endif
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
+                            Keterangan Kondisi
+                        </label>
+
+                        <textarea
+                            name="condition_note"
+                            id="condition_note"
+                            rows="3"
+                            class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed" diabled
+                            placeholder="Contoh: LCD rusak, motherboard mati, dll"
+                        >{{ old('condition_note', $item->condition_note) }}</textarea>
                     </div>
                 </div>
             </div>

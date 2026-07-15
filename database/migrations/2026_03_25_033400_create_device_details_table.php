@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('ip_address')->nullable();
             $table->string('mac_lan')->nullable();
             $table->string('mac_wifi')->nullable();
-            $table->string('connection_type')->nullable(); // LAN / USB / WIFI
+            $table->string('connection_type')->nullable(); // LAN / USB / WIFI / HDMI / VGA / DP
             $table->string('port')->nullable();
             $table->string('shared_name')->nullable();
 

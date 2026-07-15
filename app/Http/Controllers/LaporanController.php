@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Barang_masuk;
 use App\Models\Distribution;
 use App\Models\Items;
+use App\Support\DateFormatter;
 use Illuminate\Http\Request;
 
 class LaporanController extends Controller
@@ -38,10 +39,20 @@ class LaporanController extends Controller
 
     private function warehouseReportData(Request $request): array
     {
-        $kategoriList = array_keys(Items::getKategoriOptions());
+        $kategoriOptions = Items::getKategoriOptions();
+        $kategoriList = array_keys($kategoriOptions);
         $tanggalDari = $request->filled('tanggal_dari') ? $request->tanggal_dari : null;
         $tanggalSampai = $request->filled('tanggal_sampai') ? $request->tanggal_sampai : null;
+        $selectedKategori = $this->filterValues($request, 'kategori');
+        $selectedMerk = $this->filterValues($request, 'merk');
+        $selectedAsset = $this->filterValues($request, 'asset');
         $periodeLabel = $this->periodeLabel($tanggalDari, $tanggalSampai);
+        $filterLabel = $this->filterLabel($selectedKategori, $selectedMerk, $selectedAsset);
+        $hasBarangMasukFilters = ! empty($selectedKategori) || ! empty($selectedMerk) || ! empty($selectedAsset);
+
+        $barangMasukItemFilter = function ($query) use ($selectedKategori, $selectedMerk, $selectedAsset) {
+            $this->applyBarangMasukItemFilters($query, $selectedKategori, $selectedMerk, $selectedAsset);
+        };
 
         $activeDistribution = function ($query) {
             $query->where('status', 'dipakai')
@@ -82,6 +93,7 @@ class LaporanController extends Controller
             'used' => $usedCount(),
             'maintenance' => $statusCount('maintenance'),
             'retired' => $statusCount('retired'),
+            'vendor' => $statusCount('vendor'),
             'active_distributions' => Distribution::where('status', 'dipakai')->count(),
             'barang_masuk' => Barang_masuk::count(),
         ];
@@ -107,6 +119,7 @@ class LaporanController extends Controller
                 'used' => $usedCount($kategori),
                 'maintenance' => $kategoriStatusCount('maintenance'),
                 'retired' => $kategoriStatusCount('retired'),
+                'vendor' => $kategoriStatusCount('vendor'),
             ];
         });
 
@@ -137,9 +150,10 @@ class LaporanController extends Controller
             ->sortByDesc('total')
             ->values();
 
-        $barangMasuk = Barang_masuk::with('items')
+        $barangMasuk = Barang_masuk::with(['items' => $barangMasukItemFilter])
             ->when($tanggalDari, fn ($query) => $query->whereDate('tanggal_masuk', '>=', $tanggalDari))
             ->when($tanggalSampai, fn ($query) => $query->whereDate('tanggal_masuk', '<=', $tanggalSampai))
+            ->when($hasBarangMasukFilters, fn ($query) => $query->whereHas('items', $barangMasukItemFilter))
             ->latest('tanggal_masuk')
             ->get();
 
@@ -157,6 +171,7 @@ class LaporanController extends Controller
 
             return [
                 'tanggal_masuk' => $barang->tanggal_masuk,
+                'asset' => $barang->supplier ?? '-',
                 'supplier' => $barang->supplier ?? '-',
                 'po_number' => $barang->po_number ?? '-',
                 'kategori' => $firstItem->kategori ?? '-',
@@ -210,6 +225,13 @@ class LaporanController extends Controller
                 'color' => 'red',
             ],
             [
+                'title' => 'Dibawa Vendor',
+                'description' => 'Barang yang sedang berada di vendor untuk dicek atau diperbaiki.',
+                'count' => $summary['vendor'],
+                'url' => route('items.index', ['status' => 'vendor']),
+                'color' => 'purple',
+            ],
+            [
                 'title' => 'Tanpa Detail Perangkat',
                 'description' => 'Barang yang belum memiliki data detail perangkat.',
                 'count' => $itemsTanpaDetail->count(),
@@ -232,6 +254,14 @@ class LaporanController extends Controller
             ],
         ];
 
+        $assetList = $this->assetList();
+        $merkList = $this->merkList($selectedAsset);
+        $filters = [
+            'kategori' => $selectedKategori,
+            'merk' => $selectedMerk,
+            'asset' => $selectedAsset,
+        ];
+
         return compact(
             'summary',
             'stokPerKategori',
@@ -246,24 +276,100 @@ class LaporanController extends Controller
             'perluPerhatian',
             'tanggalDari',
             'tanggalSampai',
-            'periodeLabel'
+            'periodeLabel',
+            'filterLabel',
+            'kategoriOptions',
+            'merkList',
+            'assetList',
+            'filters'
         );
     }
 
     private function periodeLabel(?string $tanggalDari, ?string $tanggalSampai): string
     {
-        if ($tanggalDari && $tanggalSampai) {
-            return $tanggalDari . ' sampai ' . $tanggalSampai;
+        return DateFormatter::dateRange($tanggalDari, $tanggalSampai);
+    }
+
+    private function filterValues(Request $request, string $key): array
+    {
+        return collect((array) $request->input($key, []))
+            ->map(fn ($value) => trim((string) $value))
+            ->filter(fn ($value) => $value !== '')
+            ->values()
+            ->all();
+    }
+
+    private function applyBarangMasukItemFilters($query, array $selectedKategori, array $selectedMerk, array $selectedAsset): void
+    {
+        if (! empty($selectedAsset)) {
+            $query->where(function ($assetQuery) use ($selectedAsset) {
+                $assetQuery->whereIn('asset', $selectedAsset)
+                    ->orWhereHas('barang_masuk', fn ($barangMasuk) => $barangMasuk->whereIn('supplier', $selectedAsset));
+            });
         }
 
-        if ($tanggalDari) {
-            return 'Mulai ' . $tanggalDari;
+        if (! empty($selectedKategori)) {
+            $query->whereIn('kategori', $selectedKategori);
         }
 
-        if ($tanggalSampai) {
-            return 'Sampai ' . $tanggalSampai;
+        if (! empty($selectedMerk)) {
+            $query->whereIn('merk', $selectedMerk);
+        }
+    }
+
+    private function assetList(): array
+    {
+        $itemAssets = Items::whereNotNull('asset')
+            ->where('asset', '!=', '')
+            ->pluck('asset');
+
+        $barangMasukAssets = Barang_masuk::whereNotNull('supplier')
+            ->where('supplier', '!=', '')
+            ->pluck('supplier');
+
+        return $itemAssets
+            ->merge($barangMasukAssets)
+            ->map(fn ($asset) => trim((string) $asset))
+            ->filter(fn ($asset) => $asset !== '')
+            ->unique()
+            ->sortBy(fn ($asset) => strtolower($asset))
+            ->values()
+            ->all();
+    }
+
+    private function merkList(array $selectedAsset): array
+    {
+        return Items::query()
+            ->when(! empty($selectedAsset), function ($query) use ($selectedAsset) {
+                $query->where(function ($assetQuery) use ($selectedAsset) {
+                    $assetQuery->whereIn('asset', $selectedAsset)
+                        ->orWhereHas('barang_masuk', fn ($barangMasuk) => $barangMasuk->whereIn('supplier', $selectedAsset));
+                });
+            })
+            ->whereNotNull('merk')
+            ->where('merk', '!=', '')
+            ->distinct()
+            ->orderBy('merk')
+            ->pluck('merk')
+            ->toArray();
+    }
+
+    private function filterLabel(array $selectedKategori, array $selectedMerk, array $selectedAsset): string
+    {
+        $parts = [];
+
+        if (! empty($selectedAsset)) {
+            $parts[] = 'Asset: ' . implode(', ', $selectedAsset);
         }
 
-        return 'Semua periode';
+        if (! empty($selectedKategori)) {
+            $parts[] = 'Kategori: ' . implode(', ', $selectedKategori);
+        }
+
+        if (! empty($selectedMerk)) {
+            $parts[] = 'Merk: ' . implode(', ', $selectedMerk);
+        }
+
+        return ! empty($parts) ? implode(' | ', $parts) : 'Semua asset, kategori, dan merk';
     }
 }

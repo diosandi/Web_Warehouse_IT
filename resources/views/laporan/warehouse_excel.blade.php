@@ -15,6 +15,7 @@
 <body>
     <h1>Laporan Warehouse IT</h1>
     <p>Periode barang masuk: {{ $periodeLabel }}</p>
+    <p>Filter barang masuk: {{ $filterLabel }}</p>
     <p>Tanggal export: {{ now()->format('d-m-Y H:i') }}</p>
 
     <h2>Ringkasan Inventaris</h2>
@@ -24,6 +25,7 @@
         <tr><td>Digunakan</td><td>{{ $summary['used'] }}</td></tr>
         <tr><td>Pemeliharaan</td><td>{{ $summary['maintenance'] }}</td></tr>
         <tr><td>Tidak Digunakan</td><td>{{ $summary['retired'] }}</td></tr>
+        <tr><td>Dibawa Vendor</td><td>{{ $summary['vendor'] }}</td></tr>
         <tr><td>Distribusi Aktif</td><td>{{ $summary['active_distributions'] }}</td></tr>
         <tr><td>Data Barang Masuk</td><td>{{ $summary['barang_masuk'] }}</td></tr>
         <tr><td>Item Masuk Sesuai Periode</td><td>{{ $totalBarangMasukPeriode }}</td></tr>
@@ -39,6 +41,7 @@
                 <th>Digunakan</th>
                 <th>Pemeliharaan</th>
                 <th>Tidak Digunakan</th>
+                <th>Vendor</th>
             </tr>
         </thead>
         <tbody>
@@ -50,6 +53,7 @@
                     <td>{{ $stok['used'] }}</td>
                     <td>{{ $stok['maintenance'] }}</td>
                     <td>{{ $stok['retired'] }}</td>
+                    <td>{{ $stok['vendor'] }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -78,7 +82,7 @@
         <thead>
             <tr>
                 <th>Tanggal</th>
-                <th>Supplier</th>
+                <th>Asset</th>
                 <th>No PO</th>
                 <th>Kategori</th>
                 <th>Merk</th>
@@ -90,8 +94,8 @@
         <tbody>
             @forelse($barangMasukDetail as $row)
                 <tr>
-                    <td>{{ $row['tanggal_masuk'] }}</td>
-                    <td>{{ $row['supplier'] }}</td>
+                    <td>{{ \App\Support\DateFormatter::date($row['tanggal_masuk']) }}</td>
+                    <td>{{ $row['asset'] }}</td>
                     <td>{{ $row['po_number'] }}</td>
                     <td>{{ $row['kategori'] }}</td>
                     <td>{{ $row['merk'] }}</td>

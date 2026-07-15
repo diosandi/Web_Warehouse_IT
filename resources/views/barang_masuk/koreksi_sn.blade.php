@@ -35,10 +35,10 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div>
                 <p class="text-xs font-semibold uppercase text-gray-500">Tanggal Masuk</p>
-                <p class="mt-1 text-sm font-semibold text-gray-900">{{ $barang_masuk->tanggal_masuk ?? '-' }}</p>
+                <p class="mt-1 text-sm font-semibold text-gray-900">{{ \App\Support\DateFormatter::date($barang_masuk->tanggal_masuk) }}</p>
             </div>
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-500">Supplier</p>
+                <p class="text-xs font-semibold uppercase text-gray-500">Asset</p>
                 <p class="mt-1 text-sm font-semibold text-gray-900">{{ $barang_masuk->supplier ?? '-' }}</p>
             </div>
             <div>
@@ -137,7 +137,7 @@
                     <tbody class="divide-y divide-gray-200 bg-white">
                         @foreach($corrections as $correction)
                             <tr>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $correction->created_at?->format('d-m-Y H:i') }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">{{ \App\Support\DateFormatter::datetime($correction->created_at) }}</td>
                                 <td class="px-4 py-3 text-sm font-semibold text-gray-900">{{ $correction->old_serial_number }}</td>
                                 <td class="px-4 py-3 text-sm font-semibold text-gray-900">{{ $correction->new_serial_number }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $correction->user->name ?? '-' }}</td>

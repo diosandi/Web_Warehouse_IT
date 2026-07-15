@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Barang_masuk;
 use App\Models\Items;
 use App\Models\SerialNumberCorrection;
+use App\Support\DateFormatter;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Concerns\ResolvesRedirects;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +32,8 @@ class Barang_masukController extends Controller
             ->orWhereHas('items', function ($itemQuery) use ($search) {
                 $itemQuery->where('merk', 'like', $search)
                           ->orWhere('type', 'like', $search)
-                          ->orWhere('kategori', 'like', $search);
+                          ->orWhere('kategori', 'like', $search)
+                          ->orWhere('asset', 'like', $search);
             })
             ->limit(10)
             ->get();
@@ -47,9 +49,10 @@ class Barang_masukController extends Controller
                 'merk' => $item ? $item->merk : '-',
                 'type' => $item ? $item->type : '-',
                 'kategori' => $item ? $item->kategori : '-',
+                'asset' => $d->supplier,
                 'supplier' => $d->supplier,
                 'po_number' => $d->po_number,
-                'text' => trim($itemText . ' | supplier: ' . ($d->supplier ?? '-'))
+                'text' => trim($itemText . ' | Asset: ' . ($d->supplier ?? '-'))
             ];
         });
 
@@ -60,7 +63,7 @@ class Barang_masukController extends Controller
     {
         $query = $this->barangMasukQuery($request);
 
-         $barang_masuk = $query->latest()->paginate(10)->withQueryString();
+         $barang_masuk = $query->latest()->paginate(50)->withQueryString();
         // $barang_masuk = Barang_masuk::with('items')->paginate(10);
         // $barangMasuk = collect();
         return view('barang_masuk.index',compact('barang_masuk'));
@@ -111,6 +114,7 @@ class Barang_masukController extends Controller
                     $item->where('serial_number', 'like', "%{$request->search}%")
                         ->orWhere('service_tag', 'like', "%{$request->search}%")
                         ->orWhere('kategori', 'like', "%{$request->search}%")
+                        ->orWhere('asset', 'like', "%{$request->search}%")
                         ->orWhere('merk', 'like', "%{$request->search}%")
                         ->orWhere('type', 'like', "%{$request->search}%");
                 });
@@ -147,19 +151,7 @@ class Barang_masukController extends Controller
 
     private function periodeLabel(Request $request): string
     {
-        if ($request->tanggal_dari && $request->tanggal_sampai) {
-            return $request->tanggal_dari . ' sampai ' . $request->tanggal_sampai;
-        }
-
-        if ($request->tanggal_dari) {
-            return 'Mulai ' . $request->tanggal_dari;
-        }
-
-        if ($request->tanggal_sampai) {
-            return 'Sampai ' . $request->tanggal_sampai;
-        }
-
-        return 'Semua periode';
+        return DateFormatter::dateRange($request->tanggal_dari, $request->tanggal_sampai);
     }
 
     private function filterLabel(Request $request): string
@@ -193,6 +185,7 @@ class Barang_masukController extends Controller
             'kategori'=> 'required',
             'merk'=> 'required',
             'type'=> 'required',
+            'supplier' => 'nullable|string|max:255',
             'serial_numbers'=>'required|array',
             'serial_numbers.*' => 'required|distinct|unique:items,serial_number'
         ],[
@@ -201,9 +194,12 @@ class Barang_masukController extends Controller
             'serial_numbers.*.distinct' => 'Serial Number tidak boleh duplicate',
         ]);
 
+        $asset = trim((string) $request->supplier);
+        $asset = $asset !== '' ? $asset : null;
+
         //simpan header
         $barang_masuk = Barang_masuk::create([
-            'supplier' => $request->supplier,
+            'supplier' => $asset,
             'tanggal_masuk' => $request->tanggal_masuk,
             'po_number'=>$request->po_number,
             'quantity' => count($request->serial_numbers),
@@ -217,6 +213,7 @@ class Barang_masukController extends Controller
                 'serial_number'=>$sn,
                 'merk'=>$request->merk,
                 'type'=>$request->type,
+                'asset' => $asset,
                 'kategori'=>$request->kategori,
                 'status'=>'available'
             ]);
@@ -235,99 +232,155 @@ class Barang_masukController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-           'kategori'=>'required',
-           'merk'=>'required',
-           'type'=>'required',
-           'serial_numbers'=>'required|array',
-           'serial_numbers.*' => 'required|distinct'
+           'kategori'=>'required|in:PC,Monitor,Printer Kertas,Printer Barcode,Scanner,Lainnya',
+           'merk'=>'required|string|max:255',
+           'type'=>'required|string|max:255',
+           'supplier' => 'nullable|string|max:255',
+           'po_number' => 'nullable|string|max:255',
+           'tanggal_masuk' => 'required|date',
+           'keterangan' => 'nullable|string',
+           'item_ids' => 'nullable|array',
+           'item_ids.*' => 'nullable|integer|exists:items,id',
+           'serial_numbers'=>'required|array|min:1',
+           'serial_numbers.*' => 'required|string|max:255'
         ],[
             'serial_numbers.*.required' => 'Serial Number tidak boleh kosong',
-            // 'serial_numbers.*.unique' => 'Serial Number harus unik',
             'serial_numbers.*.distinct' => 'Serial Number tidak boleh duplicate',
         ]);
 
-        $barang_masuk = Barang_masuk::findOrfail($id);
+        $barang_masuk = Barang_masuk::with('items')->findOrfail($id);
+        $asset = trim((string) $request->supplier);
+        $asset = $asset !== '' ? $asset : null;
+        $existingItems = $barang_masuk->items->keyBy('id');
+        $serialNumbers = collect($validated['serial_numbers'])
+            ->map(fn ($serialNumber) => trim((string) $serialNumber))
+            ->values();
 
-        //Cek apakah item sudah dipakai
-        $usedItems = Items::where('barang_masuk_id', $id)
-            ->where('status','used')
-            ->exists();
+        $seenSerialNumbers = [];
+        $submittedItemIds = [];
+        $submittedRows = [];
 
-        if($usedItems){
-            return back()->with('error','Tidak bisa edit, ada item yang sudah dipakai');
-        }
-        //Hapus Item lama
-        // $oldItems=Items::where('barang_masuk_id',$id)->get();
-        // foreach($oldItems as $old){
-        //     $old->delete();
-        // }
+        foreach ($serialNumbers as $index => $serialNumber) {
+            $serialKey = strtolower($serialNumber);
 
-        //Update Header
-        $barang_masuk->update([
-            'supplier' => $request->supplier,
-            'tanggal_masuk' => $request->tanggal_masuk,
-            'po_number'=>$request->po_number,
-            'quantity' => count($request->serial_numbers),
-            'keterangan' => $request->keterangan
-        ]);
-
-        // simpan id item yang masih ada
-        $existingIds = [];
-
-        foreach($request->serial_numbers as $index => $sn){
-
-            $itemId = $request->item_ids[$index] ?? null;
-
-            if($itemId){
-
-                // update item lama
-                $item = Items::find($itemId);
-
-                if($item){
-
-                    $item->update([
-                        'serial_number' => $sn,
-                        'merk' => $request->merk,
-                        'type' => $request->type,
-                        'kategori' => $request->kategori,
-                    ]);
-
-                    $existingIds[] = $item->id;
-                }
-
-            } else {
-
-                // tambah item baru
-                $newItem = Items::create([
-                    'barang_masuk_id' => $barang_masuk->id,
-                    'serial_number' => $sn,
-                    'merk' => $request->merk,
-                    'type' => $request->type,
-                    'kategori' => $request->kategori,
-                    'status' => 'available'
+            if (isset($seenSerialNumbers[$serialKey])) {
+                throw ValidationException::withMessages([
+                    'serial_numbers' => 'Serial Number tidak boleh duplicate.',
                 ]);
+            }
 
-                $existingIds[] = $newItem->id;
+            $seenSerialNumbers[$serialKey] = true;
+
+            $itemId = $request->input("item_ids.{$index}");
+            $itemId = $itemId ? (int) $itemId : null;
+
+            if ($itemId && ! $existingItems->has($itemId)) {
+                throw ValidationException::withMessages([
+                    'serial_numbers' => 'Item tidak valid untuk barang masuk ini.',
+                ]);
+            }
+
+            $serialExists = Items::where('serial_number', $serialNumber)
+                ->when($itemId, fn ($query) => $query->where('id', '!=', $itemId))
+                ->exists();
+
+            if ($serialExists) {
+                throw ValidationException::withMessages([
+                    'serial_numbers' => "Serial Number {$serialNumber} sudah digunakan item lain.",
+                ]);
+            }
+
+            if ($itemId) {
+                $submittedItemIds[] = $itemId;
+                $submittedRows[] = [
+                    'item_id' => $itemId,
+                    'serial_number' => $serialNumber,
+                ];
             }
         }
 
-        // hapus item yang dihapus dari form
-        Items::where('barang_masuk_id', $barang_masuk->id)
-            ->whereNotIn('id', $existingIds)
-            ->delete();
+        $itemsToDelete = $barang_masuk->items()
+            ->whereNotIn('id', $submittedItemIds)
+            ->get();
 
+        $itemsWithHistory = $itemsToDelete->filter(function ($item) {
+            return $item->distributionItems()->exists();
+        });
 
-        //Simpan Ulang Item
-        // foreach($request->serial_numbers as $sn){
-        //     Items::create([
-        //         'barang_masuk_id' => $barang_masuk->id,
-        //         'serial_number'=>$sn,
-        //         'merk'=>$request->merk,
-        //         'type'=>$request->type,
-        //         'kategori'=>$request->kategori,
-        //         'status'=>'available'
-        //     ]);
-        // }
+        if ($itemsWithHistory->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'serial_numbers' => 'Item yang sudah punya riwayat distribusi tidak bisa dihapus dari Barang Masuk.',
+            ]);
+        }
+
+        DB::transaction(function () use ($request, $barang_masuk, $serialNumbers, $asset) {
+            // Update header barang masuk.
+            $barang_masuk->update([
+                'supplier' => $asset,
+                'tanggal_masuk' => $request->tanggal_masuk,
+                'po_number'=>$request->po_number,
+                'quantity' => $serialNumbers->count(),
+                'keterangan' => $request->keterangan
+            ]);
+
+            $existingIds = [];
+
+            foreach($serialNumbers as $index => $sn){
+
+                $itemId = $request->input("item_ids.{$index}");
+                $itemId = $itemId ? (int) $itemId : null;
+
+                if($itemId){
+
+                    // Update item lama. Ini aman untuk koreksi merk/type walaupun item sedang dipakai.
+                    $item = Items::find($itemId);
+
+                    if($item){
+                        if ($item->serial_number !== $sn) {
+                            SerialNumberCorrection::create([
+                                'item_id' => $item->id,
+                                'barang_masuk_id' => $barang_masuk->id,
+                                'user_id' => Auth::id(),
+                                'old_serial_number' => $item->serial_number,
+                                'new_serial_number' => $sn,
+                                'reason' => 'Diubah melalui Edit Barang Masuk',
+                            ]);
+                        }
+
+                        $item->update([
+                            'serial_number' => $sn,
+                            'merk' => $request->merk,
+                            'type' => $request->type,
+                            'asset' => $asset,
+                            'kategori' => $request->kategori,
+                        ]);
+
+                        $existingIds[] = $item->id;
+                    }
+
+                } else {
+
+                    // Tambah item baru jika memang ada SN tambahan.
+                    $newItem = Items::create([
+                        'barang_masuk_id' => $barang_masuk->id,
+                        'serial_number' => $sn,
+                        'merk' => $request->merk,
+                        'type' => $request->type,
+                        'asset' => $asset,
+                        'kategori' => $request->kategori,
+                        'status' => 'available'
+                    ]);
+
+                    $existingIds[] = $newItem->id;
+                }
+            }
+
+            // Hapus hanya item yang memang belum punya riwayat distribusi.
+            Items::where('barang_masuk_id', $barang_masuk->id)
+                ->whereNotIn('id', $existingIds)
+                ->delete();
+        });
+
         return redirect($this->redirectTarget($request, route('barang_masuk.index')))->with('success', 'Barang berhasil diperbarui!');
     }
 

@@ -12,7 +12,9 @@
         ? (array) request('kategori_laporan')
         : array_keys($categoryOptions);
 
+    $selectedAssets = array_values(array_filter((array) request('asset', [])));
     $showCategory = fn ($category) => in_array($category, $selectedCategories, true);
+    $showAsset = fn ($item) => empty($selectedAssets) || in_array((string) ($item->asset ?? ''), $selectedAssets, true);
 @endphp
 <!doctype html>
 <html lang="id">
@@ -30,6 +32,7 @@
         th { background: #15803d; color: white; }
         th, td { border: 1px solid #9ca3af; padding: 4px; text-align: left; vertical-align: top; }
         .nowrap { white-space: nowrap; }
+        .muted { color: #4b5563; font-size: 7px; font-weight: 700; }
         @media print {
             body { margin: 0; }
             .actions { display: none; }
@@ -55,7 +58,7 @@
 
                 @if($showCategory('pc'))
                     <th>PC</th>
-                    <th>SN PC</th>
+                    <th>SN PC / Asset</th>
                     <th>PC Name</th>
                     <th>User Account</th>
                     <th>IP</th>
@@ -66,29 +69,29 @@
 
                 @if($showCategory('monitor'))
                     <th>Monitor</th>
-                    <th>SN Monitor</th>
+                    <th>SN Monitor / Asset</th>
                 @endif
 
                 @if($showCategory('printer_kertas'))
                     <th>Printer Kertas</th>
-                    <th>SN Printer</th>
+                    <th>SN Printer / Asset</th>
                     <th>Detail Printer</th>
                 @endif
 
                 @if($showCategory('printer_barcode'))
                     <th>Printer Barcode</th>
-                    <th>SN Barcode</th>
+                    <th>SN Barcode / Asset</th>
                     <th>Detail Barcode</th>
                 @endif
 
                 @if($showCategory('scanner'))
                     <th>Scanner</th>
-                    <th>SN Scanner</th>
+                    <th>SN Scanner / Asset</th>
                 @endif
 
                 @if($showCategory('lainnya'))
                     <th>Lainnya</th>
-                    <th>SN Lainnya</th>
+                    <th>SN Lainnya / Asset</th>
                 @endif
 
                 <th>Tanggal</th>
@@ -102,7 +105,8 @@
                             ? $distribution->distributionItems
                             : $distribution->distributionItems->where('status', 'dipakai'))
                         ->map(fn ($distributionItem) => $distributionItem->item)
-                        ->filter();
+                        ->filter()
+                        ->filter($showAsset);
 
                     $pc = $visibleItems->firstWhere('kategori', 'PC');
                     $pcDetail = $pc?->device_detail;
@@ -113,7 +117,15 @@
                     $lainnya = $visibleItems->where('kategori', 'Lainnya');
 
                     $formatItem = fn ($items) => $items->map(fn ($item) => trim(($item->merk ?? '-') . ' / ' . ($item->type ?? '-')))->filter()->implode(', ');
-                    $formatSn = fn ($items) => $items->map(fn ($item) => $item->serial_number ?? '-')->filter()->implode(', ');
+                    $formatSnWithAsset = function ($items) {
+                        return $items->map(function ($item) {
+                            return e($item->serial_number ?: '-') .
+                                '<br><span class="muted">Asset: ' .
+                                e($item->asset ?: '-') .
+                                '</span>';
+                        })->filter()->implode('<hr>');
+                    };
+                    $formatSingleSnWithAsset = fn ($item) => $item ? $formatSnWithAsset(collect([$item])) : '-';
                     $formatPrinterDetail = function ($items) {
                         return $items->map(function ($item) {
                             $detail = $item?->device_detail;
@@ -132,7 +144,7 @@
 
                     @if($showCategory('pc'))
                         <td>{{ $pc ? trim(($pc->merk ?? '-') . ' / ' . ($pc->type ?? '-')) : '-' }}</td>
-                        <td>{{ $pc->serial_number ?? '-' }}</td>
+                        <td>{!! $formatSingleSnWithAsset($pc) !!}</td>
                         <td>{{ $pcDetail->pc_name ?? '-' }}</td>
                         <td>{{ $pcDetail->user_account ?? '-' }}</td>
                         <td>{{ $pcDetail->ip_address ?? '-' }}</td>
@@ -143,32 +155,32 @@
 
                     @if($showCategory('monitor'))
                         <td>{{ $formatItem($monitors) ?: '-' }}</td>
-                        <td>{{ $formatSn($monitors) ?: '-' }}</td>
+                        <td>{!! $monitors->count() ? $formatSnWithAsset($monitors) : '-' !!}</td>
                     @endif
 
                     @if($showCategory('printer_kertas'))
                         <td>{{ $formatItem($printerKertas) ?: '-' }}</td>
-                        <td>{{ $formatSn($printerKertas) ?: '-' }}</td>
+                        <td>{!! $printerKertas->count() ? $formatSnWithAsset($printerKertas) : '-' !!}</td>
                         <td>{!! $printerKertas->count() ? $formatPrinterDetail($printerKertas) : '-' !!}</td>
                     @endif
 
                     @if($showCategory('printer_barcode'))
                         <td>{{ $formatItem($printerBarcode) ?: '-' }}</td>
-                        <td>{{ $formatSn($printerBarcode) ?: '-' }}</td>
+                        <td>{!! $printerBarcode->count() ? $formatSnWithAsset($printerBarcode) : '-' !!}</td>
                         <td>{!! $printerBarcode->count() ? $formatPrinterDetail($printerBarcode) : '-' !!}</td>
                     @endif
 
                     @if($showCategory('scanner'))
                         <td>{{ $formatItem($scanners) ?: '-' }}</td>
-                        <td>{{ $formatSn($scanners) ?: '-' }}</td>
+                        <td>{!! $scanners->count() ? $formatSnWithAsset($scanners) : '-' !!}</td>
                     @endif
 
                     @if($showCategory('lainnya'))
                         <td>{{ $formatItem($lainnya) ?: '-' }}</td>
-                        <td>{{ $formatSn($lainnya) ?: '-' }}</td>
+                        <td>{!! $lainnya->count() ? $formatSnWithAsset($lainnya) : '-' !!}</td>
                     @endif
 
-                    <td class="nowrap">{{ $distribution->tanggal_distribusi ?? '-' }}</td>
+                    <td class="nowrap">{{ \App\Support\DateFormatter::date($distribution->tanggal_distribusi) }}</td>
                     <td>{{ $distribution->status === 'dipakai' ? 'Dipakai' : 'Dikembalikan' }}</td>
                 </tr>
             @empty

@@ -44,7 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('device_details', Device_detailsController::class);
     Route::get('/search-items', [DistributionController::class, 'search'])->name('distribution.search_items');
     route::get('distribution/search_distribution',[DistributionController::class, 'searchDistribution'])->name('distribution.search_distribution');
-    route::get('/get-ruangan',[DistributionController::class, 'getRuangan']);
+    Route::get('/get-ruangan', [DistributionController::class, 'getRuangan'])->name('distribution.get_ruangan');
     Route::post('/distribution/{id}/return', [DistributionController::class, 'returnItem'])->name('distribution.return');
     Route::put('/distribution-item/{id}/return',[DistributionController::class, 'returnItem']);
     Route::get('/distribution/report-detail/export/{format}', [DistributionController::class, 'exportReportDetail'])

@@ -18,7 +18,8 @@
 @endphp
 
 <br>
-<div class="container mx-auto px-4 py-12">
+<div class="distribution-page mx-auto w-full px-3 py-8 sm:px-4 lg:px-6 lg:py-12">
+    <!-- Header -->
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Kelola Pengguna</h1>
@@ -105,7 +106,11 @@
 
                                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2">
                                     <span>Cari: <strong>{{ request('search') }}</strong></span>
-                                    <a href="{{ route('users.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">x</a>
+                                    <a href="{{ route('users.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
@@ -117,7 +122,11 @@
 
                                 <span class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2">
                                     <span>Role: <strong>{{ $roleLabels[request('role')] ?? request('role') }}</strong></span>
-                                    <a href="{{ route('users.index', $roleQuery) }}" class="hover:text-green-900 font-bold text-lg leading-none">x</a>
+                                    <a href="{{ route('users.index', $roleQuery) }}" class="hover:text-green-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
@@ -129,15 +138,19 @@
 
                                 <span class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2">
                                     <span>Status: <strong>{{ $statusLabels[request('status')] ?? request('status') }}</strong></span>
-                                    <a href="{{ route('users.index', $statusQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">x</a>
+                                    <a href="{{ route('users.index', $statusQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
-                            <a href="{{ route('users.index') }}" class="btn btn-soft-danger btn-sm">
+                            <a href="{{ route('users.index') }}" class="btn btn-soft-danger btn-sm px-3 py-1.5 rounded-full inline-flex items-center gap-2">
+                            Hapus Semua
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                            Hapus Semua
                             </a>
                         </div>
                     </div>

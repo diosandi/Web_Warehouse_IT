@@ -40,7 +40,7 @@ class DistributionController extends Controller
 
         return response()->json($items);
     }
-    
+
     //Search index
     public function searchDistribution(Request $request)
     {
@@ -58,16 +58,19 @@ class DistributionController extends Controller
                 $itemQuery->where('gedung', 'like', $search)
                           ->orWhere('ruangan', 'like', $search);
             })
-            ->orWhereHas('distributionItems.item', function ($itemQuery)use($search) {
-                $itemQuery->where('serial_number','like',$search)
-                          ->orWhere('merk','like',$search);
+            ->orWhere(function ($distributionQuery) use ($search) {
+                $this->whereHasVisibleItemMatching($distributionQuery, $search);
             })
             ->limit(10)
             ->get();
 
         $keyword = strtolower($q);
         $suggestions = $results->map(function($d) use ($keyword) {
-        $matchedDistributionItem = $d->distributionItems->first(function ($distributionItem) use ($keyword) {
+        $visibleDistributionItems = $d->status === 'dikembalikan'
+            ? $d->distributionItems
+            : $d->distributionItems->where('status', 'dipakai');
+
+        $matchedDistributionItem = $visibleDistributionItems->first(function ($distributionItem) use ($keyword) {
             $item = $distributionItem->item;
 
             if (!$item) {
@@ -79,7 +82,7 @@ class DistributionController extends Controller
                 || str_contains(strtolower((string) $item->kategori), $keyword);
         });
 
-        $item = $matchedDistributionItem?->item ?? $d->distributionItems->first()?->item;
+        $item = $matchedDistributionItem?->item ?? $visibleDistributionItems->first()?->item;
         $location = $d->location;
 
         $itemText = $item
@@ -128,8 +131,10 @@ class DistributionController extends Controller
 
         // SEARCH
         if ($request->item_id) {
-            $query->whereHas('distributionItems', function($q) use ($request) {
-                $q->where('item_id', $request->item_id);
+            $query->where(function ($distributionQuery) use ($request) {
+                $this->whereHasVisibleItem($distributionQuery, function ($itemQuery) use ($request) {
+                    $itemQuery->where('id', $request->item_id);
+                });
             });
         } elseif ($request->search) {
             $query->where(function($q) use ($request) {
@@ -139,9 +144,8 @@ class DistributionController extends Controller
                     $loc->where('gedung', 'like', "%{$request->search}%")
                         ->orWhere('ruangan', 'like', "%{$request->search}%");
                 })
-                ->orWhereHas('distributionItems.item', function($item) use ($request) {
-                    $item->where('serial_number', 'like', "%{$request->search}%")
-                        ->orWhere('merk', 'like', "%{$request->search}%");
+                ->orWhere(function ($distributionQuery) use ($request) {
+                    $this->whereHasVisibleItemMatching($distributionQuery, "%{$request->search}%");
                 });
             });
         }
@@ -180,10 +184,24 @@ class DistributionController extends Controller
             $query->where('location_id', $request->ruangan);
         }
 
-        $distribution = $query->latest()->paginate(10)->withQueryString();
+        $sortBy = $request->get('sort_by');
+        $sortDir = $request->get('sort_dir', 'desc') === 'asc' ? 'asc' : 'desc';
+
+        if ($sortBy === 'location') {
+            $query->join('locations', 'distributions.location_id', '=', 'locations.id')
+                ->select('distributions.*')
+                ->orderBy('locations.gedung', $sortDir)
+                ->orderBy('locations.ruangan', $sortDir);
+        } elseif (in_array($sortBy, ['nama_user', 'divisi', 'status', 'tanggal_distribusi'], true)) {
+            $query->orderBy($sortBy, $sortDir);
+        } else {
+            $query->latest();
+        }
+
+        $distribution = $query->paginate(50)->withQueryString();
 
         $locations = Locations::where('type', 'distribution')->get();
-        $warehouseLocations = Locations::where('type', 'warehouse')->get();
+        $warehouseLocations = Locations::whereIn('type', ['warehouse', 'maintenance', 'vendor'])->get();
 
         return view('distribution.index', compact('distribution', 'locations','warehouseLocations'));
     }
@@ -202,37 +220,37 @@ class DistributionController extends Controller
             'pcs' => Items::where('kategori','PC')
                 ->where('status','available')
                 ->whereDoesntHave('distributionItems', function($q){
-                        $q->where('status', 'dipakai');
+                        $q->active();
                     })
                     ->get(),
             'monitors' => Items::where('kategori','Monitor')
                 ->where('status','available')
                 ->whereDoesntHave('distributionItems', function($q){
-                        $q->where('status', 'dipakai');
+                        $q->active();
                     })
                     ->get(),
             'printers_kertas' => Items::where('kategori','Printer Kertas')
                 ->where('status','available')
                 ->whereDoesntHave('distributionItems', function($q){
-                        $q->where('status', 'dipakai');
+                        $q->active();
                     })
                     ->get(),
             'printers_barcode' => Items::where('kategori','Printer Barcode')
                 ->where('status','available')
                 ->whereDoesntHave('distributionItems', function($q){
-                        $q->where('status', 'dipakai');
+                        $q->active();
                     })
                     ->get(),
             'lainnya' => Items::where('kategori','Lainnya')
                 ->where('status','available')
                 ->whereDoesntHave('distributionItems', function($q){
-                        $q->where('status', 'dipakai');
+                        $q->active();
                     })
                     ->get(),
             'scanners' => Items::where('kategori','Scanner')
                 ->where('status','available')
                 ->whereDoesntHave('distributionItems', function($q){
-                        $q->where('status', 'dipakai');
+                        $q->active();
                     })
                     ->get(),
             'locations' => Locations::all(),
@@ -279,18 +297,8 @@ class DistributionController extends Controller
             if (in_array($item->kategori, ['PC', 'Monitor', 'Scanner', 'Lainnya'])) {
 
                 $dipakai = DistributionItem::where('item_id', $itemId)
-                    ->whereHas('distribution', function($q) {
-                        $q->where('status', 'dipakai');
-                    })
+                    ->active()
                     ->exists();
-
-                if($dipakai){
-                    $item = Items::find($itemId);
-                    $item->update([
-                        'status' => 'used',
-                        'storage_location_id' => null
-                    ]);
-                }
 
                 if ($dipakai) {
                     return back()->with('error', $item->serial_number . ' sudah dipakai!');
@@ -366,7 +374,7 @@ class DistributionController extends Controller
 
                     $sub->where('status','available')
                         ->whereDoesntHave('distributionItems', function($qq){
-                            $qq->where('status','dipakai');
+                            $qq->active();
                         });
 
                 })
@@ -382,7 +390,7 @@ class DistributionController extends Controller
 
                     $sub->where('status','available')
                         ->whereDoesntHave('distributionItems', function($qq){
-                            $qq->where('status','dipakai');
+                            $qq->active();
                         });
 
                 })
@@ -398,7 +406,7 @@ class DistributionController extends Controller
 
                     $sub->where('status','available')
                         ->whereDoesntHave('distributionItems', function($qq){
-                            $qq->where('status','dipakai');
+                            $qq->active();
                         });
 
                 })
@@ -414,7 +422,7 @@ class DistributionController extends Controller
 
                     $sub->where('status','available')
                         ->whereDoesntHave('distributionItems', function($qq){
-                            $qq->where('status','dipakai');
+                            $qq->active();
                         });
 
                 })
@@ -430,7 +438,7 @@ class DistributionController extends Controller
 
                     $sub->where('status','available')
                         ->whereDoesntHave('distributionItems', function($qq){
-                            $qq->where('status','dipakai');
+                            $qq->active();
                         });
 
                 })
@@ -446,7 +454,7 @@ class DistributionController extends Controller
 
                     $sub->where('status','available')
                         ->whereDoesntHave('distributionItems', function($qq){
-                            $qq->where('status','dipakai');
+                            $qq->active();
                         });
 
                 })
@@ -530,10 +538,7 @@ class DistributionController extends Controller
             if (in_array($item->kategori, ['PC', 'Monitor', 'Scanner', 'Lainnya'])) {
                 $dipakai = DistributionItem::where('item_id', $itemId)
                     ->where('distribution_id', '!=', $distribution->id)
-                    ->where('status', 'dipakai')
-                    ->whereHas('distribution', function($q) {
-                        $q->where('status', 'dipakai');
-                    })
+                    ->active()
                     ->exists();
 
                 if ($dipakai) {
@@ -566,7 +571,10 @@ class DistributionController extends Controller
                     'return_note' => $old->return_note ?? 'Diganti melalui edit distribusi',
                 ]);
 
-                $old->item?->refreshStatus();
+                if ($old->item) {
+                    $old->item->refresh();
+                    $old->item->refreshStatus();
+                }
             }
 
             foreach ($items as $itemId) {
@@ -580,12 +588,7 @@ class DistributionController extends Controller
 
                 $item = Items::find($itemId);
 
-                if (!in_array($item->kategori, ['Printer Kertas', 'Printer Barcode'])) {
-                    $item->update([
-                        'status' => 'used',
-                        'storage_location_id' => null,
-                    ]);
-                }
+                $item->refreshStatus();
             }
         });
 
@@ -658,10 +661,10 @@ class DistributionController extends Controller
             return;
         }
 
-        if ($conditionStatus === 'maintenance' && $this->isSharedPrinter($distributionItem->item)) {
+        if ($this->isSharedPrinter($distributionItem->item)) {
             $activePrinterItems = DistributionItem::with(['item', 'distribution'])
                 ->where('item_id', $distributionItem->item_id)
-                ->where('status', 'dipakai')
+                ->active()
                 ->get();
 
             foreach ($activePrinterItems as $activePrinterItem) {
@@ -674,11 +677,12 @@ class DistributionController extends Controller
                 $this->closeDistributionIfNoActiveItems($activePrinterItem->distribution);
             }
 
-            $distributionItem->item->update([
-                'status' => 'maintenance',
-                'storage_location_id' => $storageLocationId,
-                'condition_note' => $conditionNote,
-            ]);
+            $this->syncReturnedItemStatus(
+                $distributionItem->item,
+                $conditionStatus,
+                $storageLocationId,
+                $conditionNote
+            );
 
             return;
         }
@@ -729,10 +733,7 @@ class DistributionController extends Controller
         }
 
         $stillUsed = $item->distributionItems()
-            ->where('status', 'dipakai')
-            ->whereHas('distribution', function($q) {
-                $q->where('status', 'dipakai');
-            })
+            ->active()
             ->exists();
 
         $item->update([
@@ -764,6 +765,28 @@ class DistributionController extends Controller
         return in_array($item->kategori, ['Printer Kertas', 'Printer Barcode']);
     }
 
+    private function whereHasVisibleItemMatching($query, string $search): void
+    {
+        $this->whereHasVisibleItem($query, function ($itemQuery) use ($search) {
+            $itemQuery->where('serial_number', 'like', $search)
+                ->orWhere('merk', 'like', $search);
+        });
+    }
+
+    private function whereHasVisibleItem($query, callable $itemFilter): void
+    {
+        $query->where(function ($distributionQuery) use ($itemFilter) {
+            $distributionQuery->where('status', 'dikembalikan')
+                ->whereHas('distributionItems.item', $itemFilter);
+        })->orWhere(function ($distributionQuery) use ($itemFilter) {
+            $distributionQuery->where('status', '!=', 'dikembalikan')
+                ->whereHas('distributionItems', function ($distributionItemQuery) use ($itemFilter) {
+                    $distributionItemQuery->where('status', 'dipakai')
+                        ->whereHas('item', $itemFilter);
+                });
+        });
+    }
+
     public function reportDetail(Request $request)
     {
         $reports = $this->reportDetailQuery($request)
@@ -771,7 +794,15 @@ class DistributionController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('distribution.report_detail', compact('reports'));
+        $assetList = Items::select('asset')
+            ->whereNotNull('asset')
+            ->where('asset', '!=', '')
+            ->distinct()
+            ->orderBy('asset')
+            ->pluck('asset')
+            ->toArray();
+
+        return view('distribution.report_detail', compact('reports', 'assetList'));
     }
 
     public function exportReportDetail(Request $request, string $format)
@@ -839,6 +870,14 @@ class DistributionController extends Controller
                             ->orWhere('merk', 'like', "%{$request->search}%")
                             ->orWhere('type', 'like', "%{$request->search}%");
                     });
+            });
+        }
+
+        $selectedAsset = array_values(array_filter((array) $request->input('asset', [])));
+
+        if (!empty($selectedAsset)) {
+            $query->whereHas('distributionItems.item', function ($item) use ($selectedAsset) {
+                $item->whereIn('asset', $selectedAsset);
             });
         }
 

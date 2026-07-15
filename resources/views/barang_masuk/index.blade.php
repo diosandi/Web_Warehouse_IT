@@ -17,7 +17,7 @@
         || request()->filled('tanggal_sampai');
 @endphp
 <br>
-<div class="container mx-auto px-4 py-12">
+<div class="distribution-page mx-auto w-full px-3 py-8 sm:px-4 lg:px-6 lg:py-12">
 
     <!-- HEADER -->
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
@@ -84,7 +84,7 @@
             <div>
                 <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Barang Masuk</label>
                 <div class="relative">
-                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari Supplier, SN, Merk, dan kategori" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
+                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari Asset, SN, Merk, dan kategori" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                     <input type="hidden" name='item_id' id="item_id_hidden">
                     <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
                     @if(request('search'))
@@ -141,7 +141,11 @@
                                 @endphp
                                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                     <span>Cari: <strong>"{{ request('search') }}"</strong></span>
-                                    <a href="{{ route('barang_masuk.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">×</a>
+                                    <a href="{{ route('barang_masuk.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
@@ -152,7 +156,11 @@
                                 @endphp
                                 <span class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                     <span>Kategori: <strong>{{ $kategoriLabels[request('kategori')] ?? request('kategori') }}</strong></span>
-                                    <a href="{{ route('barang_masuk.index', $kategoriQuery) }}" class="hover:text-green-900 font-bold text-lg leading-none">×</a>
+                                    <a href="{{ route('barang_masuk.index', $kategoriQuery) }}" class="hover:text-green-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
@@ -160,21 +168,23 @@
                                 @php
                                     $tanggalQuery = request()->query();
                                     unset($tanggalQuery['tanggal_dari'], $tanggalQuery['tanggal_sampai']);
-                                    $tanggalLabel = request('tanggal_dari') && request('tanggal_sampai')
-                                        ? request('tanggal_dari') . ' sampai ' . request('tanggal_sampai')
-                                        : (request('tanggal_dari') ? 'Mulai ' . request('tanggal_dari') : 'Sampai ' . request('tanggal_sampai'));
+                                    $tanggalLabel = \App\Support\DateFormatter::dateRange(request('tanggal_dari'), request('tanggal_sampai'));
                                 @endphp
                                 <span class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                     <span>Tanggal: <strong>{{ $tanggalLabel }}</strong></span>
-                                    <a href="{{ route('barang_masuk.index', $tanggalQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">×</a>
+                                    <a href="{{ route('barang_masuk.index', $tanggalQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
-                            <a href="{{ route('barang_masuk.index') }}" class="btn btn-soft-danger btn-sm">
+                            <a href="{{ route('barang_masuk.index') }}" class="btn btn-soft-danger btn-sm px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                Hapus Semua
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                                Hapus Semua
                             </a>
                         </div>
                     </div>
@@ -211,8 +221,8 @@
         </div>
 
         <!-- TABLE -->
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="distribution-table-wrap overflow-x-auto">
+            <table class="distribution-table w-full divide-y divide-gray-200">
 
                 <thead class="bg-gradient-to-r from-green-600 to-green-700">
                     <tr>
@@ -221,7 +231,7 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Kategori</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Merk</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Tipe/Series</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Supplier</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Asset</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Nomor PO</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Total Barang</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Keterangan</th>
@@ -233,7 +243,7 @@
                     @forelse($barang_masuk as $bm)
                     <tr class="hover:bg-gray-50 transition duration-150">
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $loop->iteration }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->tanggal_masuk }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ \App\Support\DateFormatter::date($bm->tanggal_masuk) }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->kategori ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->merk ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->type ?? '-' }}</td>
@@ -249,13 +259,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
                                 </a>
-                                <!-- KOREKSI SN -->
                                 @if(Auth::user()->isSuperAdmin())
-                                    <a href="{{ route('barang_masuk.koreksi_sn', [$bm->id, 'redirect' => url()->full()]) }}" title="Koreksi SN" class="btn btn-indigo btn-icon">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v6h6M20 20v-6h-6M20 9A8 8 0 006.7 4.7L4 10M4 15a8 8 0 0013.3 4.3L20 14"></path>
-                                        </svg>
-                                    </a>
                                     <!-- HAPUS -->
                                     <form action="{{ route('barang_masuk.destroy', [$bm->id, 'redirect' => url()->full()]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
                                         @csrf
@@ -275,7 +279,7 @@
                     <!-- Jika Data Kosong -->
                     @empty
                         <tr>
-                            <td colspan="10" class="px-3 md:px-4 py-8">
+                            <td colspan="14" class="px-3 md:px-4 py-8">
                                   <div class="text-center">
                                     <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>

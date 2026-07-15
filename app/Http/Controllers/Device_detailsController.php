@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ResolvesRedirects;
 use App\Models\Device_details;
 use App\Models\Items;
-use App\Http\Controllers\Concerns\ResolvesRedirects;
+use App\Models\Locations;
 use Illuminate\Http\Request;
 
 class Device_detailsController extends Controller
@@ -61,7 +62,10 @@ class Device_detailsController extends Controller
 
     public function index(Request $request)
     {
-        $query = Device_details::with('item');
+        $query = Device_details::with([
+            'item.storageLocation',
+            'item.distributionItems.distribution.location',
+        ]);
 
                 if ($request->filled('item_id')) {
                     $query->whereKey($request->item_id);
@@ -85,10 +89,52 @@ class Device_detailsController extends Controller
                 ->distinct()
                 ->pluck('merk');
 
+                $gedungs = Locations::select('gedung')
+                ->whereNotNull('gedung')
+                ->distinct()
+                ->orderBy('gedung')
+                ->pluck('gedung');
+
+                $locationsByGedung = Locations::select('gedung', 'ruangan')
+                ->whereNotNull('gedung')
+                ->whereNotNull('ruangan')
+                ->distinct()
+                ->orderBy('gedung')
+                ->orderBy('ruangan')
+                ->get()
+                ->groupBy('gedung')
+                ->map(fn ($rooms) => $rooms->pluck('ruangan')->filter()->unique()->sort()->values()->all());
+
+                $selectedGedung = $request->input('gedung');
+                $selectedRuangan = $request->input('ruangan');
+
+                $connectionTypes = ['LAN', 'USB', 'WIFI', 'HDMI', 'VGA', 'DP'];
+                $selectedConnectionTypes = array_values(array_filter(
+                    (array) $request->input('connection_type', []),
+                    fn ($connectionType) => in_array($connectionType, $connectionTypes, true)
+                ));
+
                 //FILTER MERK
                 if ($request->merk) {
                     $query->whereHas('item', function ($q) use ($request) {
                         $q->where('merk', $request->merk);
+                    });
+                }
+
+                //FILTER KONEKSI
+                if (! empty($selectedConnectionTypes)) {
+                    $query->where(function ($q) use ($selectedConnectionTypes) {
+                        foreach ($selectedConnectionTypes as $connectionType) {
+                            $q->orWhere(function ($typeQuery) use ($connectionType) {
+                                $typeQuery->where('connection_type', $connectionType)
+                                    ->orWhere('connection_type', 'like', $connectionType . ',%')
+                                    ->orWhere('connection_type', 'like', $connectionType . ', %')
+                                    ->orWhere('connection_type', 'like', '%,' . $connectionType)
+                                    ->orWhere('connection_type', 'like', '%, ' . $connectionType)
+                                    ->orWhere('connection_type', 'like', '%,' . $connectionType . ',%')
+                                    ->orWhere('connection_type', 'like', '%, ' . $connectionType . ', %');
+                            });
+                        }
                     });
                 }
 
@@ -97,8 +143,31 @@ class Device_detailsController extends Controller
                     $query->where('os_version', 'like', '%' . $request->os . '%');
                 }
 
-                $deviceDetails = $query->latest()->paginate(10);
-                return view('device_details.index', compact('deviceDetails', 'merks'));
+                if ($request->filled('gedung') || $request->filled('ruangan')) {
+                    $query->where(function ($q) use ($selectedGedung, $selectedRuangan) {
+                        $q->whereHas('item.storageLocation', function ($storageLocationQuery) use ($selectedGedung, $selectedRuangan) {
+                            if ($selectedGedung) {
+                                $storageLocationQuery->where('gedung', 'like', '%' . $selectedGedung . '%');
+                            }
+
+                            if ($selectedRuangan) {
+                                $storageLocationQuery->where('ruangan', 'like', '%' . $selectedRuangan . '%');
+                            }
+                        })
+                        ->orWhereHas('item.distributionItems.distribution.location', function ($distributionLocationQuery) use ($selectedGedung, $selectedRuangan) {
+                            if ($selectedGedung) {
+                                $distributionLocationQuery->where('gedung', 'like', '%' . $selectedGedung . '%');
+                            }
+
+                            if ($selectedRuangan) {
+                                $distributionLocationQuery->where('ruangan', 'like', '%' . $selectedRuangan . '%');
+                            }
+                        });
+                    });
+                }
+
+                $deviceDetails = $query->latest()->paginate(50)->withQueryString();
+                return view('device_details.index', compact('deviceDetails', 'merks', 'gedungs', 'locationsByGedung', 'selectedGedung', 'selectedRuangan', 'connectionTypes', 'selectedConnectionTypes'));
     }
 
     /**

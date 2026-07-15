@@ -13,6 +13,7 @@ class Items extends Model
         'kategori',
         'merk',
         'type',
+        'asset',
         'serial_number',
         'service_tag',
         'processor',
@@ -51,6 +52,11 @@ class Items extends Model
     {
         return $this->hasMany(SerialNumberCorrection::class, 'item_id');
     }
+
+    public function statusHistories()
+    {
+        return $this->hasMany(ItemStatusHistory::class, 'item_id');
+    }
         /**
      * Get kategori options untuk dropdown
      */
@@ -67,31 +73,39 @@ class Items extends Model
     }
 
     // 🔥 cek apakah masih dipakai
+    public function hasActiveDistribution(): bool
+    {
+        return $this->distributionItems()
+            ->active()
+            ->exists();
+    }
+
     public function refreshStatus()
     {
-        $isUsed = $this->distributionItems()
-            ->where('status', 'dipakai')
-            ->whereHas('distribution', function($q) {
-                $q->where('status', 'dipakai');
-            })
-            ->exists();
+        $isUsed = $this->hasActiveDistribution();
 
-        if (!$isUsed && in_array($this->status, ['maintenance', 'retired'])) {
+        if (!$isUsed && in_array($this->status, ['maintenance', 'retired', 'vendor'])) {
             return;
         }
 
-        $this->status = $isUsed ? 'used' : 'available';
-        $this->save();
+        $newStatus = $isUsed ? 'used' : 'available';
+        $changes = ['status' => $newStatus];
+
+        if ($isUsed) {
+            $changes['storage_location_id'] = null;
+        }
+
+        $hasChanges = collect($changes)
+            ->contains(fn ($value, $key) => $this->{$key} !== $value);
+
+        if ($hasChanges) {
+            $this->update($changes);
+        }
     }
 
     public function isUsed()
     {
-        return \App\Models\DistributionItem::where('item_id', $this->id)
-            ->where('status', 'dipakai')
-            ->whereHas('distribution', function($q) {
-                $q->where('status', 'dipakai');
-            })
-            ->exists();
+        return $this->hasActiveDistribution();
     }
 
     public function storageLocation()

@@ -190,6 +190,48 @@
 
 </div>
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const gedungSelect = document.getElementById('gedung');
+    const ruanganSelect = document.getElementById('ruangan');
+    const getRuanganUrl = @json(route('distribution.get_ruangan'));
+
+    if (!gedungSelect || !ruanganSelect) {
+        return;
+    }
+
+    gedungSelect.addEventListener('change', function () {
+        const gedung = gedungSelect.value;
+
+        if (!gedung) {
+            ruanganSelect.innerHTML = '<option value="">Pilih gedung dulu</option>';
+            return;
+        }
+
+        ruanganSelect.innerHTML = '<option value="">Loading...</option>';
+
+        fetch(getRuanganUrl + '?' + new URLSearchParams({ gedung }))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data ruangan');
+                }
+
+                return response.json();
+            })
+            .then(function (data) {
+                let html = '<option value="">-- Pilih Ruangan --</option>';
+
+                data.forEach(function (ruangan) {
+                    html += `<option value="${ruangan.id}">${ruangan.ruangan}</option>`;
+                });
+
+                ruanganSelect.innerHTML = html;
+            })
+            .catch(function () {
+                ruanganSelect.innerHTML = '<option value="">Ruangan gagal dimuat</option>';
+            });
+    });
+});
+
 // Search Device tambah data barang
 function setupSearch(inputId, suggestionId, hiddenId, kategori, containerId = null, inputName = null) {
     let $input = $(inputId);
@@ -336,30 +378,5 @@ $(document).on('click', '.remove-item', function () {
     $container.find(`input[value="${id}"]`).remove(); // hapus hidden
 });
 
-//Search ambil ruangan
-$('#gedung').on('change', function() {
-    let gedung = $(this).val();
-
-    if (!gedung) {
-    $('#ruangan').html('<option>Pilih gedung dulu</option>');
-    return;
-    }
-
-    $('#ruangan').html('<option>Loading...</option>');
-
-    $.ajax({
-        url: '/get-ruangan',
-        data: { gedung: gedung },
-        success: function(data) {
-            let html = '<option value="">-- Pilih Ruangan --</option>';
-
-            data.forEach(r => {
-                html += `<option value="${r.id}">${r.ruangan}</option>`;
-            });
-
-            $('#ruangan').html(html);
-        }
-    });
-});
 </script>
 @endsection

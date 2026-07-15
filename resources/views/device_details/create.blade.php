@@ -62,7 +62,7 @@
                         <!-- ip address -->
                         <div class="mb-3 md:mb-4">
                             <label for="ip_address" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">IP Address <span class="text-yellow-500">( jika tidak ada : - )</span> <span class="text-red-500">*</span></label>
-                            <input type="text" name="ip_address" id="ip_address" value="{{ old('ip_address') }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="" required>
+                            <input type="text" name="ip_address" id="ip_address" value="{{ old('ip_address') }}" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="">
                             @error('ip_address')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -89,11 +89,14 @@
                         <!-- Connection type -->
                         <div class="mb-3 md:mb-4">
                             <label for="connection_type" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Jenis Koneksi</label>
-                            <select name="connection_type" id="connection_type" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>">
+                            <select name="connection_type" id="connection_type" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
                                 <option value="">-- Pilih Jenis Koneksi --</option>
-                                <option value="LAN">LAN</option>
-                                <option value="USB">USB</option>
-                                <option value="WIFI">WIFI</option>
+                                <option value="LAN" {{ old('connection_type') == 'LAN' ? 'selected' : '' }}>LAN</option>
+                                <option value="USB" {{ old('connection_type') == 'USB' ? 'selected' : '' }}>USB</option>
+                                <option value="WIFI" {{ old('connection_type') == 'WIFI' ? 'selected' : '' }}>WIFI</option>
+                                <option value="HDMI" {{ old('connection_type') == 'HDMI' ? 'selected' : '' }}>HDMI</option>
+                                <option value="VGA" {{ old('connection_type') == 'VGA' ? 'selected' : '' }}>VGA</option>
+                                <option value="DP" {{ old('connection_type') == 'DP' ? 'selected' : '' }}>DP / DisplayPort</option>
                             </select>
                             @error('connection_type')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

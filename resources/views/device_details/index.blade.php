@@ -2,12 +2,17 @@
 
 @section('content')
 @php
-    $hasActiveFilter = request()->filled('search') || request()->filled('merk');
+    $activeConnectionTypes = $selectedConnectionTypes ?? array_filter((array) request('connection_type', []));
+    $hasActiveFilter = request()->filled('search')
+        || request()->filled('merk')
+        || request()->filled('gedung')
+        || request()->filled('ruangan')
+        || count($activeConnectionTypes) > 0;
 @endphp
 <br>
-<div class="container mx-auto px-4 py-12">
+<div class="distribution-page mx-auto w-full px-3 py-8 sm:px-4 lg:px-6 lg:py-12">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Detail Perangkat</h1>
             <p class="text-gray-600 mt-1">Kelola detail perangkat untuk item berserial number</p>
@@ -59,7 +64,7 @@
             </div>
 
 
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
                 <!-- Kategori Filter -->
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Merk</label>
@@ -72,10 +77,52 @@
                             @endforeach
                         </select>
                 </div>
+
+                <div>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Gedung</label>
+                    <select name="gedung" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
+                        <option value="">Semua</option>
+                        @foreach($gedungs as $gedung)
+                            <option value="{{ $gedung }}" {{ request('gedung') == $gedung ? 'selected' : '' }}>
+                                {{ $gedung }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Ruangan</label>
+                    <select name="ruangan" id="ruangan" data-selected="{{ request('ruangan') }}" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
+                        <option value="">Semua</option>
+                    </select>
+                </div>
+
+                <!-- Koneksi Filter -->
+                <div>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Jenis Koneksi</label>
+                    <details class="relative filter-dropdown">
+                        <summary class="filter-summary list-none w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white cursor-pointer flex items-center justify-between gap-3 transition duration-200">
+                            <span class="text-gray-700 truncate text-xs uppercase">
+                                {{ empty($activeConnectionTypes) ? '-- Semua Koneksi --' : collect($activeConnectionTypes)->map(fn ($connectionType) => $connectionType === 'DP' ? 'DP / DisplayPort' : $connectionType)->implode(', ') }}
+                            </span>
+                            <span class="text-gray-400 text-xs">Pilih</span>
+                        </summary>
+                        <div class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-3 max-h-64 overflow-y-auto">
+                            <div class="space-y-2">
+                                @foreach($connectionTypes as $connectionType)
+                                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                                        <input type="checkbox" name="connection_type[]" value="{{ $connectionType }}" {{ in_array($connectionType, $activeConnectionTypes, true) ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                        <span class="text-xs uppercase">{{ $connectionType === 'DP' ? 'DP / DisplayPort' : $connectionType }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </details>
+                </div>
             </div>
 
               <!-- Buttons -->
-                <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
                     <button type="submit" class="btn btn-success btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -89,7 +136,7 @@
                         <span class="hidden sm:inline">Bersihkan</span>
                     </a>
                 </div>
-                
+
                 <!-- Active Filters Display -->
                 @if($hasActiveFilter)
                     <div class="text-xs md:text-sm text-gray-600 pt-3 border-t border-gray-200">
@@ -102,7 +149,11 @@
                                 @endphp
                                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                     <span>Cari: <strong>"{{ request('search') }}"</strong></span>
-                                    <a href="{{ route('device_details.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">×</a>
+                                    <a href="{{ route('device_details.index', $searchQuery) }}" class="hover:text-yellow-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
                             @if(request('merk'))
@@ -112,16 +163,73 @@
                                 @endphp
                                 <span class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
                                     <span>Merk: <strong>{{ request('merk') }}</strong></span>
-                                    <a href="{{ route('device_details.index', $merkQuery) }}" class="hover:text-purple-900 font-bold text-lg leading-none">×</a>
+                                    <a href="{{ route('device_details.index', $merkQuery) }}" class="hover:text-purple-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
                                 </span>
                             @endif
 
+                            @if(request('gedung'))
+                                @php
+                                    $gedungQuery = request()->query();
+                                    unset($gedungQuery['gedung']);
+                                @endphp
+                                <span class="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                    <span>Gedung: <strong>{{ request('gedung') }}</strong></span>
+                                    <a href="{{ route('device_details.index', $gedungQuery) }}" class="hover:text-amber-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
+                                </span>
+                            @endif
+
+                            @if(request('ruangan'))
+                                @php
+                                    $ruanganQuery = request()->query();
+                                    unset($ruanganQuery['ruangan']);
+                                @endphp
+                                <span class="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                    <span>Ruangan: <strong>{{ request('ruangan') }}</strong></span>
+                                    <a href="{{ route('device_details.index', $ruanganQuery) }}" class="hover:text-indigo-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
+                                </span>
+                            @endif
+
+                            @foreach($activeConnectionTypes as $activeConnectionType)
+                                @php
+                                    $connectionQuery = request()->query();
+                                    $remainingConnectionTypes = array_values(array_diff($activeConnectionTypes, [$activeConnectionType]));
+
+                                    if (count($remainingConnectionTypes) > 0) {
+                                        $connectionQuery['connection_type'] = $remainingConnectionTypes;
+                                    } else {
+                                        unset($connectionQuery['connection_type']);
+                                    }
+
+                                    $connectionLabel = $activeConnectionType === 'DP' ? 'DP / DisplayPort' : $activeConnectionType;
+                                @endphp
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                    <span>Koneksi: <strong>{{ $connectionLabel }}</strong></span>
+                                    <a href="{{ route('device_details.index', $connectionQuery) }}" class="hover:text-blue-900 font-bold text-lg leading-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </a>
+                                </span>
+                            @endforeach
+
                             <!-- Clear All Button -->
-                            <a href="{{ route('device_details.index') }}" class="btn btn-soft-danger btn-sm">
+                            <a href="{{ route('device_details.index') }}" class="btn btn-soft-danger btn-sm px-3 py-1.5 rounded-full inline-flex items-center gap-2 text-xs md:text-sm">
+                                Hapus Semua
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                                Hapus Semua
                             </a>
                         </div>
                     </div>
@@ -149,8 +257,8 @@
         </div>
 
         <!--Table-->
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="distribution-table-wrap overflow-x-auto">
+            <table class="distribution-table w-full divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-green-600 to-green-700">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
@@ -159,6 +267,7 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Akun Pengguna</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Serial Number</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Merk</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Lokasi</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">IP Address</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Jenis Koneksi</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Nama Sharing</th>
@@ -167,6 +276,26 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
+                    @php
+                        $formatLocation = function ($deviceDetail) {
+                            $item = optional($deviceDetail->item);
+
+                            $activeDistributionLocation = $item->distributionItems
+                                ->first(function ($distributionItem) {
+                                    return $distributionItem->status === 'dipakai'
+                                        && optional($distributionItem->distribution)->status === 'dipakai';
+                                })?->distribution?->location;
+
+                            $location = $activeDistributionLocation
+                                ?? optional($item->storageLocation);
+
+                            $gedung = optional($location)->gedung;
+                            $ruangan = optional($location)->ruangan;
+                            $parts = array_values(array_filter([$gedung, $ruangan], fn ($value) => filled($value)));
+
+                            return $parts ? implode(' - ', $parts) : '-';
+                        };
+                    @endphp
                     @forelse($deviceDetails as $index => $deviceDetail)
                         <tr class="hover:bg-gray-50 transition duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $deviceDetails->firstItem() + $index }}</td>
@@ -194,6 +323,7 @@
 
                                                                                                                                             </a></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ optional($deviceDetail->item)->merk ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $formatLocation($deviceDetail) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->ip_address ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->connection_type ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->shared_name ?? '-' }}</td>
@@ -224,13 +354,13 @@
                     <!-- Jika Data Kosong -->
                     @empty
                         <tr>
-                            <td colspan="10" class="px-3 md:px-4 py-8">
+                            <td colspan="12" class="px-3 md:px-4 py-8">
                                   <div class="text-center">
                                     <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                                     </svg>
                                     <p class="text-sm md:text-base text-gray-600 font-semibold mb-2">
-                                        @if(request()->filled('search') || request()->filled('merk'))
+                                        @if(request()->filled('search') || request()->filled('merk') || request()->filled('gedung') || request()->filled('ruangan') || count($activeConnectionTypes) > 0)
                                             Tidak ada hasil yang cocok
                                         @else
                                             Belum ada data master barang
@@ -257,7 +387,55 @@
     </div>
 </div>
 
+<style>
+    .filter-summary {
+        border-color: #d1d5db;
+        outline: none;
+        box-shadow: none;
+    }
+
+    .filter-dropdown[open] > .filter-summary {
+        border-color: #22c55e;
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.5);
+        background-color: #fcfcfc;
+    }
+</style>
 <script>
+const roomsByGedung = @json($locationsByGedung);
+
+function populateRuanganOptions() {
+    const gedungSelect = document.querySelector('select[name="gedung"]');
+    const ruanganSelect = document.querySelector('select[name="ruangan"]');
+
+    if (!gedungSelect || !ruanganSelect) {
+        return;
+    }
+
+    const selectedGedung = gedungSelect.value;
+    const selectedRuangan = ruanganSelect.dataset.selected || '';
+    const rooms = roomsByGedung[selectedGedung] || [];
+
+    ruanganSelect.innerHTML = '<option value="">Semua</option>';
+
+    rooms.forEach(function(room) {
+        const option = document.createElement('option');
+        option.value = room;
+        option.textContent = room;
+
+        if (room === selectedRuangan) {
+            option.selected = true;
+        }
+
+        ruanganSelect.appendChild(option);
+    });
+
+    if (selectedRuangan && !rooms.includes(selectedRuangan)) {
+        ruanganSelect.value = '';
+    }
+
+    ruanganSelect.dataset.selected = ruanganSelect.value || '';
+}
+
 $(document).ready(function() {
     var $input = $('#search');
     var $suggestions = $('#suggestions');
@@ -308,6 +486,9 @@ $(document).ready(function() {
             $suggestions.hide();
         }
     });
+
+    $('select[name="gedung"]').on('change', populateRuanganOptions);
+    populateRuanganOptions();
 });
 </script>
 @endsection

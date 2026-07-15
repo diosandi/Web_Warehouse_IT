@@ -6,16 +6,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- <title>{{ config('app.name', 'Warehouse IT RSCM') }}</title> --}}
     <title>Warehouse IT RSCM</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/select2/css/select2.min.css') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <!-- Select2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <!-- Select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('vendor/select2/js/select2.min.js') }}"></script>
 <style>
         body {
             overflow-x: hidden;
         }
-        
+
         #sidebar {
             transition: transform 0.3s ease-in-out;
         }
@@ -40,7 +40,6 @@
 </head>
 
 <body class="bg-gray-100">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <div class="flex flex-col h-screen">
         <!-- Include Navbar (Fixed Height) -->
         @include('layouts.navbar')
@@ -98,7 +97,7 @@
             toggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const isCurrentlyHidden = shouldSidebarBeHidden();
                 setSidebarHidden(!isCurrentlyHidden);
             });
@@ -168,6 +167,6 @@
             });
         });
     </script>
-    
+
 </body>
 </html>

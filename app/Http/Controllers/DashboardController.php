@@ -46,6 +46,7 @@ class DashboardController extends Controller
             })->count(),
             'maintenance' => $statusCount('maintenance'),
             'retired' => $statusCount('retired'),
+            'vendor' => $statusCount('vendor'),
             'active_distributions' => Distribution::where('status', 'dipakai')->count(),
             'barang_masuk' => Barang_masuk::count(),
             'barang_masuk_bulan_ini' => Barang_masuk::whereBetween('tanggal_masuk', [
@@ -98,6 +99,54 @@ class DashboardController extends Controller
                 'used' => $kategoriUsedCount($kategori),
                 'maintenance' => $kategoriStatusCount($kategori, 'maintenance'),
                 'retired' => $kategoriStatusCount($kategori, 'retired'),
+                'vendor' => $kategoriStatusCount($kategori, 'vendor'),
+            ];
+        });
+
+        $assetList = Items::select('asset')
+            ->whereNotNull('asset')
+            ->where('asset', '!=', '')
+            ->distinct()
+            ->orderBy('asset')
+            ->pluck('asset');
+
+        $assetStatusCount = function (string $asset, string $status) use ($activeDistribution) {
+            return Items::where('asset', $asset)
+                ->where('status', $status)
+                ->where(function ($query) use ($activeDistribution) {
+                    $query->whereNotIn('kategori', ['Printer Kertas', 'Printer Barcode'])
+                        ->orWhere(function ($printerQuery) use ($activeDistribution) {
+                            $printerQuery->whereIn('kategori', ['Printer Kertas', 'Printer Barcode'])
+                                ->whereDoesntHave('distributionItems', $activeDistribution);
+                        });
+                })
+                ->count();
+        };
+
+        $assetUsedCount = function (string $asset) use ($activeDistribution) {
+            return Items::where('asset', $asset)
+                ->where(function ($query) use ($activeDistribution) {
+                    $query->where(function ($printerQuery) use ($activeDistribution) {
+                        $printerQuery->whereIn('kategori', ['Printer Kertas', 'Printer Barcode'])
+                            ->whereHas('distributionItems', $activeDistribution);
+                    })->orWhere(function ($nonPrinterQuery) {
+                        $nonPrinterQuery->whereNotIn('kategori', ['Printer Kertas', 'Printer Barcode'])
+                            ->where('status', 'used');
+                    });
+                })
+                ->count();
+        };
+
+        $stokPerAsset = $assetList->map(function ($asset) use ($assetStatusCount, $assetUsedCount) {
+            return [
+                'asset' => $asset,
+                'total' => Items::where('asset', $asset)->count(),
+                'available' => $assetStatusCount($asset, 'available'),
+                'used' => $assetUsedCount($asset),
+                'maintenance' => $assetStatusCount($asset, 'maintenance'),
+                'retired' => $assetStatusCount($asset, 'retired'),
+                'vendor' => $assetStatusCount($asset, 'vendor'),
+                'url' => route('items.index', ['asset' => [$asset]]),
             ];
         });
 
@@ -116,6 +165,13 @@ class DashboardController extends Controller
                 'count' => $summary['maintenance'],
                 'url' => route('items.index', ['status' => 'maintenance']),
                 'color' => 'red',
+            ],
+            [
+                'title' => 'Dibawa Vendor',
+                'description' => 'Barang yang sedang berada di vendor untuk dicek atau diperbaiki.',
+                'count' => $summary['vendor'],
+                'url' => route('items.index', ['status' => 'vendor']),
+                'color' => 'purple',
             ],
             [
                 'title' => 'Tanpa Detail Perangkat',
@@ -165,12 +221,23 @@ class DashboardController extends Controller
                     ->flatMap(fn ($distribution) => $distribution->distributionItems)
                     ->where('status', 'dipakai')
                     ->map(fn ($distributionItem) => $distributionItem->item)
-                    ->filter();
+                    ->filter()
+                    ->unique('id')
+                    ->values();
+
+                $locationUrl = $location
+                    ? route('distribution.index', [
+                        'status' => 'dipakai',
+                        'gedung' => $location->gedung,
+                        'ruangan' => $location->id,
+                    ])
+                    : route('distribution.index', ['status' => 'dipakai']);
 
                 $row = [
                     'gedung' => $location->gedung ?? '-',
                     'ruangan' => $location->ruangan ?? '-',
                     'total' => $items->count(),
+                    'url' => $locationUrl,
                 ];
 
                 foreach ($kategoriList as $kategori) {
@@ -182,6 +249,33 @@ class DashboardController extends Controller
             ->sortByDesc('total')
             ->values();
 
-        return view('dashboard', compact('summary', 'stokPerKategori','distribusiTerbaru','perluPerhatian','distribusiPerLokasi'));
+        $distribusiAktifPerAsset = Distribution::with([
+                'distributionItems.item',
+            ])
+            ->where('status', 'dipakai')
+            ->get()
+            ->flatMap(fn ($distribution) => $distribution->distributionItems)
+            ->where('status', 'dipakai')
+            ->map(fn ($distributionItem) => $distributionItem->item)
+            ->filter(fn ($item) => $item && trim((string) ($item->asset ?? '')) !== '')
+            ->unique('id')
+            ->groupBy(fn ($item) => trim((string) $item->asset))
+            ->map(function ($items, $asset) use ($kategoriList) {
+                $row = [
+                    'asset' => $asset,
+                    'total' => $items->count(),
+                    'url' => route('items.index', ['asset' => [$asset], 'status' => 'used']),
+                ];
+
+                foreach ($kategoriList as $kategori) {
+                    $row[$kategori] = $items->where('kategori', $kategori)->count();
+                }
+
+                return $row;
+            })
+            ->sortByDesc('total')
+            ->values();
+
+        return view('dashboard', compact('summary', 'stokPerKategori','stokPerAsset','distribusiTerbaru','perluPerhatian','distribusiPerLokasi','distribusiAktifPerAsset'));
     }
 }

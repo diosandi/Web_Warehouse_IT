@@ -26,6 +26,12 @@
     </div>
 
     <div>
+        <label class="block text-xs font-semibold uppercase text-gray-500 mb-2">Email</label>
+        <input type="email" name="email" value="{{ old('email', $user->email) }}"
+            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+    </div>
+
+    <div>
         <label class="block text-xs font-semibold uppercase text-gray-500 mb-2">Role</label>
         <select name="role" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required>
             <option value="admin" {{ $selectedRole === 'admin' ? 'selected' : '' }}>Admin</option>

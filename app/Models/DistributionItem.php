@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,6 +22,14 @@ class DistributionItem extends Model
     protected $casts = [
         'returned_at' => 'datetime',
     ];
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('status', 'dipakai')
+            ->whereHas('distribution', function ($distribution) {
+                $distribution->where('status', 'dipakai');
+            });
+    }
 
     public function item()
     {

@@ -27,6 +27,16 @@
         </div>
     @endif
 
+    @if($errors->any())
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
+            <ul class="list-disc pl-5 text-sm font-medium">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- From -->
     <div class="bg-white rounded-xl shadow-lg p-8">
         <form action="{{ route('barang_masuk.update', $barang_masuk->id) }}" method="POST">
@@ -49,19 +59,19 @@
 
             <!-- Merk -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Merk <span class="text-red-500">*</label>
+                <label>Merk <span class="text-red-500">*</span></label>
                 <input type="text" name="merk" value="{{ old('merk', $barang_masuk->items->first()->merk ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- Type -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Tipe/Series <span class="text-red-500">*</label>
+                <label>Tipe/Series <span class="text-red-500">*</span></label>
                 <input type="text" name="type" value="{{ old('type', $barang_masuk->items->first()->type ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
-            <!-- Supplier -->
+            <!-- Asset -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Supplier</label>
+                <label>Asset</label>
                 <input type="text" name="supplier" value="{{ old('supplier', $barang_masuk->supplier ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
 
@@ -73,20 +83,21 @@
 
             <!-- Tanggal -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Tanggal Masuk <span class="text-red-500">*</label>
-                <input type="date" name="tanggal_masuk" value="{{ old('tanggal_masuk', $barang_masuk->tanggal_masuk ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"required>
+                <label>Tanggal Masuk <span class="text-red-500">*</span></label>
+                <input type="date" name="tanggal_masuk" value="{{ old('tanggal_masuk', $barang_masuk->tanggal_masuk ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- SERIAL NUMBER -->
             <div class="block text-sm font-medium text-gray-700 mb-2">
-                <label>Serial Number <span class="text-red-500">*</label>
+                <label>Serial Number <span class="text-red-500">*</span></label>
 
                 <div id="sn-wrapper">
 
                     {{-- PRIORITAS: old input --}}
                     @if(old('serial_numbers'))
-                        @foreach (old('serial_numbers') as $sn)
+                        @foreach (old('serial_numbers') as $index => $sn)
                             <div class="flex gap-2 mb-2">
+                                <input type="hidden" name="item_ids[]" value="{{ old('item_ids.' . $index) }}">
                                 <input type="text" name="serial_numbers[]" value="{{ $sn }}"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
                                 <button type="button" onclick="removeSN(this)"

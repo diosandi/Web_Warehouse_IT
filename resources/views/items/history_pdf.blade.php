@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>History Distribusi {{ $item->serial_number }}</title>
+    <title>Riwayat Status Barang {{ $item->serial_number }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -59,19 +59,19 @@
             color: #1d4ed8;
         }
 
-        .gray {
-            background: #f3f4f6;
-            color: #374151;
-        }
-
         .green {
             background: #dcfce7;
             color: #15803d;
         }
 
-        .red {
-            background: #fee2e2;
-            color: #b91c1c;
+        .purple {
+            background: #f3e8ff;
+            color: #7e22ce;
+        }
+
+        .gray {
+            background: #f3f4f6;
+            color: #374151;
         }
 
         .actions {
@@ -105,7 +105,7 @@
     </div>
 
     <div class="header">
-        <h1>Riwayat Distribusi Barang</h1>
+        <h1>Riwayat Status Barang</h1>
         <p><strong>Serial Number:</strong> {{ $item->serial_number }}</p>
         <p><strong>Barang:</strong> {{ $item->kategori }} / {{ $item->merk ?? '-' }} / {{ $item->type ?? '-' }}</p>
         <p><strong>Dicetak:</strong> {{ now()->format('d-m-Y H:i') }}</p>
@@ -114,66 +114,36 @@
     <table>
         <thead>
             <tr>
-                <th>Pengguna</th>
-                <th>Divisi</th>
+                <th>Waktu</th>
+                <th>Aktivitas</th>
+                <th>Status Lama</th>
+                <th>Status Baru</th>
+                <th>Pengguna/Oleh</th>
                 <th>Lokasi</th>
-                <th>Tanggal Pakai</th>
-                <th>Tanggal Pengembalian</th>
-                <th>Status</th>
-                <th>Kondisi Pengembalian</th>
                 <th>Keterangan</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($histories as $history)
+            @forelse($statusHistoryEvents as $event)
                 @php
-                    $returnConditionStatus = $history->return_condition_status;
-                    $returnNote = strtolower($history->return_note ?? '');
-
-                    if (
-                        $returnConditionStatus !== 'maintenance'
-                        && ($returnNote !== '')
-                        && (str_contains($returnNote, 'rusak') || str_contains($returnNote, 'maintenance'))
-                    ) {
-                        $returnConditionStatus = 'maintenance';
-                    }
+                    $eventClass = [
+                        'distribution' => 'blue',
+                        'return' => 'green',
+                        'manual' => 'purple',
+                    ][$event['event_type']] ?? 'gray';
                 @endphp
                 <tr>
-                    <td>{{ $history->distribution->nama_user ?? '-' }}</td>
-                    <td>{{ $history->distribution->divisi ?? '-' }}</td>
-                    <td>
-                        {{ $history->distribution->location->gedung ?? '-' }}
-                        -
-                        {{ $history->distribution->location->ruangan ?? '-' }}
-                    </td>
-                    <td>{{ $history->distribution->tanggal_distribusi ?? '-' }}</td>
-                    <td>{{ $history->returned_at ? $history->returned_at->format('d-m-Y H:i') : '-' }}</td>
-                    <td>
-                        @if($history->status === 'dipakai')
-                            <span class="badge blue">Dipakai</span>
-                        @else
-                            <span class="badge gray">Dikembalikan</span>
-                        @endif
-                    </td>
-                    <td>
-                        @if($history->status === 'dipakai')
-                            <span class="badge gray">-</span>
-                        @elseif($returnConditionStatus === 'maintenance')
-                            <span class="badge red">Pemeliharaan</span>
-                        @else
-                            <span class="badge green">Normal</span>
-                        @endif
-                    </td>
-                    <td>
-                        {{ $history->distribution->keterangan ?? '-' }}
-                        @if($history->return_note)
-                            <br><strong>Pengembalian:</strong> {{ $history->return_note }}
-                        @endif
-                    </td>
+                    <td>{{ \App\Support\DateFormatter::datetime($event['display_at']) }}</td>
+                    <td><span class="badge {{ $eventClass }}">{{ $event['event_label'] }}</span></td>
+                    <td>{{ $event['old_status_label'] }}</td>
+                    <td>{{ $event['new_status_label'] }}</td>
+                    <td>{{ $event['actor_label'] }}: {{ $event['actor'] }}</td>
+                    <td>{{ $event['location'] }}</td>
+                    <td>{{ $event['note'] }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8">Tidak ada riwayat distribusi.</td>
+                    <td colspan="7">Tidak ada riwayat status barang.</td>
                 </tr>
             @endforelse
         </tbody>

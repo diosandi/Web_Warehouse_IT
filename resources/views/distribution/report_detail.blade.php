@@ -2,6 +2,8 @@
 
 @section('content')
 @php
+    $selectedAssets = array_values(array_filter((array) request('asset', [])));
+    $filterQuery = request()->except('kategori_laporan', 'asset', 'page');
     $categoryOptions = [
         'pc' => 'PC',
         'monitor' => 'Monitor',
@@ -16,11 +18,10 @@
         : array_keys($categoryOptions);
 
     $showCategory = fn ($category) => in_array($category, $selectedCategories, true);
-    $filterQuery = request()->except('kategori_laporan', 'page');
 @endphp
 
 <br>
-<div class="container mx-auto px-4 py-12">
+<div class="distribution-page mx-auto w-full px-3 py-8 sm:px-4 lg:px-6 lg:py-12">
     <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Laporan Detail Distribusi</h1>
@@ -101,6 +102,25 @@
                     </label>
                 @endforeach
             </div>
+
+            @if(!empty($assetList))
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800 mb-3">Asset Yang Ditampilkan</h2>
+
+                    <div class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+                        @foreach($assetList as $asset)
+                            <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:border-green-400 hover:bg-green-50">
+                                <input type="checkbox"
+                                    name="asset[]"
+                                    value="{{ $asset }}"
+                                    class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                    {{ in_array($asset, $selectedAssets, true) ? 'checked' : '' }}>
+                                <span>{{ $asset }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </form>
     </div>
 
@@ -112,61 +132,61 @@
             <p class="text-xs text-gray-500">Kolom mengikuti kategori yang dipilih.</p>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-[1600px] w-full text-sm">
-                <thead class="bg-green-700 text-white">
+        <div class="distribution-table-wrap overflow-x-auto">
+            <table class="distribution-table w-full divide-y divide-gray-200">
+                <thead class="bg-gradient-to-r from-green-600 to-green-700">
                     <tr>
-                        <th class="px-3 py-3 text-left">No</th>
-                        <th class="px-3 py-3 text-left">Nama User</th>
-                        <th class="px-3 py-3 text-left">Divisi</th>
-                        <th class="px-3 py-3 text-left">Gedung</th>
-                        <th class="px-3 py-3 text-left">Ruangan</th>
+                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
+                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Nama User</th>
+                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Divisi</th>
+                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Gedung</th>
+                        <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Ruangan</th>
 
                         @if($showCategory('pc'))
-                            <th class="px-3 py-3 text-left">PC</th>
-                            <th class="px-3 py-3 text-left">SN PC</th>
-                            <th class="px-3 py-3 text-left">Service Tag</th>
-                            <th class="px-3 py-3 text-left">PC Name</th>
-                            <th class="px-3 py-3 text-left">User Account</th>
-                            <th class="px-3 py-3 text-left">IP</th>
-                            <th class="px-3 py-3 text-left">MAC LAN</th>
-                            <th class="px-3 py-3 text-left">Processor</th>
-                            <th class="px-3 py-3 text-left">RAM</th>
-                            <th class="px-3 py-3 text-left">Storage</th>
-                            <th class="px-3 py-3 text-left">VGA</th>
-                            <th class="px-3 py-3 text-left">OS</th>
-                            <th class="px-3 py-3 text-left">Office</th>
+                            <th class="ppx-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">PC</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">SN PC / Asset</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Service Tag</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">PC Name</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">User Account</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">IP</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">MAC LAN</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Processor</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">RAM</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Storage</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">VGA</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">OS</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Office</th>
                         @endif
 
                         @if($showCategory('monitor'))
-                            <th class="px-3 py-3 text-left">Monitor</th>
-                            <th class="px-3 py-3 text-left">SN Monitor</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Monitor</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">SN Monitor / Asset</th>
                         @endif
 
                         @if($showCategory('printer_kertas'))
-                            <th class="px-3 py-3 text-left">Printer Kertas</th>
-                            <th class="px-3 py-3 text-left">SN Printer</th>
-                            <th class="px-3 py-3 text-left">Detail Printer</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Printer Kertas</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">SN Printer / Asset</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Detail Printer</th>
                         @endif
 
                         @if($showCategory('printer_barcode'))
-                            <th class="px-3 py-3 text-left">Printer Barcode</th>
-                            <th class="px-3 py-3 text-left">SN Printer Barcode</th>
-                            <th class="px-3 py-3 text-left">Detail Barcode</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Printer Barcode</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">SN Printer Barcode / Asset</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Detail Barcode</th>
                         @endif
 
                         @if($showCategory('scanner'))
-                            <th class="px-3 py-3 text-left">Scanner</th>
-                            <th class="px-3 py-3 text-left">SN Scanner</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Scanner</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">SN Scanner / Asset</th>
                         @endif
 
                         @if($showCategory('lainnya'))
-                            <th class="px-3 py-3 text-left">Lainnya</th>
-                            <th class="px-3 py-3 text-left">SN Lainnya</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Lainnya</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">SN Lainnya / Asset</th>
                         @endif
 
-                        <th class="px-3 py-3 text-left">Tanggal Distribusi</th>
-                        <th class="px-3 py-3 text-left">Status</th>
+                        <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Tanggal Distribusi</th>
+                        <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Status</th>
                     </tr>
                 </thead>
 
@@ -177,7 +197,10 @@
                                     ? $distribution->distributionItems
                                     : $distribution->distributionItems->where('status', 'dipakai'))
                                 ->map(fn ($distributionItem) => $distributionItem->item)
-                                ->filter();
+                                ->filter()
+                                ->filter(function ($item) use ($selectedAssets) {
+                                    return empty($selectedAssets) || in_array((string) $item->asset, $selectedAssets, true);
+                                });
 
                             $pc = $visibleItems->firstWhere('kategori', 'PC');
                             $pcDetail = $pc?->device_detail;
@@ -194,9 +217,16 @@
                                 })->filter()->implode(', ');
                             };
 
-                            $formatSn = function ($items) {
-                                return $items->map(fn ($item) => $item->serial_number ?? '-')->filter()->implode(', ');
+                            $formatSnWithAsset = function ($items) {
+                                return $items->map(function ($item) {
+                                    return e($item->serial_number ?: '-') .
+                                        '<br><span class="text-xs font-semibold text-gray-500">Asset: ' .
+                                        e($item->asset ?: '-') .
+                                        '</span>';
+                                })->filter()->implode('<hr class="my-2 border-gray-200">');
                             };
+
+                            $formatSingleSnWithAsset = fn ($item) => $item ? $formatSnWithAsset(collect([$item])) : '-';
 
                             $formatPrinterDetail = function ($items) {
                                 return $items->map(function ($item) {
@@ -221,7 +251,7 @@
 
                             @if($showCategory('pc'))
                                 <td class="px-3 py-3 uppercase">{{ $pc ? trim(($pc->merk ?? '-') . ' / ' . ($pc->type ?? '-')) : '-' }}</td>
-                                <td class="px-3 py-3 uppercase">{{ $pc->serial_number ?? '-' }}</td>
+                                <td class="px-3 py-3 uppercase leading-5">{!! $formatSingleSnWithAsset($pc) !!}</td>
                                 <td class="px-3 py-3 uppercase">{{ $pc->service_tag ?? '-' }}</td>
                                 <td class="px-3 py-3 uppercase">{{ $pcDetail->pc_name ?? '-' }}</td>
                                 <td class="px-3 py-3 uppercase">{{ $pcDetail->user_account ?? '-' }}</td>
@@ -237,32 +267,32 @@
 
                             @if($showCategory('monitor'))
                                 <td class="px-3 py-3 uppercase">{{ $formatItem($monitors) ?: '-' }}</td>
-                                <td class="px-3 py-3 uppercase">{{ $formatSn($monitors) ?: '-' }}</td>
+                                <td class="px-3 py-3 uppercase text-xs leading-5">{!! $monitors->count() ? $formatSnWithAsset($monitors) : '-' !!}</td>
                             @endif
 
                             @if($showCategory('printer_kertas'))
                                 <td class="px-3 py-3 uppercase">{{ $formatItem($printerKertas) ?: '-' }}</td>
-                                <td class="px-3 py-3 uppercase">{{ $formatSn($printerKertas) ?: '-' }}</td>
+                                <td class="px-3 py-3 uppercase text-xs leading-5">{!! $printerKertas->count() ? $formatSnWithAsset($printerKertas) : '-' !!}</td>
                                 <td class="px-3 py-3 uppercase text-xs leading-5">{!! $printerKertas->count() ? $formatPrinterDetail($printerKertas) : '-' !!}</td>
                             @endif
 
                             @if($showCategory('printer_barcode'))
                                 <td class="px-3 py-3 uppercase">{{ $formatItem($printerBarcode) ?: '-' }}</td>
-                                <td class="px-3 py-3 uppercase">{{ $formatSn($printerBarcode) ?: '-' }}</td>
+                                <td class="px-3 py-3 uppercase text-xs leading-5">{!! $printerBarcode->count() ? $formatSnWithAsset($printerBarcode) : '-' !!}</td>
                                 <td class="px-3 py-3 uppercase text-xs leading-5">{!! $printerBarcode->count() ? $formatPrinterDetail($printerBarcode) : '-' !!}</td>
                             @endif
 
                             @if($showCategory('scanner'))
                                 <td class="px-3 py-3 uppercase">{{ $formatItem($scanners) ?: '-' }}</td>
-                                <td class="px-3 py-3 uppercase">{{ $formatSn($scanners) ?: '-' }}</td>
+                                <td class="px-3 py-3 uppercase text-xs leading-5">{!! $scanners->count() ? $formatSnWithAsset($scanners) : '-' !!}</td>
                             @endif
 
                             @if($showCategory('lainnya'))
                                 <td class="px-3 py-3 uppercase">{{ $formatItem($lainnya) ?: '-' }}</td>
-                                <td class="px-3 py-3 uppercase">{{ $formatSn($lainnya) ?: '-' }}</td>
+                                <td class="px-3 py-3 uppercase text-xs leading-5">{!! $lainnya->count() ? $formatSnWithAsset($lainnya) : '-' !!}</td>
                             @endif
 
-                            <td class="px-3 py-3">{{ $distribution->tanggal_distribusi ?? '-' }}</td>
+                            <td class="px-3 py-3">{{ \App\Support\DateFormatter::date($distribution->tanggal_distribusi) }}</td>
                             <td class="px-3 py-3">
                                 @if($distribution->status === 'dipakai')
                                     <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Dipakai</span>

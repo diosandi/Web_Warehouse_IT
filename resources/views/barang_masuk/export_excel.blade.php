@@ -36,7 +36,7 @@
             <tr>
                 <th>No</th>
                 <th>Tanggal Masuk</th>
-                <th>Supplier</th>
+                <th>Asset</th>
                 <th>No PO</th>
                 <th>Kategori</th>
                 <th>Merk</th>
@@ -54,7 +54,7 @@
                 @forelse($barang->items as $item)
                     <tr>
                         <td class="text-center">{{ $no++ }}</td>
-                        <td>{{ $barang->tanggal_masuk ?? '-' }}</td>
+                        <td>{{ \App\Support\DateFormatter::date($barang->tanggal_masuk) }}</td>
                         <td>{{ $barang->supplier ?? '-' }}</td>
                         <td>{{ $barang->po_number ?? '-' }}</td>
                         <td>{{ $item->kategori ?? '-' }}</td>
@@ -65,17 +65,17 @@
                         <td>{{ $statusLabels[$item->status] ?? ($item->status ?? '-') }}</td>
                         <td>{{ ($item->storageLocation->gedung ?? '-') . ' - ' . ($item->storageLocation->ruangan ?? '-') }}</td>
                         <td>{{ $barang->keterangan ?? '-' }}</td>
-                        <td>{{ $barang->created_at ? $barang->created_at->format('d-m-Y H:i') : '-' }}</td>
+                        <td>{{ \App\Support\DateFormatter::datetime($barang->created_at) }}</td>
                     </tr>
                 @empty
                     <tr>
                         <td class="text-center">{{ $no++ }}</td>
-                        <td>{{ $barang->tanggal_masuk ?? '-' }}</td>
+                        <td>{{ \App\Support\DateFormatter::date($barang->tanggal_masuk) }}</td>
                         <td>{{ $barang->supplier ?? '-' }}</td>
                         <td>{{ $barang->po_number ?? '-' }}</td>
                         <td colspan="7">Tidak ada item terkait.</td>
                         <td>{{ $barang->keterangan ?? '-' }}</td>
-                        <td>{{ $barang->created_at ? $barang->created_at->format('d-m-Y H:i') : '-' }}</td>
+                        <td>{{ \App\Support\DateFormatter::datetime($barang->created_at) }}</td>
                     </tr>
                 @endforelse
             @empty

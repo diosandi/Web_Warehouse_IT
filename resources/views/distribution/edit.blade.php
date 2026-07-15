@@ -216,6 +216,56 @@
 
 </div>
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const gedungSelect = document.getElementById('gedung');
+    const ruanganSelect = document.getElementById('ruangan');
+    const getRuanganUrl = @json(route('distribution.get_ruangan'));
+    const selectedLocationId = @json((string) $distribution->location_id);
+
+    if (!gedungSelect || !ruanganSelect) {
+        return;
+    }
+
+    function loadRuangan(gedung, selectedId = '') {
+        if (!gedung) {
+            ruanganSelect.innerHTML = '<option value="">Pilih gedung dulu</option>';
+            return;
+        }
+
+        ruanganSelect.innerHTML = '<option value="">Loading...</option>';
+
+        fetch(getRuanganUrl + '?' + new URLSearchParams({ gedung }))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data ruangan');
+                }
+
+                return response.json();
+            })
+            .then(function (data) {
+                let html = '<option value="">-- Pilih Ruangan --</option>';
+
+                data.forEach(function (ruangan) {
+                    const selected = String(ruangan.id) === String(selectedId) ? ' selected' : '';
+                    html += `<option value="${ruangan.id}"${selected}>${ruangan.ruangan}</option>`;
+                });
+
+                ruanganSelect.innerHTML = html;
+            })
+            .catch(function () {
+                ruanganSelect.innerHTML = '<option value="">Ruangan gagal dimuat</option>';
+            });
+    }
+
+    if (gedungSelect.value) {
+        loadRuangan(gedungSelect.value, selectedLocationId);
+    }
+
+    gedungSelect.addEventListener('change', function () {
+        loadRuangan(gedungSelect.value);
+    });
+});
+
 function setupSearch(inputId, suggestionId, hiddenId, kategori, containerId = null, inputName = null) {
     let $input = $(inputId);
     let $suggestions = $(suggestionId);
@@ -366,47 +416,5 @@ $(document).on('click', '.remove-item', function () {
 
 });
 
-//Search ambil ruangan
-$(document).ready(function() {
-
-    let selectedGedung = $('#gedung').val();
-    let selectedLocationId = "{{ $distribution->location_id }}";
-
-    if (selectedGedung) {
-        loadRuangan(selectedGedung, selectedLocationId);
-    }
-
-    $('#gedung').on('change', function() {
-        let gedung = $(this).val();
-        loadRuangan(gedung, null);
-    });
-
-    function loadRuangan(gedung, selectedId = null) {
-        $.ajax({
-            url: '/get-ruangan',
-            data: { gedung: gedung },
-            success: function(data) {
-
-                let html = '<option value="">-- Pilih Ruangan --</option>';
-
-                data.forEach(r => {
-
-                                if (!r.id) return;
-
-                                let selected = (r.id == selectedId) ? 'selected' : '';
-
-                                html += `
-                                    <option value="${r.id}" ${selected}>
-                                        ${r.ruangan}
-                                    </option>
-                                `;
-                });
-
-                $('#ruangan').html(html);
-            }
-        });
-    }
-
-});
 </script>
 @endsection

@@ -37,7 +37,7 @@ class AuthController extends Controller
                 $request->session()->regenerateToken();
 
                 return back()->withErrors([
-                    'username' => 'username atau password salah',
+                    'username' => 'Akun ini sedang nonaktif.',
                 ])->onlyInput('username');
             }
 
@@ -45,6 +45,11 @@ class AuthController extends Controller
 
             return redirect()->intended('/dashboard');
         }
+
+        return back()->withErrors([
+            'username' => 'Username atau password salah.',
+        ])->onlyInput('username');
+
     }
 
     /**
