@@ -2,10 +2,8 @@
 
 @section('content')
 @php
-    $roleLabels = [
-        'super_admin' => 'Super Admin',
-        'admin' => 'Admin',
-    ];
+    $roleLabels = \App\Models\User::roleLabels();
+    $roleOptions = $roleOptions ?? $roleLabels;
 
     $statusLabels = [
         'active' => 'Aktif',
@@ -23,7 +21,7 @@
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Kelola Pengguna</h1>
-            <p class="text-gray-600 mt-1">Kelola akun Super Admin dan Admin</p>
+            <p class="text-gray-600 mt-1">Kelola akun pengguna sesuai hak akses</p>
         </div>
 
         <a href="{{ route('users.create') }}" class="btn btn-success">
@@ -73,8 +71,11 @@
                         <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Role</label>
                         <select name="role" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-xs uppercase">
                             <option value="">Semua</option>
-                            <option value="super_admin" {{ request('role') === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                            <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                            @foreach($roleOptions as $roleValue => $roleLabel)
+                                <option value="{{ $roleValue }}" {{ request('role') === $roleValue ? 'selected' : '' }}>
+                                    {{ $roleLabel }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
 
@@ -192,7 +193,7 @@
                             <td class="px-6 py-4 text-sm font-mono uppercase text-gray-700">{{ $user->username }}</td>
                             <td class="px-6 py-4 text-sm font-mono uppercase text-gray-700">{{ $user->email }}</td>
                             <td class="px-6 py-4 text-sm">
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $user->role === 'super_admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800' }}">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ in_array($user->role, ['super_admin', 'admin'], true) ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800' }}">
                                     {{ $roleLabels[$user->role] ?? $user->role }}
                                 </span>
                             </td>
@@ -217,7 +218,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-sm font-medium text-gray-500">
+                                <td colspan="7" class="px-6 py-8 text-center text-sm font-medium text-gray-500">
                                 Belum ada data user.
                             </td>
                         </tr>

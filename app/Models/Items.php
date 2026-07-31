@@ -57,6 +57,11 @@ class Items extends Model
     {
         return $this->hasMany(ItemStatusHistory::class, 'item_id');
     }
+
+    public function issueReports()
+    {
+        return $this->hasMany(IssueReport::class, 'item_id');
+    }
         /**
      * Get kategori options untuk dropdown
      */

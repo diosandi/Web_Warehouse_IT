@@ -297,7 +297,7 @@
                         };
                     @endphp
                     @forelse($deviceDetails as $index => $deviceDetail)
-                        <tr class="hover:bg-gray-50 transition duration-150">
+                        <tr class="hover:bg-green-50 transition duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $deviceDetails->firstItem() + $index }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">
                                  @if(optional($deviceDetail->item)->kategori === 'PC')

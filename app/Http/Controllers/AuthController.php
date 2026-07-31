@@ -43,7 +43,7 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard');
+            return redirect()->intended($user->isOperator() ? '/dashboard' : '/dashboard-client');
         }
 
         return back()->withErrors([
@@ -65,4 +65,3 @@ class AuthController extends Controller
         return redirect('/login');
     }
 }
-

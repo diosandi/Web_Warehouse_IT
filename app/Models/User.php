@@ -60,4 +60,54 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isClient(): bool
+    {
+        return $this->role === 'client';
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->role === 'staf';
+    }
+
+    public function isOperator(): bool
+    {
+        return $this->isSuperAdmin() || $this->isAdmin();
+    }
+
+    public function canManageUsers(): bool
+    {
+        return $this->isOperator();
+    }
+
+    public function canManageIssueReports(): bool
+    {
+        return $this->isOperator();
+    }
+
+    public static function roleLabels(): array
+    {
+        return [
+            'super_admin' => 'Super Admin',
+            'admin' => 'Admin',
+            'client' => 'Client',
+            'staf' => 'Staf',
+        ];
+    }
+
+    public function distributions()
+    {
+        return $this->hasMany(Distribution::class, 'user_id');
+    }
+
+    public function issueReports()
+    {
+        return $this->hasMany(IssueReport::class, 'reporter_id');
+    }
+
+    public function resolvedIssueReports()
+    {
+        return $this->hasMany(IssueReport::class, 'resolved_by');
+    }
+
 }

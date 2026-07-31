@@ -12,6 +12,8 @@ class UserManagementController extends Controller
 {
     public function searchUsers(Request $request)
     {
+        $this->ensureCanManageUsers();
+
         $q = trim((string) $request->get('q', ''));
 
         if ($q === '') {
@@ -20,21 +22,26 @@ class UserManagementController extends Controller
 
         $search = "%{$q}%";
 
-        $users = User::where('name', 'like', $search)
-            ->orWhere('username', 'like', $search)
-            ->orWhere('email', 'like', $search)
+        $users = User::whereIn('role', $this->manageableRoles())
+            ->where(function ($query) use ($search) {
+                $query->where('name', 'like', $search)
+                    ->orWhere('username', 'like', $search)
+                    ->orWhere('email', 'like', $search);
+            })
             ->limit(10)
             ->get();
 
+        $roleLabels = User::roleLabels();
+
         return response()->json(
-            $users->map(function ($user) {
+            $users->map(function ($user) use ($roleLabels) {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'username' => $user->username,
-                    'role' => $user->role === 'super_admin' ? 'Super Admin' : 'Admin',
+                    'role' => $roleLabels[$user->role] ?? $user->role,
                     'status' => $user->is_active ? 'Aktif' : 'Nonaktif',
-                    'text' => $user->name . ' | Username: ' . $user->username . ' | Role: ' . ($user->role === 'super_admin' ? 'Super Admin' : 'Admin'),
+                    'text' => $user->name . ' | Username: ' . $user->username . ' | Role: ' . ($roleLabels[$user->role] ?? $user->role),
                 ];
             })
         );
@@ -42,7 +49,9 @@ class UserManagementController extends Controller
 
    public function index(Request $request)
     {
-        $query = User::query();
+        $this->ensureCanManageUsers();
+
+        $query = User::whereIn('role', $this->manageableRoles());
 
         if ($request->filled('user_id')) {
             $query->whereKey($request->user_id);
@@ -56,7 +65,7 @@ class UserManagementController extends Controller
             });
         }
 
-        if ($request->filled('role')) {
+        if ($request->filled('role') && in_array($request->role, $this->manageableRoles(), true)) {
             $query->where('role', $request->role);
         }
 
@@ -64,30 +73,36 @@ class UserManagementController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
 
-        $users = $query->latest()->paginate(10)->withQueryString();
+        $users = $query->latest()->paginate(50)->withQueryString();
+        $roleOptions = $this->roleOptions();
 
-        return view('users.index', compact('users'));
+        return view('users.index', compact('users', 'roleOptions'));
     }
 
     public function create()
     {
+        $this->ensureCanManageUsers();
+
         $user = new User([
-            'role' => 'admin',
+            'role' => $this->defaultRole(),
             'is_active' => true,
         ]);
+        $roleOptions = $this->roleOptions();
 
-        return view('users.create', compact('user'));
+        return view('users.create', compact('user', 'roleOptions'));
     }
 
     public function store(Request $request)
     {
+        $this->ensureCanManageUsers();
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username',
             'email' => 'nullable|email|unique:users,email',
-            'role' => 'required|in:super_admin,admin',
+            'role' => ['required', Rule::in($this->manageableRoles())],
             'is_active' => 'required|boolean',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:3',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -99,18 +114,26 @@ class UserManagementController extends Controller
 
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        $this->ensureCanManageUsers();
+        $this->ensureCanManageTarget($user);
+
+        $roleOptions = $this->roleOptions();
+
+        return view('users.edit', compact('user', 'roleOptions'));
     }
 
     public function update(Request $request, User $user)
     {
+        $this->ensureCanManageUsers();
+        $this->ensureCanManageTarget($user);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id)],
             'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'role' => 'required|in:super_admin,admin',
+            'role' => ['required', Rule::in($this->manageableRoles())],
             'is_active' => 'required|boolean',
-            'password' => 'nullable|string|min:8',
+            'password' => 'nullable|string|min:3',
         ]);
 
         if ($user->id === Auth::id() && ($validated['role'] !== 'super_admin' || ! $validated['is_active'])) {
@@ -134,6 +157,9 @@ class UserManagementController extends Controller
 
     public function destroy(User $user)
     {
+        $this->ensureCanManageUsers();
+        $this->ensureCanManageTarget($user);
+
         if ($user->id === Auth::id()) {
             return back()->with('error', 'Kamu tidak bisa menghapus akun sendiri.');
         }
@@ -152,5 +178,34 @@ class UserManagementController extends Controller
         return $user->role === 'super_admin'
             && $user->is_active
             && User::where('role', 'super_admin')->where('is_active', true)->count() <= 1;
+    }
+
+    private function ensureCanManageUsers(): void
+    {
+        abort_unless(Auth::user()?->canManageUsers(), 403);
+    }
+
+    private function ensureCanManageTarget(User $user): void
+    {
+        abort_unless(Auth::user()?->isSuperAdmin() || in_array($user->role, ['client', 'staf'], true), 403);
+    }
+
+    private function manageableRoles(): array
+    {
+        if (Auth::user()?->isSuperAdmin()) {
+            return ['super_admin', 'admin', 'client', 'staf'];
+        }
+
+        return ['client', 'staf'];
+    }
+
+    private function roleOptions(): array
+    {
+        return array_intersect_key(User::roleLabels(), array_flip($this->manageableRoles()));
+    }
+
+    private function defaultRole(): string
+    {
+        return Auth::user()?->isSuperAdmin() ? 'admin' : 'client';
     }
 }

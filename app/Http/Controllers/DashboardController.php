@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Items;
 use App\Models\Distribution;
 use App\Models\Barang_masuk;
+use App\Models\IssueReport;
 
 class DashboardController extends Controller
 {
@@ -13,6 +14,12 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
+
+        if (! $user->isOperator()) {
+            return redirect()->route('dashboard.client');
+        }
+
         $activeDistribution = function ($query) {
             $query->where('status', 'dipakai')
                 ->whereHas('distribution', function ($distribution) {
@@ -52,6 +59,10 @@ class DashboardController extends Controller
             'barang_masuk_bulan_ini' => Barang_masuk::whereBetween('tanggal_masuk', [
                 now()->startOfMonth()->toDateString(),
                 now()->endOfMonth()->toDateString(),
+            ])->count(),
+            'issue_reports_open' => IssueReport::whereIn('status', [
+                IssueReport::STATUS_OPEN,
+                IssueReport::STATUS_IN_PROGRESS,
             ])->count(),
         ];
 
@@ -152,11 +163,25 @@ class DashboardController extends Controller
 
         $distribusiTerbaru = Distribution::with([
             'distributionItems.item',
-            'location'
+            'location',
+            'user',
         ])
         ->latest()
         ->take(5)
         ->get();
+
+        $laporanKendalaTerbaru = IssueReport::with([
+                'reporter',
+                'item',
+                'location',
+            ])
+            ->whereIn('status', [
+                IssueReport::STATUS_OPEN,
+                IssueReport::STATUS_IN_PROGRESS,
+            ])
+            ->latest()
+            ->take(5)
+            ->get();
 
         $perluPerhatian = [
             [
@@ -276,6 +301,39 @@ class DashboardController extends Controller
             ->sortByDesc('total')
             ->values();
 
-        return view('dashboard', compact('summary', 'stokPerKategori','stokPerAsset','distribusiTerbaru','perluPerhatian','distribusiPerLokasi','distribusiAktifPerAsset'));
+        return view('dashboard', compact('summary', 'stokPerKategori','stokPerAsset','distribusiTerbaru','laporanKendalaTerbaru','perluPerhatian','distribusiPerLokasi','distribusiAktifPerAsset'));
+    }
+
+    public function client()
+    {
+        $user = auth()->user();
+
+        if ($user->isOperator()) {
+            return redirect()->route('dashboard');
+        }
+
+        $myDistributions = Distribution::with([
+                'location',
+                'distributionItems.item',
+            ])
+            ->where('user_id', $user->id)
+            ->where('status', 'dipakai')
+            ->latest()
+            ->get();
+
+        $myReports = IssueReport::with(['item', 'location'])
+            ->where('reporter_id', $user->id)
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $myReportSummary = [
+            'open' => IssueReport::where('reporter_id', $user->id)->where('status', IssueReport::STATUS_OPEN)->count(),
+            'in_progress' => IssueReport::where('reporter_id', $user->id)->where('status', IssueReport::STATUS_IN_PROGRESS)->count(),
+            'resolved' => IssueReport::where('reporter_id', $user->id)->where('status', IssueReport::STATUS_RESOLVED)->count(),
+            'closed' => IssueReport::where('reporter_id', $user->id)->where('status', IssueReport::STATUS_CLOSED)->count(),
+        ];
+
+        return view('dashboard_client', compact('myDistributions', 'myReports', 'myReportSummary'));
     }
 }

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Warehouse IT RSCM</title>
+    <title>Login - IT Maintenance RSCM</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body {
@@ -300,14 +301,14 @@
                         <!-- Text -->
                         <div class="space-y-3">
                             <h1 class="text-3xl font-bold tracking-wide">
-                                WAREHOUSE IT
+                                IT MAINTENANCE
                             </h1>
                             <div class="h-0.5 w-20 bg-white mx-auto rounded-full opacity-80"></div>
                             <h2 class="text-2xl font-semibold">
                                 RSCM
                             </h2>
                             <p class="text-blue-100 text-sm leading-relaxed max-w-xs mx-auto mt-4">
-                                Sistem Manajemen Kelola Barang IT<br>
+                                Sistem Manajemen Kelola Barang dan Laporan Kendala Perangkat IT<br>
                                 <span class="text-xs opacity-90">Rumah Sakit Cipto Mangunkusumo</span>
                             </p>
                         </div>

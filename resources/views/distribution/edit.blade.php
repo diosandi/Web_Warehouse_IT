@@ -36,8 +36,23 @@
 
             <!-- USER -->
             <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Akun Pengguna</label>
+                <select name="user_id" id="distribution_user_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <option value="">-- Pilih akun client/staf --</option>
+                    @foreach($distributionUsers as $distributionUser)
+                        <option value="{{ $distributionUser->id }}"
+                            data-name="{{ $distributionUser->name }}"
+                            {{ (string) old('user_id', $distribution->user_id) === (string) $distributionUser->id ? 'selected' : '' }}>
+                            {{ $distributionUser->name }} - {{ $distributionUser->username }} ({{ \App\Models\User::roleLabels()[$distributionUser->role] ?? $distributionUser->role }})
+                        </option>
+                    @endforeach
+                </select>
+                <p class="text-xs text-gray-500 mt-1">Akun ini akan melihat perangkatnya di dashboard dan bisa membuat laporan kendala.</p>
+            </div>
+
+            <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pengguna</label>
-                <input type="text" name="nama_user" value="{{ $distribution->nama_user }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <input type="text" name="nama_user" id="nama_user" value="{{ old('nama_user', $distribution->user?->name ?? $distribution->nama_user) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
             <!-- DIVISI -->
             <div class="mb-4">
@@ -219,8 +234,17 @@
 document.addEventListener('DOMContentLoaded', function () {
     const gedungSelect = document.getElementById('gedung');
     const ruanganSelect = document.getElementById('ruangan');
+    const userSelect = document.getElementById('distribution_user_id');
+    const namaUserInput = document.getElementById('nama_user');
     const getRuanganUrl = @json(route('distribution.get_ruangan'));
     const selectedLocationId = @json((string) $distribution->location_id);
+
+    if (userSelect && namaUserInput) {
+        userSelect.addEventListener('change', function () {
+            const selected = userSelect.options[userSelect.selectedIndex];
+            namaUserInput.value = selected && selected.dataset.name ? selected.dataset.name : '';
+        });
+    }
 
     if (!gedungSelect || !ruanganSelect) {
         return;

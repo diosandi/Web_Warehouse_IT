@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- <title>{{ config('app.name', 'Warehouse IT RSCM') }}</title> --}}
-    <title>Warehouse IT RSCM</title>
+    <title>IT Maintenance RSCM</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="stylesheet" href="{{ asset('vendor/select2/css/select2.min.css') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -35,6 +35,14 @@
             #main-content {
                 margin-left: 0;
             }
+        }
+
+         /* Efek blur pada body */
+        .is-blurred {
+            filter: blur(10px);
+            transition: filter 0.5s ease;
+            pointer-events: none;
+            user-select: none;
         }
     </style>
 </head>
@@ -166,6 +174,41 @@
                 }
             });
         });
+
+         (function() {
+                let timeout;
+                const idleTime = 5 * 60 * 1000; // 5 menit
+
+                function applyBlur() {
+                    document.body.classList.add('is-blurred');
+                }
+
+                function removeBlur() {
+                    if (document.body.classList.contains('is-blurred')) {
+                        document.body.classList.remove('is-blurred');
+                    }
+                    resetTimer();
+                }
+
+                function resetTimer() {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(applyBlur, idleTime);
+                }
+
+                // List kejadian yang dianggap sebagai "Aktivitas"
+                const activityEvents = [
+                    'mousedown', 'mousemove', 'keydown',
+                    'scroll', 'touchstart', 'click'
+                ];
+
+                // Daftarkan semua event ke window
+                activityEvents.forEach(function(eventName) {
+                    window.addEventListener(eventName, removeBlur, true);
+                });
+
+                // Jalankan timer saat halaman pertama kali dibuka
+                resetTimer();
+            })();
     </script>
 
 </body>

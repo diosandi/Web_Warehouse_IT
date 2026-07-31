@@ -2,6 +2,7 @@
     $isCreate = request()->routeIs('users.create');
     $selectedRole = old('role', $user->role ?? 'admin');
     $selectedStatus = (string) old('is_active', isset($user->is_active) ? (int) $user->is_active : 1);
+    $roleOptions = $roleOptions ?? \App\Models\User::roleLabels();
 @endphp
 
 @if($errors->any())
@@ -21,7 +22,7 @@
     <div>
         <label class="block text-xs font-semibold uppercase text-gray-500 mb-2">Username</label>
         <input type="text" name="username" value="{{ old('username', $user->username) }}"
-            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
             required>
     </div>
 
@@ -34,8 +35,11 @@
     <div>
         <label class="block text-xs font-semibold uppercase text-gray-500 mb-2">Role</label>
         <select name="role" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required>
-            <option value="admin" {{ $selectedRole === 'admin' ? 'selected' : '' }}>Admin</option>
-            <option value="super_admin" {{ $selectedRole === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+            @foreach($roleOptions as $roleValue => $roleLabel)
+                <option value="{{ $roleValue }}" {{ $selectedRole === $roleValue ? 'selected' : '' }}>
+                    {{ $roleLabel }}
+                </option>
+            @endforeach
         </select>
     </div>
 

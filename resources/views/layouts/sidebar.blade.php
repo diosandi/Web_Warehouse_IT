@@ -1,16 +1,29 @@
 <!-- Sidebar -->
+@php
+    $dashboardUrl = Auth::user()->isOperator() ? route('dashboard') : route('dashboard.client');
+    $dashboardActive = request()->routeIs('dashboard') || request()->routeIs('dashboard.client');
+@endphp
 <aside id="sidebar" class="fixed top-16 left-0 z-40 w-64 bg-white shadow-lg h-[calc(100vh-4rem)] overflow-y-auto transform -translate-x-full transition-transform duration-300 ease-in-out border-r border-gray-100">
     <div class="p-4 md:p-6">
         <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Menu Utama</h2>
         
         <nav class="space-y-1 md:space-y-2">
             <!-- Dashboard -->
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition duration-200 {{ request()->routeIs('dashboard') ? 'bg-green-600 text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+            <a href="{{ $dashboardUrl }}" class="flex items-center gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition duration-200 {{ $dashboardActive ? 'bg-green-600 text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                 </svg>
                 <span class="font-medium text-sm md:text-base">Dashboard</span>
             </a>
+
+            <a href="{{ route('issue_reports.index') }}" class="flex items-center gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition duration-200 {{ request()->routeIs('issue_reports.*') ? 'bg-green-600 text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m-9 7h14a2 2 0 002-2V7.5a2 2 0 00-.586-1.414l-3.5-3.5A2 2 0 0014.5 2H6a2 2 0 00-2 2v15a2 2 0 002 2z"></path>
+                </svg>
+                <span class="font-medium text-sm md:text-base">Laporan Kendala</span>
+            </a>
+
+            @if(Auth::user()->isOperator())
 
             <!-- Warehouse -->
             <a href="{{ route('locations.index') }}" class="flex items-center gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition duration-200 {{ request()->routeIs('locations.*') ? 'bg-green-600 text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
@@ -61,7 +74,7 @@
             <div class="border-t border-gray-200 my-3 md:my-4"></div>
 
             <!-- Manage User -->
-            @if(Auth::user()->isSuperAdmin())
+            @if(Auth::user()->canManageUsers())
                 <a href="{{ route('users.index') }}"
                 class="flex items-center gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition duration-200 {{ request()->routeIs('users.*') ? 'bg-green-600 text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,6 +91,7 @@
                 </svg>
                 <span class="font-medium text-sm md:text-base">Laporan</span>
             </a>
+            @endif
         </nav>
     </div>
 </aside>

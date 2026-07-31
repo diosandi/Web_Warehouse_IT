@@ -297,7 +297,7 @@
                         </th>
                         <th class="px-4 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
                             <a href="{{ $buildSortUrl('tanggal_distribusi') }}" class="flex items-center gap-1 hover:underline">
-                                Tanggal Distribusi
+                                Tanggal
                                 @if($sortBy === 'tanggal_distribusi')
                                     <span>{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
                                 @endif
@@ -345,7 +345,7 @@
                                 }
                             }
                         @endphp
-                        <tr class="{{$d->status == 'dikembalikan' ? 'bg-gray-100 opacity-70': ''}} hover:bg-gray-50 transition duration-150">
+                        <tr class="{{$d->status == 'dikembalikan' ? 'bg-gray-100 opacity-70': ''}} hover:bg-green-50 transition duration-150">
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $loop->iteration + ($distribution->currentPage() - 1) * $distribution->perPage() }}</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['PC']))
                                                                                                        @foreach($kategori['PC'] as $pc)
@@ -495,7 +495,9 @@
                                                                                                     @else
                                                                                                         -
                                                                                                     @endif</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->nama_user }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">
+                                {{ $d->user?->name ?? $d->nama_user }}
+                            </td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->divisi ?? '-' }}</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->location->gedung ?? '-' }} - {{ $d->location->ruangan ?? '-' }}</td>
                             <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ \App\Support\DateFormatter::date($d->tanggal_distribusi) }}</td>

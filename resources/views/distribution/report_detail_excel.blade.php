@@ -83,7 +83,8 @@
                     <th>SN Lainnya / Asset</th>
                 @endif
 
-                <th>Tanggal Distribusi</th>
+                <th>Tanggal</th>
+                <th>Keterangan</th>
                 <th>Status</th>
             </tr>
         </thead>
@@ -169,6 +170,7 @@
                     @endif
 
                     <td>{{ \App\Support\DateFormatter::date($distribution->tanggal_distribusi) }}</td>
+                    <td>{{ $distribution->keterangan ?? '-' }}</td>
                     <td>{{ $distribution->status === 'dipakai' ? 'Dipakai' : 'Dikembalikan' }}</td>
                 </tr>
             @endforeach

@@ -1,12 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $isManager = Auth::user()->canManageIssueReports();
+    $hasActiveFilter = request()->filled('search') || request()->filled('status') || request()->filled('priority');
+    $statusClasses = [
+        'open' => 'bg-yellow-100 text-yellow-800',
+        'in_progress' => 'bg-blue-100 text-blue-800',
+        'resolved' => 'bg-green-100 text-green-800',
+        'closed' => 'bg-gray-100 text-gray-800',
+    ];
+    $priorityClasses = [
+        'low' => 'bg-gray-100 text-gray-800',
+        'normal' => 'bg-blue-100 text-blue-800',
+        'high' => 'bg-orange-100 text-orange-800',
+        'urgent' => 'bg-red-100 text-red-800',
+    ];
+@endphp
 <br>
 <div class="distribution-page mx-auto w-full px-3 py-8 sm:px-4 lg:px-6 lg:py-12">
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
         <p class="text-gray-600 mt-1">Selamat datang di Warehouse IT RSCM</p>
     </div>
+
     {{-- card 1 --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
@@ -153,6 +170,20 @@
                 </div>
             </div>
         </div>
+        <a href="{{ route('issue_reports.index', ['status' => 'open']) }}" class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500 hover:shadow-xl transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium">Antrian Kendala</p>
+                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ number_format($summary['issue_reports_open']) }}</h3>
+                    <p class="text-xs text-gray-500 mt-1">Laporan baru dan diproses</p>
+                </div>
+                <div class="bg-orange-100 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </a>
     </div>
 
 <!-- Chart Status Barang + Stok Per Kategori-->
@@ -427,7 +458,7 @@
                         <tr class="hover:bg-gray-50">
                             <td class="py-4 pr-4">
                                 <p class="font-semibold uppercase text-gray-800">
-                                    {{ $distribusi->nama_user ?? '-' }}
+                                    {{ $distribusi->user?->name ?? $distribusi->nama_user ?? '-' }}
                                 </p>
                                 <p class="text-xs uppercase text-gray-500">
                                     {{ $distribusi->divisi ?? '-' }}
@@ -466,6 +497,79 @@
                         <tr>
                             <td colspan="5" class="py-8 text-center text-sm font-medium text-gray-500">
                                 Belum ada data distribusi.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{{-- Antrian Kendala Terbaru --}}
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Antrian Kendala Terbaru</h2>
+                <p class="text-sm text-gray-500 mt-1">Laporan user yang masih baru atau sedang diproses.</p>
+            </div>
+
+            <a href="{{ route('issue_reports.index') }}" class="btn btn-success btn-sm">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h6m-6 4h6m-6 4h4m6-8v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2h6l6 6z"></path>
+                </svg>
+                Lihat Semua
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[920px] text-sm">
+                <thead>
+                    <tr class="border-b border-gray-200 text-left text-xs uppercase text-gray-500">
+                        <th class="pb-3 font-semibold">Tiket</th>
+                        <th class="pb-3 font-semibold">Pelapor</th>
+                        <th class="pb-3 font-semibold">Kendala</th>
+                        <th class="pb-3 font-semibold">Perangkat</th>
+                        <th class="pb-3 font-semibold">Lokasi</th>
+                        <th class="pb-3 font-semibold">Prioritas</th>
+                        <th class="pb-3 font-semibold">Status</th>
+                        <th class="pb-3 font-semibold">Aksi</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($laporanKendalaTerbaru as $report)
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-4 pr-4 font-mono font-semibold text-gray-800">{{ $report->ticket_number }}</td>
+                            <td class="py-4 pr-4">
+                                <p class="font-semibold uppercase text-gray-800">{{ $report->reporter->name ?? '-' }}</p>
+                                <p class="text-xs text-gray-500">{{ $report->created_at->format('d/m/Y H:i') }}</p>
+                            </td>
+                            <td class="py-4 pr-4 text-gray-800">{{ $report->title }}</td>
+                            <td class="py-4 pr-4">
+                                <p class="font-semibold text-gray-800">{{ $report->item->kategori ?? '-' }}</p>
+                                <p class="text-xs font-mono text-gray-500">{{ $report->item->serial_number ?? '-' }}</p>
+                            </td>
+                            <td class="py-4 pr-4 uppercase text-gray-700">
+                                {{ $report->location->gedung ?? '-' }} - {{ $report->location->ruangan ?? '-' }}
+                            </td>
+                            <td class="py-4 pr-4">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $priorityClasses[$report->priority] ?? 'bg-gray-100 text-gray-800' }}">
+                                    {{ $report->priority_label }}
+                                </span>
+                            </td>
+                            <td class="py-4 pr-4">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusClasses[$report->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                    {{ $report->status_label }}
+                                </span>
+                            </td>
+                            <td class="py-4">
+                                <a href="{{ route('issue_reports.show', $report) }}" class="btn btn-primary btn-sm">Detail</a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="py-8 text-center text-sm font-medium text-gray-500">
+                                Belum ada antrian kendala.
                             </td>
                         </tr>
                     @endforelse

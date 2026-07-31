@@ -6,6 +6,7 @@ use App\Models\Distribution;
 use App\Models\Items;
 use App\Models\DistributionItem;
 use App\Models\Locations;
+use App\Models\User;
 use App\Http\Controllers\Concerns\ResolvesRedirects;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,15 +52,21 @@ class DistributionController extends Controller
         }
 
         $search = "%{$q}%";
-        $results = Distribution::with(['distributionItems.item','location'])
-            ->where('nama_user', 'like', $search)
-            ->orWhere('divisi', 'like', $search)
-            ->orWhereHas('location', function ($itemQuery) use ($search) {
-                $itemQuery->where('gedung', 'like', $search)
-                          ->orWhere('ruangan', 'like', $search);
-            })
-            ->orWhere(function ($distributionQuery) use ($search) {
-                $this->whereHasVisibleItemMatching($distributionQuery, $search);
+        $results = Distribution::with(['distributionItems.item','location', 'user'])
+            ->where(function ($query) use ($search) {
+                $query->where('nama_user', 'like', $search)
+                    ->orWhere('divisi', 'like', $search)
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', $search)
+                            ->orWhere('username', 'like', $search);
+                    })
+                    ->orWhereHas('location', function ($itemQuery) use ($search) {
+                        $itemQuery->where('gedung', 'like', $search)
+                                  ->orWhere('ruangan', 'like', $search);
+                    })
+                    ->orWhere(function ($distributionQuery) use ($search) {
+                        $this->whereHasVisibleItemMatching($distributionQuery, $search);
+                    });
             })
             ->limit(10)
             ->get();
@@ -100,11 +107,11 @@ class DistributionController extends Controller
                     'serial_number' => $item ? $item->serial_number : '-',
                     'gedung'=> $location ? $location->gedung : '-',
                     'ruangan'=>$location ? $location->ruangan : '-',
-                    'nama_user' => $d->nama_user,
+                    'nama_user' => $d->user?->name ?? $d->nama_user,
                     'text' => trim(
                         $itemText .
                     ' | Lokasi: '. $locationText .
-                    ' | Nama User: ' . ($d->nama_user ?? '-')
+                    ' | Nama User: ' . ($d->user?->name ?? $d->nama_user ?? '-')
                 )
             ];
         });
@@ -127,7 +134,7 @@ class DistributionController extends Controller
 
     public function index(Request $request)
     {
-        $query = Distribution::with(['distributionItems.item', 'location']);
+        $query = Distribution::with(['distributionItems.item', 'location', 'user']);
 
         // SEARCH
         if ($request->item_id) {
@@ -140,6 +147,10 @@ class DistributionController extends Controller
             $query->where(function($q) use ($request) {
                 $q->where('nama_user', 'like', "%{$request->search}%")
                 ->orWhere('divisi', 'like', "%{$request->search}%")
+                ->orWhereHas('user', function ($user) use ($request) {
+                    $user->where('name', 'like', "%{$request->search}%")
+                        ->orWhere('username', 'like', "%{$request->search}%");
+                })
                 ->orWhereHas('location', function($loc) use ($request) {
                     $loc->where('gedung', 'like', "%{$request->search}%")
                         ->orWhere('ruangan', 'like', "%{$request->search}%");
@@ -255,6 +266,10 @@ class DistributionController extends Controller
                     ->get(),
             'locations' => Locations::all(),
             'gedungList' => $gedungList,
+            'distributionUsers' => User::whereIn('role', ['client', 'staf'])
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(),
             'redirect' => $redirect
         ]);
     }
@@ -263,6 +278,7 @@ class DistributionController extends Controller
     {
         $request->validate([
             'location_id' => 'required|integer|exists:locations,id',
+            'user_id' => 'nullable|integer|exists:users,id',
             'nama_user' => 'nullable',
             'divisi' => 'nullable',
             'tanggal_distribusi' => 'required|date',
@@ -306,10 +322,15 @@ class DistributionController extends Controller
             }
         }
 
+        $selectedUser = $request->filled('user_id')
+            ? User::find($request->user_id)
+            : null;
+
         // 1. simpan header
         $distribution = Distribution::create([
             'location_id' => $request->location_id,
-            'nama_user' => $request->nama_user,
+            'user_id' => $selectedUser?->id,
+            'nama_user' => $selectedUser?->name ?? $request->nama_user,
             'divisi' => $request->divisi,
             'tanggal_distribusi' => $request->tanggal_distribusi,
             'status' => 'dipakai',
@@ -337,7 +358,7 @@ class DistributionController extends Controller
 
     public function edit(Request $request, $id)
     {
-        $distribution = Distribution::with('distributionItems.item')->findOrFail($id);
+        $distribution = Distribution::with(['distributionItems.item', 'user'])->findOrFail($id);
         $redirect = $this->redirectTarget($request, route('distribution.index'));
 
         $activeDistributionItems = $distribution->distributionItems->where('status', 'dipakai');
@@ -471,12 +492,23 @@ class DistributionController extends Controller
             ->pluck('gedung');
 
         $locations = Locations::all();
+        $distributionUsers = User::where(function ($query) use ($distribution) {
+                $query->whereIn('role', ['client', 'staf'])
+                    ->where('is_active', true);
+
+                if ($distribution->user_id) {
+                    $query->orWhere('id', $distribution->user_id);
+                }
+            })
+            ->orderBy('name')
+            ->get();
 
         return view('distribution.edit', compact(
             'distribution',
             'selectedItems',
             'pcs','monitors','printers_kertas','printers_barcode','scanners','lainnya',
             'locations',
+            'distributionUsers',
             'gedungList',
             'pc_selected',
             'monitor_selected',
@@ -492,6 +524,7 @@ class DistributionController extends Controller
     {
         $request->validate([
             'location_id' => 'required|integer|exists:locations,id',
+            'user_id' => 'nullable|integer|exists:users,id',
             'tanggal_distribusi' => 'required|date',
 
             // TAMBAHAN
@@ -548,11 +581,15 @@ class DistributionController extends Controller
         }
 
         $status = $items->isNotEmpty() ? 'dipakai' : 'dikembalikan';
+        $selectedUser = $request->filled('user_id')
+            ? User::find($request->user_id)
+            : null;
 
-        DB::transaction(function () use ($request, $distribution, $items, $activeDistributionItems, $status) {
+        DB::transaction(function () use ($request, $distribution, $items, $activeDistributionItems, $status, $selectedUser) {
             $distribution->update([
                 'location_id' => $request->location_id,
-                'nama_user' => $request->nama_user,
+                'user_id' => $selectedUser?->id,
+                'nama_user' => $selectedUser?->name ?? $request->nama_user,
                 'divisi' => $request->divisi,
                 'tanggal_distribusi' => $request->tanggal_distribusi,
                 'keterangan' => $request->keterangan,

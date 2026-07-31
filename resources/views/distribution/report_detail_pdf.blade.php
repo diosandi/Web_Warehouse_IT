@@ -95,6 +95,7 @@
                 @endif
 
                 <th>Tanggal</th>
+                <th>Keterangan</th>
                 <th>Status</th>
             </tr>
         </thead>
@@ -181,6 +182,7 @@
                     @endif
 
                     <td class="nowrap">{{ \App\Support\DateFormatter::date($distribution->tanggal_distribusi) }}</td>
+                    <td>{{ $distribution->keterangan ?? '-' }}</td>
                     <td>{{ $distribution->status === 'dipakai' ? 'Dipakai' : 'Dikembalikan' }}</td>
                 </tr>
             @empty

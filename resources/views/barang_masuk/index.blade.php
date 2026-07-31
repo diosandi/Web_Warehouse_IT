@@ -241,7 +241,7 @@
 
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($barang_masuk as $bm)
-                    <tr class="hover:bg-gray-50 transition duration-150">
+                    <tr class="hover:bg-green-50 transition duration-150">
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $loop->iteration }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ \App\Support\DateFormatter::date($bm->tanggal_masuk) }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->kategori ?? '-' }}</td>

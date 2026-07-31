@@ -357,7 +357,7 @@
                                 ? 'used'
                                 : ($item->status === 'used' ? 'available' : $item->status);
                         @endphp
-                        <tr class="hover:bg-gray-50 transition duration-150">
+                        <tr class="hover:bg-green-50 transition duration-150">
                             <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">{{ $items->firstItem() + $index }}</td>
                             <td class="px-3 md:px-4 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-semibold">
                                 @if($item->kategori === 'PC')

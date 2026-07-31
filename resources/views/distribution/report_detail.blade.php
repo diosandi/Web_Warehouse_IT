@@ -185,7 +185,8 @@
                             <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">SN Lainnya / Asset</th>
                         @endif
 
-                        <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Tanggal Distribusi</th>
+                        <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Tanggal</th>
+                        <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Keterangan</th>
                         <th class="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Status</th>
                     </tr>
                 </thead>
@@ -293,6 +294,7 @@
                             @endif
 
                             <td class="px-3 py-3">{{ \App\Support\DateFormatter::date($distribution->tanggal_distribusi) }}</td>
+                            <td class="px-3 py-3">{{ $distribution->keterangan ?? '-' }}</td>
                             <td class="px-3 py-3">
                                 @if($distribution->status === 'dipakai')
                                     <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Dipakai</span>

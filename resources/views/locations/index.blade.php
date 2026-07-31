@@ -246,6 +246,7 @@
         <div class="overflow-x-auto">
         <div class="distribution-table-wrap overflow-x-auto">
             <table class="distribution-table w-full divide-y divide-gray-200">
+                <thead class="bg-gradient-to-r from-green-600 to-green-700">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">No</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Gedung</th>
@@ -256,7 +257,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($locations as $index => $loc)
-                        <tr class="hover:bg-gray-50 transition duration-150">
+                        <tr class="hover:bg-green-50 transition duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ $locations->firstItem() + $index }}
                             </td>
