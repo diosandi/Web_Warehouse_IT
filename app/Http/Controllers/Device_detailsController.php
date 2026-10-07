@@ -145,23 +145,31 @@ class Device_detailsController extends Controller
 
                 if ($request->filled('gedung') || $request->filled('ruangan')) {
                     $query->where(function ($q) use ($selectedGedung, $selectedRuangan) {
-                        $q->whereHas('item.storageLocation', function ($storageLocationQuery) use ($selectedGedung, $selectedRuangan) {
-                            if ($selectedGedung) {
-                                $storageLocationQuery->where('gedung', 'like', '%' . $selectedGedung . '%');
-                            }
+                        $q->whereHas('item.distributionItems', function ($distributionItemQuery) use ($selectedGedung, $selectedRuangan) {
+                            $distributionItemQuery->active()
+                                ->whereHas('distribution.location', function ($distributionLocationQuery) use ($selectedGedung, $selectedRuangan) {
+                                    if ($selectedGedung) {
+                                        $distributionLocationQuery->where('gedung', $selectedGedung);
+                                    }
 
-                            if ($selectedRuangan) {
-                                $storageLocationQuery->where('ruangan', 'like', '%' . $selectedRuangan . '%');
-                            }
+                                    if ($selectedRuangan) {
+                                        $distributionLocationQuery->where('ruangan', $selectedRuangan);
+                                    }
+                                });
                         })
-                        ->orWhereHas('item.distributionItems.distribution.location', function ($distributionLocationQuery) use ($selectedGedung, $selectedRuangan) {
-                            if ($selectedGedung) {
-                                $distributionLocationQuery->where('gedung', 'like', '%' . $selectedGedung . '%');
-                            }
+                        ->orWhere(function ($storageQuery) use ($selectedGedung, $selectedRuangan) {
+                            $storageQuery->whereDoesntHave('item.distributionItems', function ($distributionItemQuery) {
+                                $distributionItemQuery->active();
+                            })
+                            ->whereHas('item.storageLocation', function ($storageLocationQuery) use ($selectedGedung, $selectedRuangan) {
+                                if ($selectedGedung) {
+                                    $storageLocationQuery->where('gedung', $selectedGedung);
+                                }
 
-                            if ($selectedRuangan) {
-                                $distributionLocationQuery->where('ruangan', 'like', '%' . $selectedRuangan . '%');
-                            }
+                                if ($selectedRuangan) {
+                                    $storageLocationQuery->where('ruangan', $selectedRuangan);
+                                }
+                            });
                         });
                     });
                 }

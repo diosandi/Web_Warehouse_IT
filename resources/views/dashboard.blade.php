@@ -20,17 +20,32 @@
 <br>
 <div class="distribution-page mx-auto w-full px-3 py-8 sm:px-4 lg:px-6 lg:py-12">
     <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
-        <p class="text-gray-600 mt-1">Selamat datang di Warehouse IT RSCM</p>
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Dashboard</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">Selamat datang di Warehouse IT RSCM</p>
+    </div>
+
+    <!-- Welcome Message -->
+    <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-8 text-white gap-6 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="bg-white/20 p-4 rounded-lg">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}!</h2>
+                <p class="text-green-100"><strong>Berhasi Masuk!</strong></p>
+            </div>
+        </div>
     </div>
 
     {{-- card 1 --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Total Barang</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['total_items'])}}</h3>
+                    <p class="text-gray-500 dark:text-gray-300 text-sm font-medium">Total Barang</p>
+                    <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{number_format($summary['total_items'])}}</h3>
                 </div>
                 <div class="bg-blue-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,11 +57,11 @@
             </div>
         </div>
         {{-- card 2 --}}
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 border-l-4 border-green-500">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Tersedia</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['available'])}}</h3>
+                    <p class="text-gray-500 dark:text-gray-300 text-sm font-medium">Tersedia</p>
+                    <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{number_format($summary['available'])}}</h3>
                 </div>
                 <div class="bg-green-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,11 +73,11 @@
             </div>
         </div>
         {{-- card 3 --}}
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Digunakan</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['used'])}}</h3>
+                    <p class="text-gray-500 dark:text-gray-300 text-sm font-medium">Digunakan</p>
+                    <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{number_format($summary['used'])}}</h3>
                 </div>
                 <div class="bg-yellow-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,11 +89,11 @@
             </div>
         </div>
         {{-- card 4 --}}
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 border-l-4 border-red-500">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Pemeliharaan</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['maintenance'])}}</h3>
+                    <p class="text-gray-500 dark:text-gray-300 text-sm font-medium">Pemeliharaan</p>
+                    <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{number_format($summary['maintenance'])}}</h3>
                 </div>
                 <div class="bg-red-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,11 +105,11 @@
             </div>
         </div>
         {{-- card 5 --}}
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-gray-500">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 border-l-4 border-gray-500">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Tidak Digunakan</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['retired'])}}</h3>
+                    <p class="text-gray-500 dark:text-gray-300 text-sm font-medium">Tidak Digunakan</p>
+                    <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{number_format($summary['retired'])}}</h3>
                 </div>
                 <div class="bg-gray-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,11 +120,12 @@
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+        {{-- card 6 --}}
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Dibawa Vendor</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['vendor'])}}</h3>
+                    <p class="text-gray-500 dark:text-gray-300 text-sm font-medium">Dibawa Vendor</p>
+                    <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{number_format($summary['vendor'])}}</h3>
                 </div>
                 <div class="bg-purple-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,12 +136,12 @@
                 </div>
             </div>
         </div>
-        {{-- card 6 --}}
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+        {{-- card 7 --}}
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Aktif Distribusi</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{number_format($summary['active_distributions'])}}</h3>
+                    <p class="text-gray-500 dark:text-gray-300 text-sm font-medium">Aktif Distribusi</p>
+                    <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{number_format($summary['active_distributions'])}}</h3>
                 </div>
                 <div class="bg-purple-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,13 +152,13 @@
                 </div>
             </div>
         </div>
-        {{-- card 7 --}}
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-cyan-500">
+        {{-- card 8 --}}
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 border-l-4 border-cyan-500">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Barang Masuk</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ number_format($summary['barang_masuk']) }}</h3>
-                    <p class="text-xs text-gray-500 mt-1">Total data barang masuk</p>
+                    <p class="text-gray-500 dark:text-gray-300 text-sm font-medium">Barang Masuk</p>
+                    <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{ number_format($summary['barang_masuk']) }}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Total data barang masuk</p>
                 </div>
                 <div class="bg-cyan-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,13 +169,13 @@
                 </div>
             </div>
         </div>
-        {{-- card 8 --}}
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-indigo-500">
+        {{-- card 9 --}}
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 border-l-4 border-indigo-500">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Masuk Bulan Ini</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ number_format($summary['barang_masuk_bulan_ini']) }}</h3>
-                    <p class="text-xs text-gray-500 mt-1">Data {{ now()->translatedFormat('F Y') }}</p>
+                    <p class="text-gray-500 dark:text-gray-300 text-sm font-medium">Masuk Bulan Ini</p>
+                    <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{ number_format($summary['barang_masuk_bulan_ini']) }}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Data {{ now()->translatedFormat('F Y') }}</p>
                 </div>
                 <div class="bg-indigo-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,12 +186,13 @@
                 </div>
             </div>
         </div>
-        <a href="{{ route('issue_reports.index', ['status' => 'open']) }}" class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500 hover:shadow-xl transition">
+        {{-- card 10 --}}
+        <a href="{{ route('issue_reports.index', ['status' => 'open']) }}" class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 border-l-4 border-orange-500 hover:shadow-xl transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Antrian Kendala</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ number_format($summary['issue_reports_open']) }}</h3>
-                    <p class="text-xs text-gray-500 mt-1">Laporan baru dan diproses</p>
+                    <p class="text-gray-500 dark:text-gray-300 text-sm font-medium">Antrian Kendala</p>
+                    <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{ number_format($summary['issue_reports_open']) }}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Laporan baru dan diproses</p>
                 </div>
                 <div class="bg-orange-100 p-4 rounded-lg">
                     <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,25 +207,41 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
         <!-- Chart Status Barang + Stok Per Kategori-->
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-800">Status Barang</h2>
-                    <p class="text-sm text-gray-500 mt-1">Perbandingan status seluruh barang</p>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Status Barang</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Perbandingan status seluruh barang</p>
                 </div>
             </div>
 
-            <div class="relative h-72">
-                <canvas id="statusBarangChart"></canvas>
+            <div class="relative h-72 w-full flex items-center justify-center overflow-hidden">
+                <!-- Chart Canvas -->
+                <canvas id="statusBarangChart" class="relative z-10 h-full w-full cursor-default" role="img" tabindex="0"></canvas>
+
+                <!-- Overlay Teks (Posisinya dinaikkan agar pas di lubang Doughnut) -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none"
+                    style="transform: translateY(-28px); z-index: 5;">
+
+                    <span class="text-gray-900 dark:text-gray-100"
+                        style="font-family: Arial, sans-serif; font-weight: 800; font-size: 34px; line-height: 1;">
+                        {{ number_format($summary['total_items'], 0, ',', '.') }}
+                    </span>
+
+                    <span class="text-gray-500 dark:text-gray-400"
+                        style="font-family: Arial, sans-serif; font-weight: 700; font-size: 11px; margin-top: 4px; letter-spacing: 0.05em; text-transform: uppercase;">
+                        Total Barang
+                    </span>
+                </div>
             </div>
         </div>
 
         {{-- Stok Per Kategori --}}
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-800">Stok Per Kategori</h2>
-                    <p class="text-sm text-gray-500 mt-1">Ringkasan barang berdasarkan kategori</p>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Stok Per Kategori</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Ringkasan barang berdasarkan kategori</p>
                 </div>
             </div>
 
@@ -216,22 +249,22 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-gray-200 text-left text-xs uppercase text-gray-500">
-                            <th class="pb-3 font-semibold">Kategori</th>
-                            <th class="pb-3 text-center font-semibold">Total</th>
-                            <th class="pb-3 text-center font-semibold">Tersedia</th>
-                            <th class="pb-3 text-center font-semibold">Dipakai</th>
-                            <th class="pb-3 text-center font-semibold">Pemeliharaan</th>
-                            <th class="pb-3 text-center font-semibold">Tidak Digunakan</th>
-                            <th class="pb-3 text-center font-semibold">Vendor</th>
+                            <th class="pb-3 font-semibold dark:text-gray-300">Kategori</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Total</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Tersedia</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Dipakai</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Pemeliharaan</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Tidak Digunakan</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Vendor</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-600">
                         @foreach($stokPerKategori as $stok)
-                            <tr class="hover:bg-gray-50">
-                                <td class="py-3 font-semibold text-gray-800">
+                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <td class="py-3 font-semibold text-gray-800 dark:text-gray-100">
                                     {{ $stok['kategori'] }}
                                 </td>
-                                <td class="py-3 text-center font-bold text-gray-800">
+                                <td class="py-3 text-center font-bold text-gray-800 dark:text-gray-100">
                                     {{ number_format($stok['total']) }}
                                 </td>
                                 <td class="py-3 text-center">
@@ -270,35 +303,35 @@
 {{-- Dashboard Asset --}}
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
         {{-- Stok Berdasarkan Asset --}}
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6">
             <div class="mb-6">
-                <h2 class="text-xl font-bold text-gray-800">Stok Berdasarkan Asset</h2>
-                <p class="text-sm text-gray-500 mt-1">Ringkasan kepemilikan barang berdasarkan asset.</p>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Stok Berdasarkan Asset</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Ringkasan kepemilikan barang berdasarkan asset.</p>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[860px] text-sm">
                     <thead>
                         <tr class="border-b border-gray-200 text-left text-xs uppercase text-gray-500">
-                            <th class="pb-3 font-semibold">Asset</th>
-                            <th class="pb-3 text-center font-semibold">Total</th>
-                            <th class="pb-3 text-center font-semibold">Tersedia</th>
-                            <th class="pb-3 text-center font-semibold">Dipakai</th>
-                            <th class="pb-3 text-center font-semibold">Pemeliharaan</th>
-                            <th class="pb-3 text-center font-semibold">Tidak Digunakan</th>
-                            <th class="pb-3 text-center font-semibold">Vendor</th>
-                            <th class="pb-3 text-center font-semibold">Aksi</th>
+                            <th class="pb-3 font-semibold dark:text-gray-300">Asset</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Total</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Tersedia</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Dipakai</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Pemeliharaan</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Tidak Digunakan</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Vendor</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-600">
                         @forelse($stokPerAsset as $asset)
-                            <tr class="cursor-pointer hover:bg-blue-50"
+                            <tr class="cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600"
                                 data-dashboard-asset-url="{{ $asset['url'] }}"
                                 role="link"
                                 tabindex="0"
                                 title="Lihat item asset {{ $asset['asset'] }}">
-                                <td class="py-3 font-semibold uppercase text-gray-800">{{ $asset['asset'] }}</td>
-                                <td class="py-3 text-center font-bold text-gray-900">{{ number_format($asset['total']) }}</td>
+                                <td class="py-3 font-semibold uppercase text-gray-800 dark:text-gray-100">{{ $asset['asset'] }}</td>
+                                <td class="py-3 text-center font-bold text-gray-900 dark:text-gray-100">{{ number_format($asset['total']) }}</td>
                                 <td class="py-3 text-center">
                                     <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
                                         {{ number_format($asset['available']) }}
@@ -346,42 +379,42 @@
         </div>
 
         {{-- Distribusi Aktif Berdasarkan Asset --}}
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6">
             <div class="mb-6">
-                <h2 class="text-xl font-bold text-gray-800">Distribusi Aktif Berdasarkan Asset</h2>
-                <p class="text-sm text-gray-500 mt-1">Barang fisik yang sedang dipakai, dikelompokkan berdasarkan asset.</p>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Distribusi Aktif Berdasarkan Asset</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Barang fisik yang sedang dipakai, dikelompokkan berdasarkan asset.</p>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[900px] text-sm">
                     <thead>
                         <tr class="border-b border-gray-200 text-left text-xs uppercase text-gray-500">
-                            <th class="pb-3 font-semibold">Asset</th>
-                            <th class="pb-3 text-center font-semibold">PC</th>
-                            <th class="pb-3 text-center font-semibold">Monitor</th>
-                            <th class="pb-3 text-center font-semibold">Printer Kertas</th>
-                            <th class="pb-3 text-center font-semibold">Printer Barcode</th>
-                            <th class="pb-3 text-center font-semibold">Scanner</th>
-                            <th class="pb-3 text-center font-semibold">Lainnya</th>
-                            <th class="pb-3 text-center font-semibold">Total</th>
-                            <th class="pb-3 text-center font-semibold">Aksi</th>
+                            <th class="pb-3 font-semibold dark:text-gray-300">Asset</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">PC</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Monitor</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Printer Kertas</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Printer Barcode</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Scanner</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Lainnya</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Total</th>
+                            <th class="pb-3 text-center font-semibold dark:text-gray-300">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-600">
                         @forelse($distribusiAktifPerAsset as $asset)
-                            <tr class="cursor-pointer hover:bg-green-50"
+                            <tr class="cursor-pointer hover:bg-green-50 dark:hover:bg-gray-600"
                                 data-dashboard-asset-url="{{ $asset['url'] }}"
                                 role="link"
                                 tabindex="0"
                                 title="Lihat distribusi aktif asset {{ $asset['asset'] }}">
-                                <td class="py-3 font-semibold uppercase text-gray-800">{{ $asset['asset'] }}</td>
-                                <td class="py-3 text-center">{{ number_format($asset['PC']) }}</td>
-                                <td class="py-3 text-center">{{ number_format($asset['Monitor']) }}</td>
-                                <td class="py-3 text-center">{{ number_format($asset['Printer Kertas']) }}</td>
-                                <td class="py-3 text-center">{{ number_format($asset['Printer Barcode']) }}</td>
-                                <td class="py-3 text-center">{{ number_format($asset['Scanner']) }}</td>
-                                <td class="py-3 text-center">{{ number_format($asset['Lainnya']) }}</td>
-                                <td class="py-3 text-center font-bold text-gray-900">{{ number_format($asset['total']) }}</td>
+                                <td class="py-3 font-semibold uppercase text-gray-800 dark:text-gray-100">{{ $asset['asset'] }}</td>
+                                <td class="py-3 text-center text-gray-700 dark:text-gray-100">{{ number_format($asset['PC']) }}</td>
+                                <td class="py-3 text-center text-gray-700 dark:text-gray-100">{{ number_format($asset['Monitor']) }}</td>
+                                <td class="py-3 text-center text-gray-700 dark:text-gray-100">{{ number_format($asset['Printer Kertas']) }}</td>
+                                <td class="py-3 text-center text-gray-700 dark:text-gray-100">{{ number_format($asset['Printer Barcode']) }}</td>
+                                <td class="py-3 text-center text-gray-700 dark:text-gray-100">{{ number_format($asset['Scanner']) }}</td>
+                                <td class="py-3 text-center text-gray-700 dark:text-gray-100">{{ number_format($asset['Lainnya']) }}</td>
+                                <td class="py-3 text-center font-bold text-gray-900 dark:text-gray-100">{{ number_format($asset['total']) }}</td>
                                 <td class="py-3 text-center">
                                     <a href="{{ $asset['url'] }}" class="btn btn-success btn-sm">
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -405,11 +438,11 @@
     </div>
 
 {{-- Distribusi Terbaru --}}
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 mb-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
             <div>
-                <h2 class="text-xl font-bold text-gray-800">Distribusi Terbaru</h2>
-                <p class="text-sm text-gray-500 mt-1">5 data distribusi terakhir</p>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Distribusi Terbaru</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">5 data distribusi terakhir</p>
             </div>
 
             <a href="{{ route('distribution.index') }}"
@@ -425,15 +458,15 @@
             <table class="w-full min-w-[780px] text-sm">
                 <thead>
                     <tr class="border-b border-gray-200 text-left text-xs uppercase text-gray-500">
-                        <th class="pb-3 font-semibold">User</th>
-                        <th class="pb-3 font-semibold">Barang / SN</th>
-                        <th class="pb-3 font-semibold">Lokasi</th>
-                        <th class="pb-3 font-semibold">Tanggal</th>
-                        <th class="pb-3 font-semibold">Status</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">User</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Barang / SN</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Lokasi</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Tanggal</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Status</th>
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-600">
                     @forelse($distribusiTerbaru as $distribusi)
                         @php
                             $items = $distribusi->distributionItems
@@ -455,35 +488,35 @@
                                 : 'Dikembalikan';
                         @endphp
 
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-600">
                             <td class="py-4 pr-4">
-                                <p class="font-semibold uppercase text-gray-800">
+                                <p class="font-semibold uppercase text-gray-800 dark:text-gray-100">
                                     {{ $distribusi->user?->name ?? $distribusi->nama_user ?? '-' }}
                                 </p>
-                                <p class="text-xs uppercase text-gray-500">
+                                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">
                                     {{ $distribusi->divisi ?? '-' }}
                                 </p>
                             </td>
 
                             <td class="py-4 pr-4">
-                                <p class="font-semibold text-gray-800">
+                                <p class="font-semibold text-gray-800 dark:text-gray-100">
                                     {{ $itemText ?: '-' }}
                                 </p>
 
                                 @if($sisaItem > 0)
-                                    <p class="mt-1 text-xs text-gray-500">
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                         +{{ $sisaItem }} barang lainnya
                                     </p>
                                 @endif
                             </td>
 
-                            <td class="py-4 pr-4 uppercase text-gray-700">
+                            <td class="py-4 pr-4 uppercase text-gray-700 dark:text-gray-300">
                                 {{ $distribusi->location->gedung ?? '-' }}
                                 -
                                 {{ $distribusi->location->ruangan ?? '-' }}
                             </td>
 
-                            <td class="py-4 pr-4 text-gray-700">
+                            <td class="py-4 pr-4 text-gray-700 dark:text-gray-300">
                                {{ \App\Support\DateFormatter::date($distribusi->tanggal_distribusi) }}
                             </td>
 
@@ -495,7 +528,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-8 text-center text-sm font-medium text-gray-500">
+                            <td colspan="5" class="py-8 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Belum ada data distribusi.
                             </td>
                         </tr>
@@ -506,11 +539,11 @@
     </div>
 
 {{-- Antrian Kendala Terbaru --}}
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 mb-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
             <div>
-                <h2 class="text-xl font-bold text-gray-800">Antrian Kendala Terbaru</h2>
-                <p class="text-sm text-gray-500 mt-1">Laporan user yang masih baru atau sedang diproses.</p>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Antrian Kendala Terbaru</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Laporan user yang masih baru atau sedang diproses.</p>
             </div>
 
             <a href="{{ route('issue_reports.index') }}" class="btn btn-success btn-sm">
@@ -525,40 +558,40 @@
             <table class="w-full min-w-[920px] text-sm">
                 <thead>
                     <tr class="border-b border-gray-200 text-left text-xs uppercase text-gray-500">
-                        <th class="pb-3 font-semibold">Tiket</th>
-                        <th class="pb-3 font-semibold">Pelapor</th>
-                        <th class="pb-3 font-semibold">Kendala</th>
-                        <th class="pb-3 font-semibold">Perangkat</th>
-                        <th class="pb-3 font-semibold">Lokasi</th>
-                        <th class="pb-3 font-semibold">Prioritas</th>
-                        <th class="pb-3 font-semibold">Status</th>
-                        <th class="pb-3 font-semibold">Aksi</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Tiket</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Pelapor</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Kendala</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Perangkat</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Lokasi</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Prioritas</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Status</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Aksi</th>
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-600">
                     @forelse($laporanKendalaTerbaru as $report)
-                        <tr class="hover:bg-gray-50">
-                            <td class="py-4 pr-4 font-mono font-semibold text-gray-800">{{ $report->ticket_number }}</td>
+                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-600">
+                            <td class="py-4 pr-4 font-mono font-semibold text-gray-800 dark:text-gray-100">{{ $report->ticket_number }}</td>
                             <td class="py-4 pr-4">
-                                <p class="font-semibold uppercase text-gray-800">{{ $report->reporter->name ?? '-' }}</p>
-                                <p class="text-xs text-gray-500">{{ $report->created_at->format('d/m/Y H:i') }}</p>
+                                <p class="font-semibold uppercase text-gray-800 dark:text-gray-100">{{ $report->reporter->name ?? '-' }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $report->created_at->format('d/m/Y H:i') }}</p>
                             </td>
-                            <td class="py-4 pr-4 text-gray-800">{{ $report->title }}</td>
+                            <td class="py-4 pr-4 text-gray-800 dark:text-gray-100">{{ $report->title }}</td>
                             <td class="py-4 pr-4">
-                                <p class="font-semibold text-gray-800">{{ $report->item->kategori ?? '-' }}</p>
-                                <p class="text-xs font-mono text-gray-500">{{ $report->item->serial_number ?? '-' }}</p>
+                                <p class="font-semibold text-gray-800 dark:text-gray-100">{{ $report->item->kategori ?? '-' }}</p>
+                                <p class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ $report->item->serial_number ?? '-' }}</p>
                             </td>
-                            <td class="py-4 pr-4 uppercase text-gray-700">
+                            <td class="py-4 pr-4 uppercase text-gray-700 dark:text-gray-300">
                                 {{ $report->location->gedung ?? '-' }} - {{ $report->location->ruangan ?? '-' }}
                             </td>
                             <td class="py-4 pr-4">
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $priorityClasses[$report->priority] ?? 'bg-gray-100 text-gray-800' }}">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $priorityClasses[$report->priority] ?? 'bg-gray-100 text-gray-800 dark:text-gray-100' }}">
                                     {{ $report->priority_label }}
                                 </span>
                             </td>
                             <td class="py-4 pr-4">
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusClasses[$report->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusClasses[$report->status] ?? 'bg-gray-100 text-gray-800 dark:text-gray-100' }}">
                                     {{ $report->status_label }}
                                 </span>
                             </td>
@@ -568,7 +601,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="py-8 text-center text-sm font-medium text-gray-500">
+                            <td colspan="8" class="py-8 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Belum ada antrian kendala.
                             </td>
                         </tr>
@@ -579,44 +612,44 @@
     </div>
 
 {{-- Distribusi Aktif Per Lokasi --}}
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 mb-8">
         <div class="mb-6">
-            <h2 class="text-xl font-bold text-gray-800">Distribusi Aktif Per Lokasi</h2>
-            <p class="text-sm text-gray-500 mt-1">Perangkat yang sedang dipakai, dikelompokkan berdasarkan lokasi.</p>
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Distribusi Aktif Per Lokasi</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Perangkat yang sedang dipakai, dikelompokkan berdasarkan lokasi.</p>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full min-w-[980px] text-sm">
                 <thead>
                     <tr class="border-b border-gray-200 text-left text-xs uppercase text-gray-500">
-                        <th class="pb-3 font-semibold">Gedung</th>
-                        <th class="pb-3 font-semibold">Ruangan</th>
-                        <th class="pb-3 text-center font-semibold">PC</th>
-                        <th class="pb-3 text-center font-semibold">Monitor</th>
-                        <th class="pb-3 text-center font-semibold">Printer Kertas</th>
-                        <th class="pb-3 text-center font-semibold">Printer Barcode</th>
-                        <th class="pb-3 text-center font-semibold">Scanner</th>
-                        <th class="pb-3 text-center font-semibold">Lainnya</th>
-                        <th class="pb-3 text-center font-semibold">Total</th>
-                        <th class="pb-3 text-center font-semibold">Aksi</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Gedung</th>
+                        <th class="pb-3 font-semibold dark:text-gray-300">Ruangan</th>
+                        <th class="pb-3 text-center font-semibold dark:text-gray-300">PC</th>
+                        <th class="pb-3 text-center font-semibold dark:text-gray-300">Monitor</th>
+                        <th class="pb-3 text-center font-semibold dark:text-gray-300">Printer Kertas</th>
+                        <th class="pb-3 text-center font-semibold dark:text-gray-300">Printer Barcode</th>
+                        <th class="pb-3 text-center font-semibold dark:text-gray-300">Scanner</th>
+                        <th class="pb-3 text-center font-semibold dark:text-gray-300">Lainnya</th>
+                        <th class="pb-3 text-center font-semibold dark:text-gray-300">Total</th>
+                        <th class="pb-3 text-center font-semibold dark:text-gray-300">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-600">
                     @forelse($distribusiPerLokasi as $lokasi)
-                        <tr class="cursor-pointer hover:bg-green-50"
+                        <tr class="cursor-pointer hover:bg-green-50 dark:hover:bg-gray-600"
                             data-dashboard-location-url="{{ $lokasi['url'] }}"
                             role="link"
                             tabindex="0"
                             title="Lihat distribusi aktif lokasi ini">
-                            <td class="py-3 font-semibold uppercase text-gray-800">{{ $lokasi['gedung'] }}</td>
-                            <td class="py-3 uppercase text-gray-700">{{ $lokasi['ruangan'] }}</td>
-                            <td class="py-3 text-center">{{ number_format($lokasi['PC']) }}</td>
-                            <td class="py-3 text-center">{{ number_format($lokasi['Monitor']) }}</td>
-                            <td class="py-3 text-center">{{ number_format($lokasi['Printer Kertas']) }}</td>
-                            <td class="py-3 text-center">{{ number_format($lokasi['Printer Barcode']) }}</td>
-                            <td class="py-3 text-center">{{ number_format($lokasi['Scanner']) }}</td>
-                            <td class="py-3 text-center">{{ number_format($lokasi['Lainnya']) }}</td>
-                            <td class="py-3 text-center font-bold text-gray-900">{{ number_format($lokasi['total']) }}</td>
+                            <td class="py-3 font-semibold uppercase text-gray-800 dark:text-gray-100">{{ $lokasi['gedung'] }}</td>
+                            <td class="py-3 uppercase text-gray-700 dark:text-gray-100">{{ $lokasi['ruangan'] }}</td>
+                            <td class="py-3 text-center dark:text-gray-100">{{ number_format($lokasi['PC']) }}</td>
+                            <td class="py-3 text-center dark:text-gray-100">{{ number_format($lokasi['Monitor']) }}</td>
+                            <td class="py-3 text-center dark:text-gray-100">{{ number_format($lokasi['Printer Kertas']) }}</td>
+                            <td class="py-3 text-center dark:text-gray-100">{{ number_format($lokasi['Printer Barcode']) }}</td>
+                            <td class="py-3 text-center dark:text-gray-100">{{ number_format($lokasi['Scanner']) }}</td>
+                            <td class="py-3 text-center dark:text-gray-100">{{ number_format($lokasi['Lainnya']) }}</td>
+                            <td class="py-3 text-center font-bold text-gray-900 dark:text-gray-100">{{ number_format($lokasi['total']) }}</td>
                             <td class="py-3 text-center">
                                 <a href="{{ $lokasi['url'] }}" class="btn btn-primary btn-sm">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -642,10 +675,10 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
 
         {{-- Perlu Perhatian --}}
-        <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+        <div class="lg:col-span-2 bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6">
             <div class="mb-6">
-                <h2 class="text-xl font-bold text-gray-800">Perlu Perhatian</h2>
-                <p class="text-sm text-gray-500 mt-1">Data yang perlu dicek atau dilengkapi</p>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Perlu Perhatian</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Data yang perlu dicek atau dilengkapi</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -707,10 +740,10 @@
         </div>
 
         {{-- Quick Action --}}
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6">
             <div class="mb-6">
-                <h2 class="text-xl font-bold text-gray-800">Aksi Cepat</h2>
-                <p class="text-sm text-gray-500 mt-1">Shortcut untuk pekerjaan utama</p>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Aksi Cepat</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Shortcut untuk pekerjaan utama</p>
             </div>
 
             <div class="space-y-3">
@@ -747,7 +780,7 @@
                 </a>
 
                 <a href="{{ route('distribution.index') }}"
-                class="btn btn-secondary btn-block justify-between">
+                class="btn bg-gray-500 hover:bg-gray-600 btn-block justify-between">
                     <span>Lihat Semua Distribusi</span>
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -756,21 +789,6 @@
             </div>
         </div>
 
-    </div>
-
-<!-- Welcome Message -->
-    <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-8 text-white">
-        <div class="flex items-center gap-4">
-            <div class="bg-white/20 p-4 rounded-lg">
-                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
-            <div>
-                <h2 class="text-2xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}!</h2>
-                <p class="text-green-100"><strong>Berhasi Masuk!</strong></p>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -805,13 +823,18 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    renderDoughnutChart(statusChartElement, [
+    if (window.statusBarangDoughnutChart && typeof window.statusBarangDoughnutChart.destroy === 'function') {
+        window.statusBarangDoughnutChart.destroy();
+    }
+
+    window.statusBarangDoughnutChart = renderDoughnutChart(statusChartElement, [
         { label: 'Tersedia', value: @json((int) $summary['available']), color: '#22c55e' },
         { label: 'Digunakan', value: @json((int) $summary['used']), color: '#eab308' },
         { label: 'Pemeliharaan', value: @json((int) $summary['maintenance']), color: '#ef4444' },
         { label: 'Tidak Digunakan', value: @json((int) $summary['retired']), color: '#6b7280' },
         { label: 'Dibawa Vendor', value: @json((int) $summary['vendor']), color: '#a855f7' }
     ]);
+    window.myDoughnutChart = window.statusBarangDoughnutChart;
 });
 
 function renderDoughnutChart(canvas, rawItems) {
@@ -824,7 +847,11 @@ function renderDoughnutChart(canvas, rawItems) {
             color: item.color
         };
     });
-    let hoveredIndex = null;
+    let activeIndex = null;
+    let lastPointerEvent = null;
+    let animationFrame = null;
+    let resizeTimer = null;
+    let resizeObserver = null;
     let chartState = {
         centerX: 0,
         centerY: 0,
@@ -841,8 +868,6 @@ function renderDoughnutChart(canvas, rawItems) {
         pointerEvents: 'none',
         padding: '8px 10px',
         borderRadius: '8px',
-        background: 'rgba(17, 24, 39, 0.95)',
-        color: '#ffffff',
         font: '600 12px Arial, sans-serif',
         boxShadow: '0 12px 28px rgba(15, 23, 42, 0.28)',
         whiteSpace: 'nowrap'
@@ -857,6 +882,26 @@ function renderDoughnutChart(canvas, rawItems) {
 
     function formatNumber(value) {
         return value.toLocaleString('id-ID');
+    }
+
+    function getThemeColors() {
+        const isDark = document.documentElement.classList.contains('dark');
+
+        return {
+            emptyFill: isDark ? '#4b5563' : '#e5e7eb',
+            legendText: isDark ? '#e5e7eb' : '#374151',
+            sliceBorder: isDark ? '#374151' : '#ffffff',
+            shadow: isDark ? 'rgba(0, 0, 0, 0.42)' : 'rgba(17, 24, 39, 0.28)',
+            tooltipBg: isDark ? 'rgba(31, 41, 55, 0.98)' : 'rgba(17, 24, 39, 0.96)',
+            tooltipText: '#ffffff',
+            tooltipMuted: isDark ? '#d1d5db' : '#e5e7eb'
+        };
+    }
+
+    function applyTooltipTheme(themeColors) {
+        tooltip.style.background = themeColors.tooltipBg;
+        tooltip.style.color = themeColors.tooltipText;
+        tooltip.style.boxShadow = '0 12px 28px ' + themeColors.shadow;
     }
 
     function buildLegendRows(width) {
@@ -886,7 +931,7 @@ function renderDoughnutChart(canvas, rawItems) {
         return rows;
     }
 
-    function drawLegend(rows, width, height) {
+    function drawLegend(rows, width, height, themeColors) {
         const rowHeight = 22;
         const startY = height - (rows.length * rowHeight) + 8;
 
@@ -907,7 +952,7 @@ function renderDoughnutChart(canvas, rawItems) {
                 context.arc(x + 6, y, 5, 0, Math.PI * 2);
                 context.fill();
 
-                context.fillStyle = '#374151';
+                context.fillStyle = themeColors.legendText;
                 context.fillText(entry.item.label, x + 18, y);
                 x += entry.width;
             });
@@ -946,7 +991,7 @@ function renderDoughnutChart(canvas, rawItems) {
 
         const angle = Math.atan2(distanceY, distanceX);
         const slice = chartState.slices.find(function (sliceItem) {
-            return isAngleBetween(angle, sliceItem.startAngle, sliceItem.endAngle);
+            return sliceItem.fullCircle || isAngleBetween(angle, sliceItem.startAngle, sliceItem.endAngle);
         });
 
         return slice ? slice.index : null;
@@ -974,11 +1019,13 @@ function renderDoughnutChart(canvas, rawItems) {
     function showTooltip(event, item) {
         const total = getTotal();
         const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : '0.0';
+        const themeColors = getThemeColors();
         const titleRow = document.createElement('div');
         const dot = document.createElement('span');
         const label = document.createElement('span');
         const value = document.createElement('div');
 
+        applyTooltipTheme(themeColors);
         tooltip.innerHTML = '';
         Object.assign(titleRow.style, {
             display: 'flex',
@@ -996,7 +1043,8 @@ function renderDoughnutChart(canvas, rawItems) {
 
         label.textContent = item.label;
         value.textContent = formatNumber(item.value) + ' barang (' + percentage + '%)';
-        value.style.color = '#d1d5db';
+        label.style.color = themeColors.tooltipText;
+        value.style.color = themeColors.tooltipMuted;
         value.style.fontWeight = '600';
 
         titleRow.appendChild(dot);
@@ -1011,12 +1059,34 @@ function renderDoughnutChart(canvas, rawItems) {
         tooltip.style.display = 'none';
     }
 
+    function scheduleDraw() {
+        if (animationFrame !== null) {
+            window.cancelAnimationFrame(animationFrame);
+        }
+
+        animationFrame = window.requestAnimationFrame(function () {
+            animationFrame = null;
+            draw();
+        });
+    }
+
+    function handleThemeOrLayoutChange() {
+        scheduleDraw();
+
+        if (activeIndex !== null && lastPointerEvent) {
+            showTooltip(lastPointerEvent, items[activeIndex]);
+        }
+    }
+
     function draw() {
         const bounds = parent.getBoundingClientRect();
         const width = Math.max(Math.floor(bounds.width || canvas.clientWidth || 320), 280);
         const height = Math.max(Math.floor(bounds.height || canvas.clientHeight || 288), 240);
         const ratio = Math.min(Math.max(window.devicePixelRatio || 1, 2), 3);
+        const displayWidth = Math.floor(width * ratio);
+        const displayHeight = Math.floor(height * ratio);
         const total = getTotal();
+        const themeColors = getThemeColors();
         const legendRows = buildLegendRows(width);
         const legendHeight = Math.max(46, legendRows.length * 22 + 18);
         const chartHeight = Math.max(height - legendHeight, 140);
@@ -1041,7 +1111,8 @@ function renderDoughnutChart(canvas, rawItems) {
                     item: item,
                     startAngle: startAngle,
                     endAngle: endAngle,
-                    middleAngle: startAngle + (sliceAngle / 2)
+                    middleAngle: startAngle + (sliceAngle / 2),
+                    fullCircle: sliceAngle >= (Math.PI * 2) - 0.0001
                 });
 
                 startAngle = endAngle;
@@ -1056,10 +1127,13 @@ function renderDoughnutChart(canvas, rawItems) {
             slices: slices
         };
 
-        canvas.width = Math.floor(width * ratio);
-        canvas.height = Math.floor(height * ratio);
-        canvas.style.width = width + 'px';
-        canvas.style.height = height + 'px';
+        if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+            canvas.width = displayWidth;
+            canvas.height = displayHeight;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+        }
+
         context.setTransform(ratio, 0, 0, ratio, 0, 0);
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = 'high';
@@ -1070,20 +1144,20 @@ function renderDoughnutChart(canvas, rawItems) {
             context.arc(centerX, centerY, radius, 0, Math.PI * 2);
             context.arc(centerX, centerY, innerRadius, Math.PI * 2, 0, true);
             context.closePath();
-            context.fillStyle = '#e5e7eb';
+            context.fillStyle = themeColors.emptyFill;
             context.fill();
         } else {
             const drawSlice = function (sliceItem) {
-                const isHovered = sliceItem.index === hoveredIndex;
-                const lift = isHovered ? 6 : 0;
-                const outerRadius = radius + (isHovered ? 3 : 0);
-                const hoverInnerRadius = innerRadius + (isHovered ? 2 : 0);
+                const isActive = sliceItem.index === activeIndex;
+                const lift = isActive ? 6 : 0;
+                const outerRadius = radius + (isActive ? 3 : 0);
+                const hoverInnerRadius = innerRadius + (isActive ? 2 : 0);
                 const offsetX = Math.cos(sliceItem.middleAngle) * lift;
                 const offsetY = Math.sin(sliceItem.middleAngle) * lift;
 
                 context.save();
-                if (isHovered) {
-                    context.shadowColor = 'rgba(17, 24, 39, 0.28)';
+                if (isActive) {
+                    context.shadowColor = themeColors.shadow;
                     context.shadowBlur = 16;
                     context.shadowOffsetY = 6;
                 }
@@ -1093,30 +1167,30 @@ function renderDoughnutChart(canvas, rawItems) {
                 context.closePath();
                 context.fillStyle = sliceItem.item.color;
                 context.fill();
-                context.lineWidth = isHovered ? 5 : 4;
-                context.strokeStyle = '#ffffff';
+                context.lineWidth = isActive ? 5 : 4;
+                context.strokeStyle = themeColors.sliceBorder;
                 context.stroke();
                 context.restore();
             };
 
             slices.filter(function (sliceItem) {
-                return sliceItem.index !== hoveredIndex;
+                return sliceItem.index !== activeIndex;
             }).forEach(drawSlice);
 
             slices.filter(function (sliceItem) {
-                return sliceItem.index === hoveredIndex;
+                return sliceItem.index === activeIndex;
             }).forEach(drawSlice);
         }
 
-        context.textAlign = 'center';
-        context.fillStyle = '#111827';
-        context.font = '800 34px Arial, sans-serif';
-        context.fillText(total.toLocaleString('id-ID'), centerX, centerY - 4);
-        context.fillStyle = '#6b7280';
-        context.font = '700 14px Arial, sans-serif';
-        context.fillText('Total Barang', centerX, centerY + 24);
+        // context.textAlign = 'center';
+        // context.fillStyle = '#111827';
+        // context.font = '800 34px Arial, sans-serif';
+        // context.fillText(total.toLocaleString('id-ID'), centerX, centerY - 4);
+        // context.fillStyle = '#6b7280';
+        // context.font = '700 14px Arial, sans-serif';
+        // context.fillText('Total Barang', centerX, centerY + 24);
 
-        drawLegend(legendRows, width, height);
+        drawLegend(legendRows, width, height, themeColors);
         canvas.setAttribute('aria-label', items.map(function (item) {
             const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : '0.0';
 
@@ -1124,40 +1198,93 @@ function renderDoughnutChart(canvas, rawItems) {
         }).join(', '));
     }
 
-    canvas.addEventListener('mousemove', function (event) {
-        const nextHoveredIndex = getHoveredSliceIndex(event);
+    function updateActiveSlice(event) {
+        const nextActiveIndex = getHoveredSliceIndex(event);
 
-        canvas.style.cursor = nextHoveredIndex === null ? 'default' : 'pointer';
+        lastPointerEvent = event;
+        canvas.style.cursor = nextActiveIndex === null ? 'default' : 'pointer';
 
-        if (nextHoveredIndex === null) {
+        if (nextActiveIndex === null) {
             hideTooltip();
         } else {
-            showTooltip(event, items[nextHoveredIndex]);
+            showTooltip(event, items[nextActiveIndex]);
         }
 
-        if (nextHoveredIndex !== hoveredIndex) {
-            hoveredIndex = nextHoveredIndex;
+        if (nextActiveIndex !== activeIndex) {
+            activeIndex = nextActiveIndex;
             draw();
         }
-    });
+    }
 
-    canvas.addEventListener('mouseleave', function () {
+    function clearActiveSlice() {
         canvas.style.cursor = 'default';
         hideTooltip();
 
-        if (hoveredIndex !== null) {
-            hoveredIndex = null;
+        if (activeIndex !== null) {
+            activeIndex = null;
             draw();
         }
+    }
+
+    canvas.addEventListener('pointermove', updateActiveSlice);
+    canvas.addEventListener('pointerdown', updateActiveSlice);
+    canvas.addEventListener('pointerleave', clearActiveSlice);
+    canvas.addEventListener('blur', clearActiveSlice);
+
+    canvas.addEventListener('keydown', function (event) {
+        if (!['ArrowLeft', 'ArrowRight', 'Enter', ' '].includes(event.key) || !chartState.slices.length) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const currentSlicePosition = chartState.slices.findIndex(function (sliceItem) {
+            return sliceItem.index === activeIndex;
+        });
+        let nextSlicePosition = currentSlicePosition;
+
+        if (event.key === 'ArrowLeft') {
+            nextSlicePosition = currentSlicePosition <= 0 ? chartState.slices.length - 1 : currentSlicePosition - 1;
+        } else if (event.key === 'ArrowRight' || currentSlicePosition === -1) {
+            nextSlicePosition = currentSlicePosition >= chartState.slices.length - 1 ? 0 : currentSlicePosition + 1;
+        }
+
+        activeIndex = chartState.slices[nextSlicePosition].index;
+        draw();
     });
 
-    let resizeTimer;
     window.addEventListener('resize', function () {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(draw, 150);
+        resizeTimer = setTimeout(scheduleDraw, 150);
     });
+    window.addEventListener('warehouse-theme-changed', handleThemeOrLayoutChange);
+    window.addEventListener('warehouse-layout-changed', handleThemeOrLayoutChange);
+
+    if ('ResizeObserver' in window) {
+        resizeObserver = new ResizeObserver(scheduleDraw);
+        resizeObserver.observe(parent);
+    }
 
     draw();
+
+    return {
+        update: scheduleDraw,
+        destroy: function () {
+            if (animationFrame !== null) {
+                window.cancelAnimationFrame(animationFrame);
+            }
+
+            clearTimeout(resizeTimer);
+            window.removeEventListener('warehouse-theme-changed', handleThemeOrLayoutChange);
+            window.removeEventListener('warehouse-layout-changed', handleThemeOrLayoutChange);
+
+            if (resizeObserver) {
+                resizeObserver.disconnect();
+            }
+
+            tooltip.remove();
+        }
+    };
 }
 </script>
 @endsection

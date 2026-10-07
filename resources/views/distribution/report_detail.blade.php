@@ -24,23 +24,23 @@
 <div class="distribution-page mx-auto w-full px-3 py-8 sm:px-4 lg:px-6 lg:py-12">
     <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Laporan Detail Distribusi</h1>
-            <p class="text-sm text-gray-600 mt-1">Satu baris per distribusi, berisi perangkat dan detail yang dipilih.</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Laporan Detail Distribusi</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Satu baris per distribusi, berisi perangkat dan detail yang dipilih.</p>
         </div>
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
             <a href="{{ route('distribution.report_detail.export', array_merge(['format' => 'excel'], request()->query())) }}"
                class="btn btn-success btn-sm">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m4 5H5a2 2 0 01-2-2V6a2 2 0 012-2h8l6 6v8a2 2 0 01-2 2z"></path>
+                <svg class="w-4 md:w-5 h-4 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"></path>
                 </svg>
                 Export Excel
             </a>
             <a href="{{ route('distribution.report_detail.export', array_merge(['format' => 'pdf'], request()->query())) }}"
                target="_blank"
                class="btn btn-danger btn-sm">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m4 5H5a2 2 0 01-2-2V6a2 2 0 012-2h8l6 6v8a2 2 0 01-2 2z"></path>
+                <svg class="w-4 md:w-5 h-4 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                 </svg>
                 Export PDF
             </a>
@@ -54,7 +54,7 @@
         </div>
     </div>
 
-    <div class="mb-6 rounded-xl bg-white p-4 shadow-lg md:p-6">
+    <div class="mb-6 rounded-xl bg-white dark:bg-gray-700 p-4 shadow-lg md:p-6">
         <form method="GET" action="{{ route('distribution.report_detail') }}" class="space-y-4">
             @foreach($filterQuery as $name => $value)
                 @if(is_array($value))
@@ -68,8 +68,8 @@
 
             <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div>
-                    <h2 class="text-lg font-bold text-gray-800">Kategori Yang Ditampilkan</h2>
-                    <p class="mt-1 text-sm text-gray-500">Pilih kategori yang ingin muncul di laporan.</p>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100">Kategori Yang Ditampilkan</h2>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Pilih kategori yang ingin muncul di laporan.</p>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
@@ -92,7 +92,7 @@
 
             <div class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
                 @foreach($categoryOptions as $value => $label)
-                    <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:border-green-400 hover:bg-green-50">
+                    <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-100 transition hover:border-green-400 dark:hover:border-gray-500 hover:bg-green-50 dark:hover:bg-gray-600">
                         <input type="checkbox"
                             name="kategori_laporan[]"
                             value="{{ $value }}"
@@ -105,11 +105,11 @@
 
             @if(!empty($assetList))
                 <div>
-                    <h2 class="text-lg font-bold text-gray-800 mb-3">Asset Yang Ditampilkan</h2>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3">Asset Yang Ditampilkan</h2>
 
                     <div class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
                         @foreach($assetList as $asset)
-                            <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:border-green-400 hover:bg-green-50">
+                            <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-100 transition hover:border-green-400 dark:hover:border-gray-500 hover:bg-green-50 dark:hover:bg-gray-600">
                                 <input type="checkbox"
                                     name="asset[]"
                                     value="{{ $asset }}"
@@ -124,12 +124,12 @@
         </form>
     </div>
 
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="px-4 md:px-6 py-4 bg-gray-50 border-b border-gray-200 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <p class="text-sm text-gray-600">
-                <span class="font-semibold text-gray-800">{{ $reports->total() }}</span> data laporan ditemukan
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
+        <div class="px-4 md:px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                <span class="font-semibold text-gray-800 dark:text-gray-100">{{ $reports->total() }}</span> data laporan ditemukan
             </p>
-            <p class="text-xs text-gray-500">Kolom mengikuti kategori yang dipilih.</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Kolom mengikuti kategori yang dipilih.</p>
         </div>
 
         <div class="distribution-table-wrap overflow-x-auto">
@@ -221,7 +221,7 @@
                             $formatSnWithAsset = function ($items) {
                                 return $items->map(function ($item) {
                                     return e($item->serial_number ?: '-') .
-                                        '<br><span class="text-xs font-semibold text-gray-500">Asset: ' .
+                                        '<br><span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Asset: ' .
                                         e($item->asset ?: '-') .
                                         '</span>';
                                 })->filter()->implode('<hr class="my-2 border-gray-200">');
@@ -243,9 +243,9 @@
                             };
                         @endphp
 
-                        <tr class="hover:bg-gray-50 align-top">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 align-top">
                             <td class="px-3 py-3">{{ $reports->firstItem() + $index }}</td>
-                            <td class="px-3 py-3 uppercase font-semibold text-gray-900">{{ $distribution->nama_user ?? '-' }}</td>
+                            <td class="px-3 py-3 uppercase font-semibold">{{ $distribution->nama_user ?? '-' }}</td>
                             <td class="px-3 py-3 uppercase">{{ $distribution->divisi ?? '-' }}</td>
                             <td class="px-3 py-3 uppercase">{{ $distribution->location->gedung ?? '-' }}</td>
                             <td class="px-3 py-3 uppercase">{{ $distribution->location->ruangan ?? '-' }}</td>
@@ -305,7 +305,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="40" class="px-3 py-10 text-center text-gray-500">
+                            <td colspan="40" class="px-3 py-10 text-center text-gray-500 dark:text-gray-400">
                                 Tidak ada data laporan.
                             </td>
                         </tr>

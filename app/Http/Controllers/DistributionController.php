@@ -708,6 +708,7 @@ class DistributionController extends Controller
                 $this->markDistributionItemReturned(
                     $activePrinterItem,
                     $conditionStatus,
+                    $storageLocationId,
                     $conditionNote
                 );
 
@@ -727,6 +728,7 @@ class DistributionController extends Controller
         $this->markDistributionItemReturned(
             $distributionItem,
             $conditionStatus,
+            $storageLocationId,
             $conditionNote
         );
 
@@ -743,12 +745,14 @@ class DistributionController extends Controller
     private function markDistributionItemReturned(
         DistributionItem $distributionItem,
         string $conditionStatus,
+        int $storageLocationId,
         ?string $conditionNote
     ): void {
         $distributionItem->update([
             'status' => 'dikembalikan',
             'returned_at' => now(),
             'return_condition_status' => $conditionStatus,
+            'return_storage_location_id' => $storageLocationId,
             'return_note' => $conditionNote,
         ]);
     }
@@ -827,7 +831,6 @@ class DistributionController extends Controller
     public function reportDetail(Request $request)
     {
         $reports = $this->reportDetailQuery($request)
-            ->latest()
             ->paginate(20)
             ->withQueryString();
 
@@ -845,7 +848,6 @@ class DistributionController extends Controller
     public function exportReportDetail(Request $request, string $format)
     {
         $reports = $this->reportDetailQuery($request)
-            ->latest()
             ->get();
 
         $filename = 'laporan-detail-distribusi-' . now()->format('Ymd-His');
@@ -916,6 +918,20 @@ class DistributionController extends Controller
             $query->whereHas('distributionItems.item', function ($item) use ($selectedAsset) {
                 $item->whereIn('asset', $selectedAsset);
             });
+        }
+
+        $sortBy = $request->get('sort_by');
+        $sortDir = $request->get('sort_dir', 'desc') === 'asc' ? 'asc' : 'desc';
+
+        if ($sortBy === 'location') {
+            $query->join('locations', 'distributions.location_id', '=', 'locations.id')
+                ->select('distributions.*')
+                ->orderBy('locations.gedung', $sortDir)
+                ->orderBy('locations.ruangan', $sortDir);
+        } elseif (in_array($sortBy, ['nama_user', 'divisi', 'status', 'tanggal_distribusi'], true)) {
+            $query->orderBy($sortBy, $sortDir);
+        } else {
+            $query->latest();
         }
 
         return $query;

@@ -6,8 +6,8 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Tambah Barang Masuk</h1>
-            <p class="text-gray-600 mt-1">Input Barang Masuk</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Tambah Barang Masuk</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Input Barang Masuk</p>
         </div>
         <a href="{{ $redirect }}" class="btn btn-secondary">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,13 +30,13 @@
     @endif
 
     <!-- From -->
-    <div class="bg-white rounded-xl shadow-lg p-8">
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-8">
         <form action="{{ route('barang_masuk.store') }}" method="POST">
             @csrf
             <input type="hidden" name="redirect" value="{{ $redirect }}">
             <!-- Kategori -->
             <div class="mb-3 md:mb-4">
-                <label for="kategori" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Kategori <span class="text-red-500">*</span></label>
+                <label for="kategori" class="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1 md:mb-2">Kategori <span class="text-red-500">*</span></label>
                 <select name="kategori" id="kategori" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
                     <option>-- Pilih Kategori --</option>
                     <option>PC</option>
@@ -49,37 +49,37 @@
             </div>
 
             <!-- Merk -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Merk <span class="text-red-500">*</span></label>
                 <input type="text" name="merk" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- Type -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Tipe/Series <span class="text-red-500">*</span></label>
                 <input type="text" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- Asset -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Asset</label>
                 <input type="text" name="supplier" value="{{ old('supplier') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
 
              <!-- PO Number -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Nomor PO</label>
                 <input type="text" name="po_number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
-            
+
             <!-- Tanggal -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Tanggal Masuk <span class="text-red-500">*</span></label>
                 <input type="date" name="tanggal_masuk" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- SERIAL NUMBER -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Serial Number <span class="text-red-500">*</span></label>
                 <div id="sn-wrapper">
                     <div class="flex gap-2 mb-2">
@@ -94,7 +94,7 @@
             </div>
 
             <!-- Keterangan -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Keterangan</label>
                 <textarea name="keterangan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
             </div>
@@ -108,7 +108,7 @@
                     Simpan
                 </button>
 
-                <a href="{{ $redirect }}" class="btn btn-secondary">
+                <a href="{{ $redirect }}" class="btn bg-gray-500 hover:bg-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>Batal

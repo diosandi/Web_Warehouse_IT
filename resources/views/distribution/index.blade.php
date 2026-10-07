@@ -19,8 +19,8 @@
     <!-- Header -->
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Distribusi Barang</h1>
-            <p class="text-gray-600 mt-1">Kelola data distribusi perangkat IT</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Distribusi Barang</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Kelola data distribusi perangkat IT</p>
         </div>
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
             <a href="{{ route('distribution.report_detail', request()->query()) }}"
@@ -61,15 +61,15 @@
     @endif
 
     <!-- Filter Section -->
-     <details class="bg-white rounded-xl shadow-lg mb-6 group" {{ $hasActiveFilter ? 'open' : '' }}>
+     <details class="bg-white dark:bg-gray-700 rounded-xl shadow-lg mb-6 group" {{ $hasActiveFilter ? 'open' : '' }}>
         <summary class="list-none p-4 md:p-6 cursor-pointer flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                 </svg>
-                <h2 class="text-lg md:text-xl font-bold text-gray-800">Filter & Cari Barang</h2>
+                <h2 class="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100">Filter & Cari Barang</h2>
             </div>
-            <svg class="w-5 h-5 text-gray-500 transition duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
         </summary>
@@ -78,22 +78,22 @@
         <form action="" method="GET" class="space-y-4">
             <!-- Search Bar -->
             <div>
-                <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Barang</label>
+                <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">🔍 Cari Barang</label>
                 <div class="relative">
-                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari user, SN, Merk" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
+                    <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari user, SN, Merk" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs uppercase">
                     <input type="hidden" name="item_id" id="item_id_hidden">
-                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
+                    <div id="suggestions" class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
                     @if(request('search'))
                         <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold">{{ strlen(request('search')) }} char</span>
                     @endif
                 </div>
-                <p class="text-xs text-gray-500 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
             </div>
 
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                 <!-- Status Filter -->
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Status</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Status</label>
                         <select name="status" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                             <option value="">Semua</option>
                             <option value="dipakai" {{ request('status')=='dipakai'?'selected':'' }}>Dipakai</option>
@@ -102,16 +102,16 @@
                 </div>
                 <!-- TANGGAL -->
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Tanggal Dari</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Tanggal Dari</label>
                     <input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
                 </div>
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Tanggal Sampai</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Tanggal Sampai</label>
                     <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
                 </div>
                 <!-- LOKASI -->
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Gedung</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Gedung</label>
                     <select id="filter_gedung" name="gedung" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                         <option value="">Semua</option>
                         @foreach($locations->unique('gedung') as $loc)
@@ -123,7 +123,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Ruangan</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Ruangan</label>
                     <select id="filter_ruangan" name="ruangan" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                         <option value="">Semua</option>
                         @foreach($locations as $loc)
@@ -142,7 +142,7 @@
                         </svg>
                         <span class="hidden sm:inline">Cari</span>
                     </button>
-                    <a href="{{ route('distribution.index') }}" class="btn btn-secondary btn-block">
+                    <a href="{{ route('distribution.index') }}" class="btn bg-gray-500 hover:bg-gray-600 btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
@@ -151,7 +151,7 @@
                 </div>
                 @if($hasActiveFilter)
                     <div class="text-xs md:text-sm text-gray-600 pt-3 border-t border-gray-200">
-                        <span class="font-semibold text-gray-700 block mb-2">Filter aktif:</span>
+                        <span class="font-semibold text-gray-700 dark:text-gray-100 block mb-2">Filter aktif:</span>
                         <div class="flex flex-wrap gap-2">
                             @if(request('search'))
                                 @php
@@ -244,18 +244,18 @@
 
 
     <!-- Daftar Distribution  -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
 
         <!-- Result Counter -->
-        <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
-            <div class="text-xs md:text-sm text-gray-600">
-                <span class="font-semibold text-gray-800">{{ $distribution->total() }}</span>
+        <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-wrap gap-2">
+            <div class="text-xs md:text-sm text-gray-600 dark:text-gray-400">
+                <span class="font-semibold text-gray-800 dark:text-gray-100">{{ $distribution->total() }}</span>
                 <span>Data Distribusi Ditemukan</span>
                 @if($hasActiveFilter)
-                    <span class="text-gray-500">(dari total database)</span>
+                    <span class="text-gray-500 dark:text-gray-400">(dari total database)</span>
                 @endif
             </div>
-            <div class="text-xs md:text-sm text-gray-600">
+            <div class="text-xs md:text-sm text-gray-600 dark:text-gray-300">
                 Halaman <span class="font-semibold">{{ $distribution->currentPage() }}</span> dari <span class="font-semibold">{{ $distribution->lastPage() }}</span>
             </div>
         </div>
@@ -316,7 +316,7 @@
                     </tr>
                 </thead>
                 <!-- BODY -->
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
                     @forelse($distribution as $d)
                        @php
                             $kategori = [
@@ -345,9 +345,9 @@
                                 }
                             }
                         @endphp
-                        <tr class="{{$d->status == 'dikembalikan' ? 'bg-gray-100 opacity-70': ''}} hover:bg-green-50 transition duration-150">
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $loop->iteration + ($distribution->currentPage() - 1) * $distribution->perPage() }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['PC']))
+                        <tr class="{{$d->status == 'dikembalikan' ? 'bg-gray-100 opacity-70': ''}} hover:bg-green-50 dark:hover:bg-gray-600 transition duration-150">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">{{ $loop->iteration + ($distribution->currentPage() - 1) * $distribution->perPage() }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">@if(count($kategori['PC']))
                                                                                                        @foreach($kategori['PC'] as $pc)
                                                                                                             <div>
                                                                                                                 @if($d->status == 'dikembalikan')
@@ -357,12 +357,12 @@
                                                                                                                 @else
                                                                                                                     <a href="{{ route('items.show', [$pc['id'],'redirect' => url()->full()]) }}"
                                                                                                                     title="Lihat detail Item"
-                                                                                                                    class="text-green-600 hover:text-green-800 hover:underline font-semibold">
+                                                                                                                    class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600 hover:underline font-semibold">
                                                                                                                         {{ $pc['serial_number'] }}
                                                                                                                     </a>
                                                                                                                 @endif
                                                                                                                     / {{ $pc['merk'] ?? '-' }}
-                                                                                                                    <div class="text-xs font-semibold text-gray-500">
+                                                                                                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">
                                                                                                                         Asset: {{ $pc['asset'] ?? '-' }}
                                                                                                                     </div>
                                                                                                             </div>
@@ -370,7 +370,7 @@
                                                                                                     @else
                                                                                                         -
                                                                                                     @endif</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Monitor']))
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">@if(count($kategori['Monitor']))
                                                                                                         @foreach($kategori['Monitor'] as $pc)
                                                                                                             <div>
                                                                                                                 @if($d->status == 'dikembalikan')
@@ -380,12 +380,12 @@
                                                                                                                 @else
                                                                                                                     <a href="{{ route('items.show', [$pc['id'],'redirect' => url()->full()]) }}"
                                                                                                                     title="Lihat detail Item"
-                                                                                                                    class="text-green-600 hover:underline">
+                                                                                                                    class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600 hover:underline">
                                                                                                                         {{ $pc['serial_number'] }}
                                                                                                                     </a>
                                                                                                                 @endif
                                                                                                                     / {{ $pc['merk'] }}
-                                                                                                                    <div class="text-xs font-semibold text-gray-500">
+                                                                                                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">
                                                                                                                         Asset: {{ $pc['asset'] ?? '-' }}
                                                                                                                     </div>
                                                                                                             </div>
@@ -393,7 +393,7 @@
                                                                                                     @else
                                                                                                         -
                                                                                                     @endif</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Printer Kertas']))
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">@if(count($kategori['Printer Kertas']))
                                                                                                         <div class="flex flex-col gap-1">
                                                                                                             @foreach($kategori['Printer Kertas'] as $pk)
                                                                                                                 <span class="bg-green-100 text-green-800 px-2 py-1 rounded">
@@ -414,14 +414,14 @@
                                                                                                                         </span>
                                                                                                                 </span>
                                                                                                             @endforeach
-                                                                                                            <span class="text-xs text-gray-500">
+                                                                                                            <span class="text-xs text-gray-500 dark:text-gray-400">
                                                                                                                 Total: {{ count($kategori['Printer Kertas']) }}
                                                                                                             </span>
                                                                                                         </div>
                                                                                                     @else
                                                                                                         -
                                                                                                     @endif</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Printer Barcode']))
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">@if(count($kategori['Printer Barcode']))
                                                                                                         <div class="flex flex-col gap-1">
                                                                                                             @foreach($kategori['Printer Barcode'] as $pb)
                                                                                                                 <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -442,14 +442,14 @@
                                                                                                                         </span>
                                                                                                                 </span>
                                                                                                             @endforeach
-                                                                                                            <span class="text-xs text-gray-500">
+                                                                                                            <span class="text-xs text-gray-500 dark:text-gray-400">
                                                                                                                 Total: {{ count($kategori['Printer Barcode']) }}
                                                                                                             </span>
                                                                                                         </div>
                                                                                                     @else
                                                                                                         -
                                                                                                     @endif</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Scanner']))
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">@if(count($kategori['Scanner']))
                                                                                                         @foreach($kategori['Scanner'] as $pc)
                                                                                                              <div>
                                                                                                                 @if($d->status == 'dikembalikan')
@@ -459,12 +459,12 @@
                                                                                                                 @else
                                                                                                                     <a href="{{ route('items.show', [$pc['id'],'redirect' => url()->full()]) }}"
                                                                                                                     title="Lihat detail Item"
-                                                                                                                    class="text-green-600 hover:underline">
+                                                                                                                    class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600 hover:underline">
                                                                                                                         {{ $pc['serial_number'] }}
                                                                                                                     </a>
                                                                                                                 @endif
                                                                                                                     / {{ $pc['merk'] }}
-                                                                                                                    <div class="text-xs font-semibold text-gray-500">
+                                                                                                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">
                                                                                                                         Asset: {{ $pc['asset'] ?? '-' }}
                                                                                                                     </div>
                                                                                                             </div>
@@ -472,7 +472,7 @@
                                                                                                     @else
                                                                                                         -
                                                                                                     @endif</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">@if(count($kategori['Lainnya']))
+                                <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">@if(count($kategori['Lainnya']))
                                                                                                         @foreach($kategori['Lainnya'] as $pc)
                                                                                                              <div>
                                                                                                                 @if($d->status == 'dikembalikan')
@@ -482,12 +482,12 @@
                                                                                                                 @else
                                                                                                                     <a href="{{ route('items.show', [$pc['id'],'redirect' => url()->full()]) }}"
                                                                                                                     title="Lihat detail Item"
-                                                                                                                    class="text-green-600 hover:underline">
+                                                                                                                    class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600 hover:underline">
                                                                                                                         {{ $pc['serial_number'] }}
                                                                                                                     </a>
                                                                                                                 @endif
                                                                                                                     / {{ $pc['merk'] }}
-                                                                                                                    <div class="block text-xs font-semibold text-gray-500">
+                                                                                                                    <div class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
                                                                                                                         Asset: {{ $pc['asset'] ?? '-' }}
                                                                                                                     </div>
                                                                                                             </div>
@@ -495,14 +495,14 @@
                                                                                                     @else
                                                                                                         -
                                                                                                     @endif</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">
                                 {{ $d->user?->name ?? $d->nama_user }}
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->divisi ?? '-' }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->location->gedung ?? '-' }} - {{ $d->location->ruangan ?? '-' }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ \App\Support\DateFormatter::date($d->tanggal_distribusi) }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $d->keterangan ??'-' }}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">{{ $d->divisi ?? '-' }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">{{ $d->location->gedung ?? '-' }} - {{ $d->location->ruangan ?? '-' }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">{{ \App\Support\DateFormatter::date($d->tanggal_distribusi) }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">{{ $d->keterangan ??'-' }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">
                             @if($d->status == 'dipakai')
                                 <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs">
                                     Dipakai
@@ -574,8 +574,8 @@
         </div>
 
         <!-- Pagination -->
-        <div class="bg-white px-3 md:px-4 py-4 border-t border-gray-200 overflow-x-auto">
-            <div class="flex justify-center md:justify-end">
+        <div class="bg-white dark:bg-gray-700 px-3 md:px-4 py-4 border-t border-gray-200 overflow-x-auto">
+            <div class="location-pagination flex justify-center md:justify-end">
                 {{ $distribution->links() }}
             </div>
         </div>
@@ -586,20 +586,20 @@
 <!-- RETURN MODAL -->
 <div id="returnModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
     <div class="flex min-h-screen w-full items-center justify-center p-4">
-        <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-2xl">
+        <div class="w-full max-w-lg rounded-lg bg-white dark:bg-gray-700 p-6 shadow-2xl">
 
-        <h2 class="mb-6 text-xl font-bold text-gray-900">
+        <h2 class="mb-6 text-xl font-bold text-gray-900 dark:text-gray-50">
             Pengembalian Barang 1 SET
         </h2>
 
         <form id="returnForm" method="POST">
             @csrf
             <div class="mb-4">
-                <label class="mb-2 block text-sm font-semibold text-gray-700">
+                <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-100">
                     Lokasi Penyimpanan
                 </label>
 
-                <select name="storage_location_id" class="popup-select w-full rounded-lg border border-gray-300 px-4 py-3 text-sm" required>
+                <select name="storage_location_id" class="popup-select w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition" required>
                     <option value="">-- Pilih Lokasi --</option>
                     @foreach($warehouseLocations as $location)
                         <option value="{{ $location->id }}">
@@ -611,11 +611,11 @@
             </div>
 
             <div class="mb-4">
-                <label class="mb-2 block text-sm font-semibold text-gray-700">
+                <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-100">
                     Kondisi Barang
                 </label>
 
-                <select name="condition_status" class="popup-select w-full rounded-lg border border-gray-300 px-4 py-3 text-sm" required>
+                <select name="condition_status" class="popup-select w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition" required>
                     <option value="available">
                         Normal / Tersedia
                     </option>
@@ -626,13 +626,13 @@
             </div>
 
             <div class="mb-4">
-                <label class="mb-2 block text-sm font-semibold text-gray-700">
+                <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-100">
                     Keterangan Kondisi
                 </label>
 
                 <textarea
                     name="condition_note"
-                    class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm"
+                    class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                     rows="3"
                     placeholder="Contoh: Monitor bergaris, printer mati total"></textarea>
             </div>
@@ -641,7 +641,7 @@
                 <button
                     type="button"
                     onclick="closeReturnModal()"
-                    class="btn btn-secondary">
+                    class="btn bg-gray-500 hover:bg-gray-600">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -714,6 +714,45 @@
     .pagination span {
         padding: 0.5rem 0.75rem;
         font-size: 0.875rem;
+    }
+
+    .dark .pagination a,
+    .dark .pagination span {
+        color: #f9fafb;
+        border-color: #4b5563;
+    }
+
+    .dark .location-pagination nav,
+    .dark .location-pagination p {
+        color: #d1d5db;
+    }
+
+    .dark .location-pagination span,
+    .dark .location-pagination a {
+        border-color: #4b5563 !important;
+    }
+
+    .dark .location-pagination a {
+        background-color: #374151 !important;
+        color: #f9fafb !important;
+    }
+
+    .dark .location-pagination a:hover {
+        background-color: #1f2937 !important;
+        color: #ffffff !important;
+    }
+
+    .dark .location-pagination span[aria-current="page"] span {
+        background-color: #1f2937 !important;
+        border-color: #6b7280 !important;
+        color: #ffffff !important;
+        font-weight: 700;
+    }
+
+    .dark .location-pagination span[aria-disabled="true"] span,
+    .dark .location-pagination span:not([aria-current]) {
+        background-color: #374151 !important;
+        color: #9ca3af !important;
     }
 
     .filter-summary {
@@ -805,7 +844,7 @@ $(document).ready(function() {
                     var html = '';
                         $.each(data, function(i, item) {
                         html += `
-                            <div class="px-3 py-2 cursor-pointer hover:bg-green-100"
+                            <div class="px-3 py-2 cursor-pointer hover:bg-green-100  dark:hover:bg-gray-600"
                                 data-id="${item.id}"
                                 data-serial="${item.serial_number}"
                                 data-text="${item.text}">

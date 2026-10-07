@@ -11,6 +11,7 @@ use App\Http\Controllers\Barang_masukController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\IssueReportController;
+use App\Http\Controllers\MaintenanceBerkalaController;
 
 // Redirect root ke login
 Route::get('/', function () {
@@ -28,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard-client', [DashboardController::class, 'client'])->name('dashboard.client');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/maintenance-saya', [MaintenanceBerkalaController::class, 'my'])->name('maintenance_berkala.my');
 
     Route::get('/laporan-kendala', [IssueReportController::class, 'index'])->name('issue_reports.index');
     Route::get('/laporan-kendala/create', [IssueReportController::class, 'create'])->name('issue_reports.create');
@@ -45,6 +47,9 @@ Route::middleware('auth')->group(function () {
         Route::get('locations/search-locations', [LocationsController::class, 'searchLocations'])->name('locations.search_locations');
         Route::resource('locations', LocationsController::class);
         Route::get('items/search-items', [ItemsController::class, 'searchItems'])->name('items.search_items');
+        Route::get('items/export/{format}', [ItemsController::class, 'export'])
+            ->whereIn('format', ['excel', 'pdf'])
+            ->name('items.export');
         Route::get('items/{item}/history/export/{format}', [ItemsController::class, 'exportHistory'])
             ->whereIn('format', ['excel', 'pdf'])
             ->name('items.history.export');
@@ -64,6 +69,12 @@ Route::middleware('auth')->group(function () {
             ->name('distribution.report_detail.export');
         Route::get('/distribution/report-detail', [DistributionController::class, 'reportDetail'])->name('distribution.report_detail');
         Route::resource('distribution', DistributionController::class);
+        Route::get('maintenance-berkala/export/{format}', [MaintenanceBerkalaController::class, 'export'])
+            ->whereIn('format', ['excel', 'pdf'])
+            ->name('maintenance_berkala.export');
+        Route::get('maintenance-berkala/search', [MaintenanceBerkalaController::class, 'search'])->name('maintenance_berkala.search');
+        Route::get('maintenance-berkala', [MaintenanceBerkalaController::class, 'index'])->name('maintenance_berkala.index');
+        Route::post('maintenance-berkala', [MaintenanceBerkalaController::class, 'store'])->name('maintenance_berkala.store');
         Route::get('barang_masuk/search-barang-masuk', [Barang_masukController::class, 'searchBarangMasuk'])->name('barang_masuk.search_barang_masuk');
         Route::get('barang_masuk/export/{format}', [Barang_masukController::class, 'export'])
             ->whereIn('format', ['excel', 'pdf'])

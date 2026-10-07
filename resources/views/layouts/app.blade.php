@@ -11,6 +11,14 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('vendor/select2/js/select2.min.js') }}"></script>
+    <script>
+    // Cek local storage atau preferensi sistem untuk menentukan mode awal
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark')
+    }
+    </script>
 <style>
         body {
             overflow-x: hidden;
@@ -47,7 +55,7 @@
     </style>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
     <div class="flex flex-col h-screen">
         <!-- Include Navbar (Fixed Height) -->
         @include('layouts.navbar')
@@ -94,6 +102,11 @@
                         overlay.classList.remove('hidden');
                     }
                 }
+
+                window.dispatchEvent(new CustomEvent('warehouse-layout-changed'));
+                setTimeout(function () {
+                    window.dispatchEvent(new CustomEvent('warehouse-layout-changed'));
+                }, 320);
             }
 
             // Function to get whether sidebar should be hidden
@@ -175,6 +188,44 @@
             });
         });
 
+
+            // --- FUNGSI DARK MODE ---
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+            const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+            if (themeToggleBtn) {
+                // Set icon awal berdasarkan mode saat ini
+                if (document.documentElement.classList.contains('dark')) {
+                    if (themeToggleLightIcon) themeToggleLightIcon.classList.remove('hidden');
+                    if (themeToggleDarkIcon) themeToggleDarkIcon.classList.add('hidden');
+                } else {
+                    if (themeToggleDarkIcon) themeToggleDarkIcon.classList.remove('hidden');
+                    if (themeToggleLightIcon) themeToggleLightIcon.classList.add('hidden');
+                }
+
+                themeToggleBtn.addEventListener('click', function() {
+                    // Toggle icons
+                    if (themeToggleDarkIcon) themeToggleDarkIcon.classList.toggle('hidden');
+                    if (themeToggleLightIcon) themeToggleLightIcon.classList.toggle('hidden');
+
+                    // Ganti mode
+                    if (document.documentElement.classList.contains('dark')) {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('color-theme', 'light');
+                    } else {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('color-theme', 'dark');
+                    }
+
+                    window.dispatchEvent(new CustomEvent('warehouse-theme-changed', {
+                        detail: {
+                            theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+                        }
+                    }));
+                });
+            }
+
          (function() {
                 let timeout;
                 const idleTime = 5 * 60 * 1000; // 5 menit
@@ -209,7 +260,7 @@
                 // Jalankan timer saat halaman pertama kali dibuka
                 resetTimer();
             })();
-    </script>
 
+    </script>
 </body>
 </html>

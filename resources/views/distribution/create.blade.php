@@ -7,10 +7,10 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Tambah Distribusi Barang</h1>
-            <p class="text-gray-600 mt-1">Input Barang Distribusi</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Tambah Distribusi Barang</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Input Barang Distribusi</p>
         </div>
-        <a href="{{ $redirect }}" class="btn btn-secondary">
+        <a href="{{ $redirect }}" class="btn bg-gray-500 hover:bg-gray-600">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -29,13 +29,13 @@
     @endif
 
     <!-- FORM -->
-    <div class="bg-white rounded-xl shadow-lg p-8">
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-8">
         <form action="{{ route('distribution.store') }}" method="POST">
             @csrf
             <input type="hidden" name="redirect" value="{{ $redirect }}">
             <!-- USER -->
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Akun Pengguna</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Akun Pengguna</label>
                 <select name="user_id" id="distribution_user_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
                     <option value="">-- Pilih akun client/staf --</option>
                     @foreach($distributionUsers as $distributionUser)
@@ -46,22 +46,22 @@
                         </option>
                     @endforeach
                 </select>
-                <p class="text-xs text-gray-500 mt-1">Pilih akun agar user bisa membuat laporan kendala dari perangkat ini.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih akun agar user bisa membuat laporan kendala dari perangkat ini.</p>
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nama User</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Nama User</label>
                 <input type="text" name="nama_user" id="nama_user" value="{{ old('nama_user') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Divisi</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Divisi</label>
                 <input type="text" name="divisi" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
 
             <!-- LOKASI -->
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Lokasi <span class="text-red-500">*</span></label>
                     <!-- GEDUNG -->
                     <select id="gedung" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
                         <option value="">-- Pilih Gedung --</option>
@@ -76,11 +76,11 @@
                     </select>
             </div>
 
-            
+
 
             <!-- TANGGAL -->
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Tanggal <span class="text-red-500">*</span></label>
                 <input type="date" name="tanggal_distribusi" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
@@ -90,7 +90,7 @@
 
             <!-- PC -->
             <div class="mb-4 relative">
-                <label class="block text-sm font-medium text-gray-700 mb-2">PC</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">PC</label>
                 <input type="text" id="pc_search"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Ketik SN PC...">
@@ -98,13 +98,13 @@
                 <input type="hidden" name="items[]" id="pc_id">
 
                 <div id="pc_suggestions"
-                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
+                    class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
                 </div>
             </div>
 
             <!-- Monitor -->
             <div class="mb-4 relative">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Monitor</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Monitor</label>
                 <input type="text" id="monitor_search"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Ketik SN Monitor...">
@@ -112,45 +112,45 @@
                 <input type="hidden" name="items[]" id="monitor_id">
 
                 <div id="monitor_suggestions"
-                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
+                    class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
                 </div>
             </div>
 
             <!-- Printer Kertas -->
             <div class="mb-4 relative">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Printer Kertas</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Printer Kertas</label>
                 <input type="text" id="printer_kertas_search"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Ketik SN Printer Kertas...">
 
-               
+
                 {{-- <input type="hidden" name="items[]" id="printer_kertas_id"> --}}
 
                 <div id="printer_kertas_selected" class="mt-2 flex flex-wrap gap-2"></div>
                 <div id="printer_kertas_suggestions"
-                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
+                    class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
                 </div>
             </div>
 
             <!-- Printer Kertas Barcode -->
             <div class="mb-4 relative">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Printer Barcode</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Printer Barcode</label>
                 <input type="text" id="printer_barcode_search"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Ketik SN Printer Barcode...">
 
-                
+
                 {{-- <input type="hidden" name="items[]" id="printer_barcode_id"> --}}
 
                 <div id="printer_barcode_selected" class="mt-2 flex flex-wrap gap-2"></div>
                 <div id="printer_barcode_suggestions"
-                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
+                    class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
                 </div>
             </div>
 
             <!-- Scanner -->
             <div class="mb-4 relative">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Scanner</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Scanner</label>
                 <input type="text" id="scanner_search"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Ketik SN Scanner...">
@@ -158,23 +158,23 @@
                 <input type="hidden" name="items[]" id="scanner_id">
 
                 <div id="scanner_suggestions"
-                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
+                    class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
                 </div>
             </div>
 
              <!-- Lainnya -->
             <div class="mb-4 relative">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Lainnya</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Lainnya</label>
                 <input type="text" id="lainnya_search"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Ketik SN Lainnya...">
 
-                
+
                 {{-- <input type="hidden" name="items[]" id="printer_barcode_id"> --}}
 
                 <div id="lainnya_selected" class="mt-2 flex flex-wrap gap-2"></div>
                 <div id="lainnya_suggestions"
-                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
+                    class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto">
                 </div>
             </div>
 
@@ -190,10 +190,10 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    Simpan 
+                    Simpan
                 </button>
 
-                <a href="{{ $redirect }}" class="btn btn-secondary">
+                <a href="{{ $redirect }}" class="btn bg-gray-500 hover:bg-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>Batal
@@ -284,14 +284,14 @@ function setupSearch(inputId, suggestionId, hiddenId, kategori, containerId = nu
                 success: function (data) {
 
                     if (data.length === 0) {
-                        $suggestions.html('<div class="px-3 py-2 text-gray-500">Tidak ada</div>').show();
+                        $suggestions.html('<div class="px-3 py-2 text-gray-500 dark:text-gray-400">Tidak ada</div>').show();
                         return;
                     }
 
                     let html = '';
                     data.forEach(item => {
                         html += `
-                        <div class="px-3 py-2 cursor-pointer hover:bg-green-100"
+                        <div class="px-3 py-2 cursor-pointer hover:bg-green-100 dark:hover:bg-gray-600 dark:text-gray-100"
                             data-id="${item.id}"
                             data-text="${item.serial_number}">
                             ${item.serial_number} - ${item.merk}

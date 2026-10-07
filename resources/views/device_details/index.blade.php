@@ -14,8 +14,8 @@
     <!-- Header -->
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Detail Perangkat</h1>
-            <p class="text-gray-600 mt-1">Kelola detail perangkat untuk item berserial number</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Detail Perangkat</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Kelola detail perangkat untuk item berserial number</p>
         </div>
         {{-- <a href="{{ route('device_details.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition duration-200 shadow-lg hover:shadow-xl">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,15 +35,15 @@
         </div>
     @endif
 
-     <details class="bg-white rounded-xl shadow-lg mb-6 group" {{ $hasActiveFilter ? 'open' : '' }}>
+     <details class="bg-white dark:bg-gray-700 rounded-xl shadow-lg mb-6 group" {{ $hasActiveFilter ? 'open' : '' }}>
         <summary class="list-none p-4 md:p-6 cursor-pointer flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                 </svg>
-                <h2 class="text-lg md:text-xl font-bold text-gray-800">Filter & Cari Detail Perangkat</h2>
+                <h2 class="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100">Filter & Cari Detail Perangkat</h2>
             </div>
-            <svg class="w-5 h-5 text-gray-500 transition duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
         </summary>
@@ -52,22 +52,22 @@
             <!-- Search Bar -->
             <div>
                 <div class="relative">
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">🔍 Cari Detail Perangkat <span class="text-red-500">*</span></label>
+                    <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">🔍 Cari Detail Perangkat <span class="text-red-500">*</span></label>
                     <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs uppercase" placeholder="Cari nama SN atau IP">
                     <input type="hidden" name="item_id" id="item_id_hidden">
-                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
+                    <div id="suggestions" class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
                     @error('item_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-                <p class="text-xs text-gray-500 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
             </div>
 
 
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
                 <!-- Kategori Filter -->
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Merk</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Merk</label>
                         <select name="merk" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                             <option class="text-xs uppercase" value="">Semua</option>
                              @foreach($merks as $merk)
@@ -79,7 +79,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Gedung</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Gedung</label>
                     <select name="gedung" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                         <option value="">Semua</option>
                         @foreach($gedungs as $gedung)
@@ -91,7 +91,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Ruangan</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Ruangan</label>
                     <select name="ruangan" id="ruangan" data-selected="{{ request('ruangan') }}" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                         <option value="">Semua</option>
                     </select>
@@ -99,18 +99,18 @@
 
                 <!-- Koneksi Filter -->
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Jenis Koneksi</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Jenis Koneksi</label>
                     <details class="relative filter-dropdown">
                         <summary class="filter-summary list-none w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white cursor-pointer flex items-center justify-between gap-3 transition duration-200">
-                            <span class="text-gray-700 truncate text-xs uppercase">
+                            <span class="text-gray-700 dark:text-gray-100 truncate text-xs uppercase">
                                 {{ empty($activeConnectionTypes) ? '-- Semua Koneksi --' : collect($activeConnectionTypes)->map(fn ($connectionType) => $connectionType === 'DP' ? 'DP / DisplayPort' : $connectionType)->implode(', ') }}
                             </span>
                             <span class="text-gray-400 text-xs">Pilih</span>
                         </summary>
-                        <div class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-3 max-h-64 overflow-y-auto">
+                        <div class="filter-menu absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-3 max-h-64 overflow-y-auto">
                             <div class="space-y-2">
                                 @foreach($connectionTypes as $connectionType)
-                                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                                    <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-100 cursor-pointer">
                                         <input type="checkbox" name="connection_type[]" value="{{ $connectionType }}" {{ in_array($connectionType, $activeConnectionTypes, true) ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-500">
                                         <span class="text-xs uppercase">{{ $connectionType === 'DP' ? 'DP / DisplayPort' : $connectionType }}</span>
                                     </label>
@@ -129,7 +129,7 @@
                         </svg>
                         <span class="hidden sm:inline">Cari</span>
                     </button>
-                    <a href="{{ route('device_details.index') }}" class="btn btn-secondary btn-block">
+                    <a href="{{ route('device_details.index') }}" class="btn bg-gray-500 hover:bg-gray-600 btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
@@ -140,7 +140,7 @@
                 <!-- Active Filters Display -->
                 @if($hasActiveFilter)
                     <div class="text-xs md:text-sm text-gray-600 pt-3 border-t border-gray-200">
-                        <span class="font-semibold text-gray-700 block mb-2">Filter aktif:</span>
+                        <span class="font-semibold text-gray-700 dark:text-gray-100 block mb-2">Filter aktif:</span>
                         <div class="flex flex-wrap gap-2">
                             @if(request('search'))
                                 @php
@@ -240,18 +240,18 @@
 
 
     <!-- Daftar Device Details -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
 
          <!-- Result Counter -->
-        <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
-            <div class="text-xs md:text-sm text-gray-600">
-                <span class="font-semibold text-gray-800">{{ $deviceDetails->total() }}</span>
+        <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-wrap gap-2">
+            <div class="text-xs md:text-sm text-gray-600 dark:text-gray-400">
+                <span class="font-semibold text-gray-800 dark:text-gray-100">{{ $deviceDetails->total() }}</span>
                 <span>Data Detail Perangkat Ditemukan</span>
                 @if($hasActiveFilter)
-                    <span class="text-gray-500">(dari total database)</span>
+                    <span class="text-gray-500 dark:text-gray-400">(dari total database)</span>
                 @endif
             </div>
-            <div class="text-xs md:text-sm text-gray-600">
+            <div class="text-xs md:text-sm text-gray-600 dark:text-gray-300">
                 Halaman <span class="font-semibold">{{ $deviceDetails->currentPage() }}</span> dari <span class="font-semibold">{{ $deviceDetails->lastPage() }}</span>
             </div>
         </div>
@@ -275,7 +275,7 @@
                         <th class="px-6 py-4 text-center text-xs font-semibold text-white uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
                     @php
                         $formatLocation = function ($deviceDetail) {
                             $item = optional($deviceDetail->item);
@@ -297,9 +297,9 @@
                         };
                     @endphp
                     @forelse($deviceDetails as $index => $deviceDetail)
-                        <tr class="hover:bg-green-50 transition duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $deviceDetails->firstItem() + $index }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">
+                        <tr class="hover:bg-green-50 dark:hover:bg-gray-600 transition duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-100">{{ $deviceDetails->firstItem() + $index }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">
                                  @if(optional($deviceDetail->item)->kategori === 'PC')
                                     <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">PC</span>
                                 @elseif(optional($deviceDetail->item)->kategori === 'Monitor')
@@ -314,20 +314,20 @@
                                     <span class="px-2 md:px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-cyan-100 text-cyan-800">Lainnya</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->pc_name ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->user_account ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase font-semibold text-gray-900"><a href="{{ route('items.show', [$deviceDetail->item, 'redirect' => url()->full()]) }}"
-                                                                                                                                                class="text-green-600 hover:text-green-800 hover:underline font-semibold">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $deviceDetail->pc_name ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $deviceDetail->user_account ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase font-semibold text-gray-900 dark:text-gray-100"><a href="{{ route('items.show', [$deviceDetail->item, 'redirect' => url()->full()]) }}"
+                                                                                                                                                class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600  hover:underline font-semibold">
 
                                                                                                                                                 {{ optional($deviceDetail->item)->serial_number ?? '-' }}
 
                                                                                                                                             </a></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ optional($deviceDetail->item)->merk ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $formatLocation($deviceDetail) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->ip_address ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->connection_type ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->shared_name ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $deviceDetail->os_version ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ optional($deviceDetail->item)->merk ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $formatLocation($deviceDetail) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $deviceDetail->ip_address ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $deviceDetail->connection_type ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $deviceDetail->shared_name ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $deviceDetail->os_version ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                 <div class="inline-flex gap-2">
                                     <!-- Tombol Edit -->
@@ -359,7 +359,7 @@
                                     <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                                     </svg>
-                                    <p class="text-sm md:text-base text-gray-600 font-semibold mb-2">
+                                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-400 font-semibold mb-2">
                                         @if(request()->filled('search') || request()->filled('merk') || request()->filled('gedung') || request()->filled('ruangan') || count($activeConnectionTypes) > 0)
                                             Tidak ada hasil yang cocok
                                         @else
@@ -378,8 +378,8 @@
         </div>
 
         <!-- Pagination -->
-        <div class="bg-white px-3 md:px-4 py-4 border-t border-gray-200 overflow-x-auto">
-            <div class="flex justify-center md:justify-end">
+        <div class="bg-white dark:bg-gray-700 px-3 md:px-4 py-4 border-t border-gray-200 overflow-x-auto">
+            <div class="location-pagination flex justify-center md:justify-end">
                 {{ $deviceDetails->links() }}
             </div>
         </div>
@@ -388,6 +388,57 @@
 </div>
 
 <style>
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .pagination a,
+    .pagination span {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .dark .pagination a,
+    .dark .pagination span {
+        color: #f9fafb;
+        border-color: #4b5563;
+    }
+
+    .dark .location-pagination nav,
+    .dark .location-pagination p {
+        color: #d1d5db;
+    }
+
+    .dark .location-pagination span,
+    .dark .location-pagination a {
+        border-color: #4b5563 !important;
+    }
+
+    .dark .location-pagination a {
+        background-color: #374151 !important;
+        color: #f9fafb !important;
+    }
+
+    .dark .location-pagination a:hover {
+        background-color: #1f2937 !important;
+        color: #ffffff !important;
+    }
+
+    .dark .location-pagination span[aria-current="page"] span {
+        background-color: #1f2937 !important;
+        border-color: #6b7280 !important;
+        color: #ffffff !important;
+        font-weight: 700;
+    }
+
+    .dark .location-pagination span[aria-disabled="true"] span,
+    .dark .location-pagination span:not([aria-current]) {
+        background-color: #374151 !important;
+        color: #9ca3af !important;
+    }
+
     .filter-summary {
         border-color: #d1d5db;
         outline: none;
@@ -398,6 +449,28 @@
         border-color: #22c55e;
         box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.5);
         background-color: #fcfcfc;
+    }
+
+    .dark .filter-summary {
+        background-color: #374151;
+        border-color: #f0e8e8;
+        color: #f9fafb;
+    }
+
+    .dark .filter-menu {
+        background-color: #2d2b35;
+        border-color: #4b4855;
+        color: #f9fafb;
+    }
+
+    .dark .filter-dropdown[open] > .filter-summary {
+        background-color: #374151;
+        border-color: #09ff00;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16);
+    }
+
+    .dark .filter-menu label:hover {
+        background-color: #403d49;
     }
 </style>
 <script>
@@ -454,13 +527,13 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(data) {
                 if (data.length === 0) {
-                    $suggestions.html('<div class="px-3 py-2 text-gray-500">Tidak ada hasil</div>').show();
+                    $suggestions.html('<div class="px-3 py-2 text-gray-500 dark:text-gray-400">Tidak ada hasil</div>').show();
                     return;
                 }
                 var html = '';
                 $.each(data, function(i, item) {
                     html += `
-                        <div class="px-3 py-2 cursor-pointer hover:bg-green-100"
+                        <div class="px-3 py-2 cursor-pointer hover:bg-green-100 dark:hover:bg-gray-600"
                             data-id="${item.id}"
                             data-text="${item.text}">
                             ${item.text}

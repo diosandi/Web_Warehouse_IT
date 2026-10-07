@@ -16,6 +16,7 @@ class DistributionItem extends Model
         'status',
         'returned_at',
         'return_condition_status',
+        'return_storage_location_id',
         'return_note'
     ];
 
@@ -39,5 +40,15 @@ class DistributionItem extends Model
     public function distribution()
     {
         return $this->belongsTo(Distribution::class);
+    }
+
+    public function returnStorageLocation()
+    {
+        return $this->belongsTo(Locations::class, 'return_storage_location_id');
+    }
+
+    public function maintenanceBerkalas()
+    {
+        return $this->hasMany(MaintenanceBerkala::class);
     }
 }

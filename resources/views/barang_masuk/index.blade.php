@@ -22,15 +22,15 @@
     <!-- HEADER -->
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Barang Masuk</h1>
-                <p class="text-gray-600 mt-1">Kelola Barang Masuk</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Barang Masuk</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Kelola Barang Masuk</p>
         </div>
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
             <a href="{{ route('barang_masuk.export', array_merge(request()->query(), ['format' => 'excel'])) }}"
                class="btn btn-success">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m4 5H5a2 2 0 01-2-2V6a2 2 0 012-2h8l6 6v8a2 2 0 01-2 2z"></path>
+                <svg class="w-4 md:w-5 h-4 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"></path>
                 </svg>
                 Export Excel
             </a>
@@ -38,8 +38,8 @@
             <a href="{{ route('barang_masuk.export', array_merge(request()->query(), ['format' => 'pdf'])) }}"
                target="_blank"
                class="btn btn-danger">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m4 5H5a2 2 0 01-2-2V6a2 2 0 012-2h8l6 6v8a2 2 0 01-2 2z"></path>
+                <svg class="w-4 md:w-5 h-4 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                 </svg>
                 Export PDF
             </a>
@@ -65,15 +65,15 @@
     @endif
 
     <!-- Filter Section -->
-     <details class="bg-white rounded-xl shadow-lg mb-6 group" {{ $hasActiveFilter ? 'open' : '' }}>
+     <details class="bg-white dark:bg-gray-700 rounded-xl shadow-lg mb-6 group" {{ $hasActiveFilter ? 'open' : '' }}>
         <summary class="list-none p-4 md:p-6 cursor-pointer flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                 </svg>
-                <h2 class="text-lg md:text-xl font-bold text-gray-800">Filter & Cari Barang</h2>
+                <h2 class="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100">Filter & Cari Barang</h2>
             </div>
-            <svg class="w-5 h-5 text-gray-500 transition duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
         </summary>
@@ -82,22 +82,22 @@
         <form action="" method="GET" class="space-y-4">
             <!-- Search Bar -->
             <div>
-                <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">🔍 Cari Barang Masuk</label>
+                <label for="search" class="block text-xs md:text-sm font-semibold text-gray-700  dark:text-gray-100 mb-2">🔍 Cari Barang Masuk</label>
                 <div class="relative">
                     <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}" placeholder="Cari Asset, SN, Merk, dan kategori" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                     <input type="hidden" name='item_id' id="item_id_hidden">
-                    <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
+                    <div id="suggestions" class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
                     @if(request('search'))
                         <span class="absolute right-3 top-3 text-gray-400 text-sm font-semibold">{{ strlen(request('search')) }} char</span>
                     @endif
                 </div>
-                <p class="text-xs text-gray-500 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tekan Enter atau klik Cari untuk mencari di semua field</p>
             </div>
 
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                 <!-- Kategori Filter -->
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Kategori</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Kategori</label>
                         <select name="kategori" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10 text-xs uppercase">
                             <option value="">Semua</option>
                             @foreach($kategoriLabels as $value => $label)
@@ -108,11 +108,11 @@
 
                  <!-- TANGGAL -->
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Tanggal Dari</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Tanggal Dari</label>
                     <input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
                 </div>
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Tanggal Sampai</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Tanggal Sampai</label>
                     <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 pr-10">
                 </div>
             </div>
@@ -123,16 +123,16 @@
                         </svg>
                         <span class="hidden sm:inline">Cari</span>
                     </button>
-                    <a href="{{ route('barang_masuk.index') }}" class="btn btn-secondary btn-block">
+                    <a href="{{ route('barang_masuk.index') }}" class="btn bg-gray-500 hover:bg-gray-600 btn-block">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
-                        <span class="hidden sm:inline">Reset</span>
+                        <span class="hidden sm:inline">Bersihkan</span>
                     </a>
                 </div>
                 @if($hasActiveFilter)
-                    <div class="text-xs md:text-sm text-gray-600 pt-3 border-t border-gray-200">
-                        <span class="font-semibold text-gray-700 block mb-2">Filter aktif:</span>
+                    <div class="text-xs md:text-sm text-gray-600 dark:text-gray-400 pt-3 border-t border-gray-200">
+                        <span class="font-semibold text-gray-700 dark:text-gray-100 block mb-2">Filter aktif:</span>
                         <div class="flex flex-wrap gap-2">
                             @if(request('search'))
                                 @php
@@ -204,18 +204,18 @@
     @endif
 
     <!--Daftar Barang Masuk -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
 
         <!-- Result Counter -->
-        <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
-            <div class="text-xs md:text-sm text-gray-600">
-                <span class="font-semibold text-gray-800">{{ $barang_masuk->total() }}</span>
+        <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-wrap gap-2">
+            <div class="text-xs md:text-sm text-gray-600 dark:text-gray-400">
+                <span class="font-semibold text-gray-800 dark:text-gray-100">{{ $barang_masuk->total() }}</span>
                 <span>Data Barang Masuk Ditemukan</span>
                 @if($hasActiveFilter)
-                    <span class="text-gray-500">(dari total database)</span>
+                    <span class="text-gray-500 dark:text-gray-400">(dari total database)</span>
                 @endif
             </div>
-            <div class="text-xs md:text-sm text-gray-600">
+            <div class="text-xs md:text-sm text-gray-600 dark:text-gray-300">
                 Halaman <span class="font-semibold">{{ $barang_masuk->currentPage() }}</span> dari <span class="font-semibold">{{ $barang_masuk->lastPage() }}</span>
             </div>
         </div>
@@ -239,18 +239,18 @@
                     </tr>
                 </thead>
 
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
                     @forelse($barang_masuk as $bm)
-                    <tr class="hover:bg-green-50 transition duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900">{{ $loop->iteration }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ \App\Support\DateFormatter::date($bm->tanggal_masuk) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->kategori ?? '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->merk ?? '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->items->first()->type ?? '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->supplier ?? '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->po_number ?? '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase font-semibold text-gray-900">{{ $bm->items->count() ?? 0 }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700">{{ $bm->keterangan ?? '-' }}</td>
+                    <tr class="hover:bg-green-50 dark:hover:bg-gray-600 transition duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-900 dark:text-gray-50">{{ $loop->iteration }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ \App\Support\DateFormatter::date($bm->tanggal_masuk) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $bm->items->first()->kategori ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $bm->items->first()->merk ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $bm->items->first()->type ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $bm->supplier ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $bm->po_number ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase font-semibold text-gray-900 dark:text-gray-50">{{ $bm->items->count() ?? 0 }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm uppercase text-gray-700 dark:text-gray-100">{{ $bm->keterangan ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                             <div class="inline-flex gap-2">
                                 <!-- EDIT -->
@@ -301,14 +301,67 @@
         </div>
 
             <!-- Pagination -->
-            <div class="bg-white px-3 md:px-4 py-4 border-t border-gray-200 overflow-x-auto">
-                <div class="flex justify-center md:justify-end">
+            <div class="bg-white dark:bg-gray-700 px-3 md:px-4 py-4 border-t border-gray-200 overflow-x-auto">
+                <div class="location-pagination flex justify-center md:justify-end">
                     @if($barang_masuk->hasPages()) {{ $barang_masuk->links() }} @endif
                 </div>
             </div>
 
     </div>
 </div>
+<style>
+    /* Custom pagination styling untuk responsif */
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .pagination a,
+    .pagination span {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .dark .pagination a,
+    .dark .pagination span {
+        color: #f9fafb;
+        border-color: #4b5563;
+    }
+
+    .dark .location-pagination nav,
+    .dark .location-pagination p {
+        color: #d1d5db;
+    }
+
+    .dark .location-pagination span,
+    .dark .location-pagination a {
+        border-color: #4b5563 !important;
+    }
+
+    .dark .location-pagination a {
+        background-color: #374151 !important;
+        color: #f9fafb !important;
+    }
+
+    .dark .location-pagination a:hover {
+        background-color: #1f2937 !important;
+        color: #ffffff !important;
+    }
+
+    .dark .location-pagination span[aria-current="page"] span {
+        background-color: #1f2937 !important;
+        border-color: #6b7280 !important;
+        color: #ffffff !important;
+        font-weight: 700;
+    }
+
+    .dark .location-pagination span[aria-disabled="true"] span,
+    .dark .location-pagination span:not([aria-current]) {
+        background-color: #374151 !important;
+        color: #9ca3af !important;
+    }
+</style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -346,12 +399,12 @@ $(document).ready(function() {
                 dataType: 'json',
                 success: function(data) {
                     if (data.length === 0) {
-                        $suggestions.html('<div class="px-3 py-2 text-gray-500">Tidak ada hasil</div>').show();
+                        $suggestions.html('<div class="px-3 py-2 text-gray-500 dark:text-gray-400">Tidak ada hasil</div>').show();
                         return;
                     }
                     var html = '';
                         $.each(data, function(i, item) {
-                        html += '<div class="px-3 py-2 cursor-pointer hover:bg-green-100" data-id="'+item.id+'" data-text="'+item.text+'">'+item.text+'</div>';
+                        html += '<div class="px-3 py-2 cursor-pointer hover:bg-green-100 dark:hover:bg-gray-600" data-id="'+item.id+'" data-text="'+item.text+'">'+item.text+'</div>';
                     });
                     $suggestions.html(html).show();
                 }

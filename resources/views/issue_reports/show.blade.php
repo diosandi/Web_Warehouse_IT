@@ -21,10 +21,10 @@
 <div class="container mx-auto px-4 py-12">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">{{ $issueReport->ticket_number }}</h1>
-            <p class="text-gray-600 mt-1">{{ $issueReport->title }}</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">{{ $issueReport->ticket_number }}</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $issueReport->title }}</p>
         </div>
-        <a href="{{ route('issue_reports.index') }}" class="btn btn-secondary">
+        <a href="{{ route('issue_reports.index') }}" class="btn bg-gray-500 hover:bg-gray-600">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -46,18 +46,18 @@
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div class="xl:col-span-2 space-y-6">
-            <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6">
                 <div class="flex flex-wrap gap-2 mb-5">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusClasses[$issueReport->status] ?? 'bg-gray-100 text-gray-800' }}">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusClasses[$issueReport->status] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100' }}">
                         {{ $issueReport->status_label }}
                     </span>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $priorityClasses[$issueReport->priority] ?? 'bg-gray-100 text-gray-800' }}">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $priorityClasses[$issueReport->priority] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100' }}">
                         {{ $issueReport->priority_label }}
                     </span>
                 </div>
 
-                <h2 class="text-xl font-bold text-gray-800 mb-3">Deskripsi Kendala</h2>
-                <p class="text-sm leading-6 text-gray-700 whitespace-pre-line">{{ $issueReport->description }}</p>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">Deskripsi Kendala</h2>
+                <p class="text-sm leading-6 text-gray-700 dark:text-gray-200 whitespace-pre-line">{{ $issueReport->description }}</p>
 
                 @if($issueReport->evidence_path)
                     @php
@@ -65,9 +65,9 @@
                         $isVideoEvidence = in_array($evidenceExtension, ['mp4', 'webm', 'avi', 'mov', 'mkv'], true);
                     @endphp
                     <div class="mt-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Bukti / Foto / Video</h3>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Bukti / Foto / Video</h3>
                         @if($isVideoEvidence)
-                            <video controls class="w-full max-h-96 rounded-lg border border-gray-200 bg-black">
+                            <video controls class="w-full max-h-96 rounded-lg border border-gray-200 dark:border-gray-600 bg-black dark:bg-gray-100">
                                 <source src="{{ asset('storage/' . $issueReport->evidence_path) }}" type="video/{{ $evidenceExtension === 'mkv' ? 'x-matroska' : $evidenceExtension }}">
                                 Browser kamu tidak mendukung pemutaran video.
                             </video>
@@ -78,8 +78,8 @@
                 @endif
             </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Live Messages</h2>
+            <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Live Messages</h2>
                 @php
                     $chatNoticeClasses = $canSendMessages
                         ? 'border-green-200 bg-green-50 text-green-800'
@@ -110,7 +110,7 @@
                 @if($canSendMessages)
                     <form id="message-form" method="POST" action="{{ route('issue_reports.store_message', $issueReport) }}" class="mt-4 flex gap-2">
                         @csrf
-                        <input type="text" id="message-input" name="message" placeholder="Ketik pesan untuk admin / client..." class="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <input type="text" id="message-input" name="message" placeholder="Ketik pesan untuk admin / client..." class="flex-1 px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition" required>
                         <button type="submit" class="btn btn-success">Kirim</button>
                     </form>
                 @else
@@ -123,54 +123,54 @@
         </div>
 
         <div class="space-y-6">
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Detail Laporan</h2>
+            <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Detail Laporan</h2>
                 <dl class="space-y-4 text-sm">
                     <div>
-                        <dt class="text-xs font-semibold uppercase text-gray-500">Pelapor</dt>
-                        <dd class="font-semibold text-gray-800">{{ $issueReport->reporter->name ?? '-' }}</dd>
+                        <dt class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Pelapor</dt>
+                        <dd class="font-semibold text-gray-800 dark:text-gray-100">{{ $issueReport->reporter->name ?? '-' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase text-gray-500">Kategori Kendala</dt>
-                        <dd class="font-semibold text-gray-800">{{ $issueReport->issue_category_label }}</dd>
+                        <dt class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Kategori Kendala</dt>
+                        <dd class="font-semibold text-gray-800 dark:text-gray-100">{{ $issueReport->issue_category_label }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase text-gray-500">Perangkat</dt>
-                        <dd class="text-gray-800">
+                        <dt class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Perangkat</dt>
+                        <dd class="text-gray-800 dark:text-gray-100">
                             {{ $issueReport->item->kategori ?? '-' }} - {{ $issueReport->item->serial_number ?? '-' }} - {{ $issueReport->item->merk ?? '-' }} - {{ $issueReport->item->type ?? '-' }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase text-gray-500">Lokasi</dt>
-                        <dd class="uppercase text-gray-800">{{ $issueReport->location->gedung ?? '-' }} - {{ $issueReport->location->ruangan ?? '-' }}</dd>
+                        <dt class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Lokasi</dt>
+                        <dd class="uppercase text-gray-800 dark:text-gray-100">{{ $issueReport->location->gedung ?? '-' }} - {{ $issueReport->location->ruangan ?? '-' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase text-gray-500">Tanggal Lapor</dt>
-                        <dd class="text-gray-800">{{ $issueReport->created_at->format('d/m/Y H:i') }}</dd>
+                        <dt class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Tanggal Lapor</dt>
+                        <dd class="text-gray-800 dark:text-gray-100">{{ $issueReport->created_at->format('d/m/Y H:i') }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase text-gray-500">Diselesaikan Oleh</dt>
-                        <dd class="text-gray-800">{{ $issueReport->resolver->name ?? '-' }}</dd>
+                        <dt class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Diselesaikan Oleh</dt>
+                        <dd class="text-gray-800 dark:text-gray-100">{{ $issueReport->resolver->name ?? '-' }}</dd>
                     </div>
                     @if($issueReport->admin_note)
                         <div class="rounded-lg border border-green-100 bg-green-50 p-4">
                             <dt class="text-xs font-semibold uppercase text-green-700">Catatan Admin</dt>
-                            <dd class="mt-2 text-gray-800 whitespace-pre-line">{{ $issueReport->admin_note }}</dd>
+                            <dd class="mt-2 text-gray-800 dark:text-gray-100 whitespace-pre-line">{{ $issueReport->admin_note }}</dd>
                         </div>
                     @endif
                 </dl>
             </div>
 
             @if($isManager)
-                <form method="POST" action="{{ route('issue_reports.update_status', $issueReport) }}" class="bg-white rounded-xl shadow-lg p-6 space-y-4">
+                <form method="POST" action="{{ route('issue_reports.update_status', $issueReport) }}" class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-6 space-y-4">
                     @csrf
                     @method('PATCH')
 
-                    <h2 class="text-xl font-bold text-gray-800">Update Antrian</h2>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Update Antrian</h2>
 
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-gray-500 mb-2">Status</label>
-                        <select name="status" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Status</label>
+                        <select name="status" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition" required>
                             @foreach($statusOptions as $status => $label)
                                 <option value="{{ $status }}" {{ old('status', $issueReport->status) === $status ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
@@ -178,8 +178,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-gray-500 mb-2">Prioritas</label>
-                        <select name="priority" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Prioritas</label>
+                        <select name="priority" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition" required>
                             @foreach($priorityOptions as $priority => $label)
                                 <option value="{{ $priority }}" {{ old('priority', $issueReport->priority) === $priority ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
@@ -187,8 +187,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-gray-500 mb-2">Catatan Admin untuk Client</label>
-                        <textarea name="admin_note" rows="5" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">{{ old('admin_note', $issueReport->admin_note) }}</textarea>
+                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Catatan Admin untuk Client</label>
+                        <textarea name="admin_note" rows="5" class="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition">{{ old('admin_note', $issueReport->admin_note) }}</textarea>
                     </div>
 
                     <button type="submit" class="btn btn-success btn-block">Simpan Status</button>
@@ -321,7 +321,7 @@
             container.innerHTML = '';
 
             if (!currentMessages.length) {
-                container.innerHTML = '<p class="text-sm text-gray-500">Belum ada pesan.</p>';
+                container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Belum ada pesan.</p>';
                 return;
             }
 

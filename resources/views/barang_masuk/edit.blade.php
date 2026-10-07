@@ -6,8 +6,8 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Edit Barang Masuk</h1>
-            <p class="text-gray-600 mt-1">Input Edit Barang Masuk</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Edit Barang Masuk</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Input Edit Barang Masuk</p>
         </div>
         <a href="{{ $redirect }}" class="btn btn-secondary">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,14 +38,14 @@
     @endif
 
     <!-- From -->
-    <div class="bg-white rounded-xl shadow-lg p-8">
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-8">
         <form action="{{ route('barang_masuk.update', $barang_masuk->id) }}" method="POST">
         @csrf
         @method('PUT')
             <input type="hidden" name="redirect" value="{{ $redirect }}">
             <!-- Kategori -->
             <div class="mb-3 md:mb-4">
-                <label for="kategori" class="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Kategori <span class="text-red-500">*</span></label>
+                <label for="kategori" class="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1 md:mb-2">Kategori <span class="text-red-500">*</span></label>
                 <select name="kategori" id="kategori" class="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
                     <option value="">-- Pilih Kategori --</option>
                     <option value="PC" {{ (old('kategori', $barang_masuk->items->first()->kategori ?? '') == 'PC') ? 'selected' : '' }}>PC</option>
@@ -58,37 +58,37 @@
             </div>
 
             <!-- Merk -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Merk <span class="text-red-500">*</span></label>
                 <input type="text" name="merk" value="{{ old('merk', $barang_masuk->items->first()->merk ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- Type -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Tipe/Series <span class="text-red-500">*</span></label>
                 <input type="text" name="type" value="{{ old('type', $barang_masuk->items->first()->type ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- Asset -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Asset</label>
                 <input type="text" name="supplier" value="{{ old('supplier', $barang_masuk->supplier ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
 
             <!-- PO Number -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Nomor PO</label>
                 <input type="text" name="po_number" value="{{ old('po_number', $barang_masuk->po_number ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
 
             <!-- Tanggal -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Tanggal Masuk <span class="text-red-500">*</span></label>
                 <input type="date" name="tanggal_masuk" value="{{ old('tanggal_masuk', $barang_masuk->tanggal_masuk ?? '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
             </div>
 
             <!-- SERIAL NUMBER -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Serial Number <span class="text-red-500">*</span></label>
 
                 <div id="sn-wrapper">
@@ -156,7 +156,7 @@
             </div>
 
             <!-- Keterangan -->
-            <div class="block text-sm font-medium text-gray-700 mb-2">
+            <div class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
                 <label>Keterangan</label>
                 <textarea name="keterangan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">{{ old('keterangan', $barang_masuk->keterangan ?? '') }}</textarea>
             </div>
@@ -170,7 +170,7 @@
                     Perbarui
                 </button>
 
-                <a href="{{ $redirect }}" class="btn btn-secondary">
+                <a href="{{ $redirect }}" class="btn bg-gray-500 hover:bg-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>Batal

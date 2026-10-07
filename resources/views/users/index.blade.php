@@ -20,8 +20,8 @@
     <!-- Header -->
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Kelola Pengguna</h1>
-            <p class="text-gray-600 mt-1">Kelola akun pengguna sesuai hak akses</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Kelola Pengguna</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Kelola akun pengguna sesuai hak akses</p>
         </div>
 
         <a href="{{ route('users.create') }}" class="btn btn-success">
@@ -44,32 +44,32 @@
         </div>
     @endif
 
-    <details class="bg-white rounded-xl shadow-lg mb-6 group" {{ $hasActiveFilter ? 'open' : '' }}>
+    <details class="bg-white dark:bg-gray-700 rounded-xl shadow-lg mb-6 group" {{ $hasActiveFilter ? 'open' : '' }}>
         <summary class="list-none p-4 md:p-6 cursor-pointer flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
-                <h2 class="text-lg md:text-xl font-bold text-gray-800">Filter & Cari User</h2>
+                <h2 class="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100">Filter & Cari User</h2>
             </div>
-            <span class="text-sm text-gray-500">Pilih</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">Pilih</span>
         </summary>
 
         <div class="px-4 md:px-6 pb-4 md:pb-6">
             <form method="GET" action="{{ route('users.index') }}" class="space-y-4">
                 <div>
-                    <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Cari User</label>
+                    <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Cari User</label>
 
                     <div class="relative">
                         <input type="text" name="search" id="search" autocomplete="off" value="{{ request('search') }}"
                             placeholder="Cari nama atau username"
-                            class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-xs uppercase">
+                            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm uppercase focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500">
                         <input type="hidden" name="user_id" id="user_id_hidden" value="{{ request('user_id') }}">
-                        <div id="suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
+                        <div id="suggestions" class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 rounded-lg mt-1 shadow-lg hidden max-h-56 overflow-auto text-xs uppercase"></div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                     <div>
-                        <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Role</label>
-                        <select name="role" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-xs uppercase">
+                        <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Role</label>
+                        <select name="role" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm uppercase focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500">
                             <option value="">Semua</option>
                             @foreach($roleOptions as $roleValue => $roleLabel)
                                 <option value="{{ $roleValue }}" {{ request('role') === $roleValue ? 'selected' : '' }}>
@@ -80,8 +80,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-2">Status</label>
-                        <select name="status" class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-xs uppercase">
+                        <label class="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">Status</label>
+                        <select name="status" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm uppercase focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500">
                             <option value="">Semua</option>
                             <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
                             <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Nonaktif</option>
@@ -90,13 +90,23 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
-                    <button type="submit" class="btn btn-success btn-block">Cari</button>
-                    <a href="{{ route('users.index') }}" class="btn btn-secondary btn-block">Bersihkan</a>
+                    <button type="submit" class="btn btn-success btn-block">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Cari</span>
+                    </button>
+                    <a href="{{ route('users.index') }}" class="btn bg-gray-500 hover:bg-gray-600 btn-block">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Bersihkan</span>
+                    </a>
                 </div>
 
                 @if($hasActiveFilter)
-                    <div class="text-xs md:text-sm text-gray-600 pt-3 border-t border-gray-200">
-                        <span class="font-semibold text-gray-700 block mb-2">Filter aktif:</span>
+                    <div class="text-xs md:text-sm text-gray-600 dark:text-gray-400 pt-3 border-t border-gray-200">
+                        <span class="font-semibold text-gray-700 dark:text-gray-100 block mb-2">Filter aktif:</span>
 
                         <div class="flex flex-wrap gap-2">
                             @if(request('search'))
@@ -160,13 +170,13 @@
         </div>
     </details>
 
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
-            <div class="text-xs md:text-sm text-gray-600">
-                <span class="font-semibold text-gray-800">{{ $users->total() }}</span>
+    <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
+        <div class="px-4 md:px-6 py-3 md:py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-wrap gap-2">
+            <div class="text-xs md:text-sm text-gray-600 dark:text-gray-400">
+                <span class="font-semibold text-gray-800 dark:text-gray-100">{{ $users->total() }}</span>
                 <span>Data User Ditemukan</span>
             </div>
-            <div class="text-xs md:text-sm text-gray-600">
+            <div class="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                 Halaman <span class="font-semibold">{{ $users->currentPage() }}</span> dari <span class="font-semibold">{{ $users->lastPage() }}</span>
             </div>
         </div>
@@ -185,13 +195,13 @@
                     </tr>
                 </thead>
 
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
                     @forelse($users as $index => $user)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ $users->firstItem() + $index }}</td>
-                            <td class="px-6 py-4 text-sm font-semibold uppercase text-gray-900">{{ $user->name }}</td>
-                            <td class="px-6 py-4 text-sm font-mono uppercase text-gray-700">{{ $user->username }}</td>
-                            <td class="px-6 py-4 text-sm font-mono uppercase text-gray-700">{{ $user->email }}</td>
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <td class="px-6 py-4 text-sm">{{ $users->firstItem() + $index }}</td>
+                            <td class="px-6 py-4 text-sm font-semibold uppercase">{{ $user->name }}</td>
+                            <td class="px-6 py-4 text-sm font-mono uppercase">{{ $user->username }}</td>
+                            <td class="px-6 py-4 text-sm font-mono uppercase">{{ $user->email }}</td>
                             <td class="px-6 py-4 text-sm">
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold {{ in_array($user->role, ['super_admin', 'admin'], true) ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800' }}">
                                     {{ $roleLabels[$user->role] ?? $user->role }}
@@ -218,7 +228,7 @@
                         </tr>
                     @empty
                         <tr>
-                                <td colspan="7" class="px-6 py-8 text-center text-sm font-medium text-gray-500">
+                                <td colspan="7" class="px-6 py-8 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Belum ada data user.
                             </td>
                         </tr>
@@ -227,7 +237,7 @@
             </table>
         </div>
 
-        <div class="bg-white px-4 py-4 border-t border-gray-200">
+        <div class="bg-white dark:bg-gray-700 px-4 py-4 border-t border-gray-200">
             {{ $users->links() }}
         </div>
     </div>
@@ -264,7 +274,7 @@ $(document).ready(function() {
 
                     $.each(data, function(i, user) {
                         html += `
-                            <div class="px-3 py-2 cursor-pointer hover:bg-green-100"
+                            <div class="px-3 py-2 cursor-pointer hover:bg-green-100 dark:hover:bg-gray-600"
                                 data-id="${user.id}"
                                 data-text="${user.text}">
                                 ${user.text}

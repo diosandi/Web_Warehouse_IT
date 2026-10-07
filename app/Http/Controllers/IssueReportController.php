@@ -23,7 +23,13 @@ class IssueReportController extends Controller
         $statusOptions = IssueReport::statusOptions();
         $priorityOptions = IssueReport::priorityOptions();
 
-        return view('issue_reports.index', compact('reports', 'summary', 'categoryOptions', 'statusOptions', 'priorityOptions'));
+        return view('issue_reports.index', compact(
+            'reports',
+            'summary',
+            'categoryOptions',
+            'statusOptions',
+            'priorityOptions'
+        ));
     }
 
     public function create(Request $request)

@@ -90,7 +90,7 @@ class User extends Authenticatable
         return [
             'super_admin' => 'Super Admin',
             'admin' => 'Admin',
-            'client' => 'Client',
+            'client' => 'Pengguna',
             'staf' => 'Staf',
         ];
     }

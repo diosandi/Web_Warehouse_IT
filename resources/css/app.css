@@ -1,4 +1,35 @@
 @import "tailwindcss";
+@config "../../tailwind.config.js";
+
+@layer base {
+    select {
+        color-scheme: light;
+        background-color: #ffffff;
+        color: #111827;
+    }
+
+    select option {
+        background-color: #ffffff;
+        color: #111827;
+    }
+
+    .dark select {
+        color-scheme: dark;
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #f9fafb;
+    }
+
+    .dark select option {
+        background-color: #2d2b35;
+        color: #f9fafb;
+    }
+
+    .dark select option:checked {
+        background-color: #403d49;
+        color: #ffffff;
+    }
+}
 
 @layer components {
     .btn {

@@ -195,6 +195,166 @@ class ItemsController extends Controller
         return view('items.index', compact('items', 'kategoriOptions', 'merkList', 'assetList', 'filters'));
     }
 
+    public function export(Request $request, string $format)
+    {
+        $selectedKategori = array_values(array_filter((array) $request->input('kategori', '')));
+        $selectedMerk = array_values(array_filter((array) $request->input('merk', '')));
+        $selectedAsset = array_values(array_filter((array) $request->input('asset', '')));
+        $selectedSource = $request->input('source');
+
+        if (! in_array($selectedSource, ['barang_masuk', 'master_item'], true)) {
+            $selectedSource = null;
+        }
+
+        $items = $this->exportItemsQuery($request, $selectedKategori, $selectedMerk, $selectedAsset, $selectedSource)
+            ->latest()
+            ->get();
+
+        $items->each(function (Items $item) {
+            $item->refreshStatus();
+        });
+
+        $data = [
+            'items' => $items,
+            'filterLabel' => $this->itemsExportFilterLabel($request, $selectedKategori, $selectedMerk, $selectedAsset, $selectedSource),
+        ];
+
+        $filename = 'master-data-barang-' . now()->format('Ymd-His');
+
+        if ($format === 'excel') {
+            return response()->streamDownload(function () use ($data) {
+                echo view('items.export_excel', $data)->render();
+            }, $filename . '.xls', [
+                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+            ]);
+        }
+
+        if ($format === 'pdf') {
+            return view('items.export_pdf', $data);
+        }
+
+        abort(404);
+    }
+
+    private function exportItemsQuery(Request $request, array $selectedKategori, array $selectedMerk, array $selectedAsset, ?string $selectedSource)
+    {
+        $activeDistribution = function ($di) {
+            $di->where('status', 'dipakai')
+                ->whereHas('distribution', function ($d) {
+                    $d->where('status', 'dipakai');
+                });
+        };
+
+        $query = Items::with([
+            'barang_masuk',
+            'storageLocation',
+            'distributionItems' => function ($distributionItem) use ($activeDistribution) {
+                $activeDistribution($distributionItem);
+                $distributionItem->with('distribution.location')->latest();
+            },
+        ]);
+
+        if ($request->item_id) {
+            $query->where('id', $request->item_id);
+        } elseif ($request->filled('search')) {
+            $search = '%' . $request->search . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('serial_number', 'like', $search)
+                    ->orWhere('service_tag', 'like', $search)
+                    ->orWhere('asset', 'like', $search)
+                    ->orWhere('merk', 'like', $search)
+                    ->orWhere('type', 'like', $search)
+                    ->orWhere('processor', 'like', $search)
+                    ->orWhere('os', 'like', $search)
+                    ->orWhere('ram_gb', 'like', $search)
+                    ->orWhere('tahun', 'like', $search)
+                    ->orWhere('condition_note', 'like', $search);
+            });
+        }
+
+        if (! empty($selectedKategori)) {
+            $query->whereIn('kategori', $selectedKategori);
+        }
+
+        if (! empty($selectedMerk)) {
+            $query->whereIn('merk', $selectedMerk);
+        }
+
+        if (! empty($selectedAsset)) {
+            $query->whereIn('asset', $selectedAsset);
+        }
+
+        if ($selectedSource === 'barang_masuk') {
+            $query->whereNotNull('barang_masuk_id');
+        } elseif ($selectedSource === 'master_item') {
+            $query->whereNull('barang_masuk_id');
+        }
+
+        if ($request->status) {
+            if ($request->status == 'used') {
+                $query->where(function ($q) use ($activeDistribution) {
+                    $q->where(function ($qq) use ($activeDistribution) {
+                        $qq->whereIn('kategori', ['Printer Kertas', 'Printer Barcode'])
+                            ->whereHas('distributionItems', $activeDistribution);
+                    })->orWhere(function ($qq) {
+                        $qq->whereNotIn('kategori', ['Printer Kertas', 'Printer Barcode'])
+                            ->where('status', 'used');
+                    });
+                });
+            } else {
+                $query->where('status', $request->status)
+                    ->where(function ($q) use ($activeDistribution) {
+                        $q->whereNotIn('kategori', ['Printer Kertas', 'Printer Barcode'])
+                            ->orWhere(function ($printerQuery) use ($activeDistribution) {
+                                $printerQuery->whereIn('kategori', ['Printer Kertas', 'Printer Barcode'])
+                                    ->whereDoesntHave('distributionItems', $activeDistribution);
+                            });
+                    });
+            }
+        }
+
+        if ($request->kelengkapan === 'tanpa_detail') {
+            $query->whereDoesntHave('device_detail');
+        }
+
+        return $query;
+    }
+
+    private function itemsExportFilterLabel(Request $request, array $selectedKategori, array $selectedMerk, array $selectedAsset, ?string $selectedSource): string
+    {
+        $filters = [];
+
+        if ($request->filled('search')) {
+            $filters[] = 'Cari: ' . $request->search;
+        }
+
+        if (! empty($selectedKategori)) {
+            $filters[] = 'Kategori: ' . implode(', ', $selectedKategori);
+        }
+
+        if (! empty($selectedMerk)) {
+            $filters[] = 'Merk: ' . implode(', ', $selectedMerk);
+        }
+
+        if (! empty($selectedAsset)) {
+            $filters[] = 'Asset: ' . implode(', ', $selectedAsset);
+        }
+
+        if ($request->filled('status')) {
+            $filters[] = 'Kondisi: ' . $this->itemStatusLabel($request->status);
+        }
+
+        if ($selectedSource) {
+            $filters[] = 'Asal Data: ' . ($selectedSource === 'barang_masuk' ? 'Barang Masuk' : 'Master Item');
+        }
+
+        if ($request->filled('item_id')) {
+            $filters[] = 'Pilihan suggestion';
+        }
+
+        return empty($filters) ? 'Semua data' : implode(' | ', $filters);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -366,7 +526,7 @@ class ItemsController extends Controller
         $events = collect();
 
         $item->distributionItems()
-            ->with(['distribution.location'])
+            ->with(['distribution.location', 'returnStorageLocation'])
             ->get()
             ->each(function (DistributionItem $distributionItem) use ($events) {
                 $distribution = $distributionItem->distribution;
@@ -407,7 +567,7 @@ class ItemsController extends Controller
                     'new_status_class' => $this->itemStatusClass($returnedStatus),
                     'actor' => $distribution?->nama_user ?: '-',
                     'actor_label' => 'Pengguna',
-                    'location' => $this->formatLocation($location),
+                    'location' => $this->formatLocation($distributionItem->returnStorageLocation ?? $location),
                     'note' => $distributionItem->return_note ?: 'Barang dikembalikan',
                 ]);
             });
@@ -488,7 +648,39 @@ class ItemsController extends Controller
             return 'maintenance';
         }
 
+        $returnedAt = $distributionItem->returned_at
+            ? Carbon::parse($distributionItem->returned_at)
+            : null;
+
+        if ($returnedAt && $this->hasOtherActiveDistributionAt($distributionItem, $returnedAt)) {
+            return 'used';
+        }
+
         return 'available';
+    }
+
+    private function hasOtherActiveDistributionAt(DistributionItem $distributionItem, Carbon $checkedAt): bool
+    {
+        return $distributionItem->item
+            ? $distributionItem->item->distributionItems()
+                ->with('distribution')
+                ->whereKeyNot($distributionItem->id)
+                ->get()
+                ->contains(function (DistributionItem $otherDistributionItem) use ($checkedAt) {
+                    $startedAt = $this->distributionHistoryTimestamp($otherDistributionItem)
+                        ?? ($otherDistributionItem->created_at ? Carbon::parse($otherDistributionItem->created_at) : null);
+
+                    if (! $startedAt || $startedAt->gt($checkedAt)) {
+                        return false;
+                    }
+
+                    if (! $otherDistributionItem->returned_at) {
+                        return true;
+                    }
+
+                    return Carbon::parse($otherDistributionItem->returned_at)->gt($checkedAt);
+                })
+            : false;
     }
 
     private function itemStatusLabel(?string $status): string

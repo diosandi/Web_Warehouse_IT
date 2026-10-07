@@ -309,6 +309,7 @@
                             </h2>
                             <p class="text-blue-100 text-sm leading-relaxed max-w-xs mx-auto mt-4">
                                 Sistem Manajemen Kelola Barang dan Laporan Kendala Perangkat IT<br>
+                                <span class="text-xs opacity-90">IPLT</span> <br>
                                 <span class="text-xs opacity-90">Rumah Sakit Cipto Mangunkusumo</span>
                             </p>
                         </div>
